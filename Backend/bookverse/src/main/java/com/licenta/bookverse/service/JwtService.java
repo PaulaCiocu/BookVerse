@@ -1,5 +1,6 @@
 package com.licenta.bookverse.service;
 
+import com.licenta.bookverse.entity.Person;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,6 +15,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import static javax.crypto.Cipher.SECRET_KEY;
 
 @Service
 public class JwtService {
@@ -105,4 +108,54 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public String generatePasswordResetToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email);  // Store the email in the token claims
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject("password-reset")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000))  // 1 hour expiration
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+    public String generateRegistrationConfirmationToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email); // Store email explicitly
+
+        return Jwts.builder()
+                .setClaims(claims) // Include claims
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 hours expiration
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+
+    public boolean isValidPasswordResetToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            String subject = claims.getSubject();
+            return "password-reset".equals(subject) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String extractEmailFromResetToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("email", String.class);  // Get email from claims
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+
+
 }

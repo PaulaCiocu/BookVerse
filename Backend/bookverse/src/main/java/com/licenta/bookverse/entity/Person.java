@@ -42,6 +42,9 @@ public class Person implements UserDetails {
     @Column(nullable = false)
     private String fullName;
 
+    @Column(nullable = false)
+    private boolean confirmed = false;
+
     // Getters, Setters, Constructors
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -72,5 +75,7 @@ public class Person implements UserDetails {
     public String getUsername() {
         return email;  // Providing access to the email
     }
+
+
 }
 

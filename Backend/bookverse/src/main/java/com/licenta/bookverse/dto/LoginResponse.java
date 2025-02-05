@@ -17,4 +17,14 @@ public class LoginResponse {
         this.expiresIn = expiresIn;
     }
 
+    // Override the toString method
+    @Override
+    public String toString() {
+        return "LoginResponse{" + "\n" +
+                "token='" + token + '\'' + "\n" +
+                ", expiresIn=" + expiresIn + "\n" +
+                '}';
+    }
+
+
 }
