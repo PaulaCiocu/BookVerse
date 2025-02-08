@@ -1,8 +1,5 @@
 package com.licenta.bookverse.config;
-
-import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.repository.PersonRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

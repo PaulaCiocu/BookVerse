@@ -3,6 +3,7 @@ package com.licenta.bookverse.service;
 import com.licenta.bookverse.dto.LoginDTO;
 import com.licenta.bookverse.dto.LoginResponse;
 import com.licenta.bookverse.dto.RegistrationDTO;
+import com.licenta.bookverse.dto.ResetPasswordRequest;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.exception.EmailAlreadyExistsException;
 import com.licenta.bookverse.exception.PasswordMismatchException;
@@ -30,8 +31,6 @@ public class AuthenticationService {
     private final PersonService personService;
     private final JwtService jwtService;
     private final EmailService emailService;
-    private final JavaMailSender mailSender;
-
 
     public Person authenticate(LoginDTO input) {
         authenticationManager.authenticate(
@@ -75,7 +74,7 @@ public class AuthenticationService {
 
         String token = jwtService.generateRegistrationConfirmationToken(registrationDTO.getEmail());
         System.out.println(token);
-        sendRegistrationConfirmationEmail(registrationDTO.getEmail(), token);
+        emailService.sendRegistrationConfirmationEmail(registrationDTO.getEmail(), token);
         System.out.println("Email sent!");
         return token;
     }
@@ -93,20 +92,8 @@ public class AuthenticationService {
         loginResponse.setToken(token);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
-        sendPasswordResetEmail(email, token);
+        emailService.sendPasswordResetEmail(email, token);
         return loginResponse;
-    }
-
-    public void sendPasswordResetEmail(String email, String token) {
-        String resetUrl = "http://yourapp.com/reset-password?token=" + token;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Password Reset Request");
-        message.setText("Hello,\n\nIt looks like you requested a password reset.\n\nPlease click on the link below to reset your password:\n\n" + resetUrl +
-                "\n\nIf you didn't request this change, please ignore this email.\n\n"+ "Best Regards,\nnBookVerse Team");
-
-        mailSender.send(message);
     }
 
     public void validatePassword(String password) {
@@ -123,26 +110,35 @@ public class AuthenticationService {
         }
     }
 
-    public void sendPasswordResetConfirmation(String email) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Password Reset Confirmation");
-        message.setText("Your password has been successfully reset. If you did not request this change, please contact support immediately.");
-        mailSender.send(message);
+    public String resetPassword(String token, ResetPasswordRequest request) {
+        validatePassword(request.getNewPassword());
+        validatePasswordMismatch(request.getNewPassword(), request.getConfirmPassword());
+        // Check if the token is valid
+        if (!jwtService.isValidPasswordResetToken(token)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
+        }
+        // Extract email from token
+        String email = jwtService.extractEmailFromResetToken(token);
+        if (email == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token data");
+        }
+        // Update password in the database
+        personService.updatePassword(email, request.getNewPassword());
+        // Send confirmation email
+        emailService.sendPasswordResetConfirmation(email);
+
+        return "Password successfully reset.";
     }
 
-    public void sendRegistrationConfirmationEmail(String email, String token) {
-        String confirmationUrl = "http://yourapp.com/confirm-registration?token=" + token;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Registration Confirmation");
-        message.setText("Welcome! To complete your registration, please click the following link: " + confirmationUrl);
-
-        mailSender.send(message);
+    public String confirmRegistration(String token) {
+        String email = jwtService.extractEmailFromResetToken(token);
+        if (email == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token.");
+        }
+        // Confirm the user
+        personService.confirmUserByEmail(email);
+        return "Registration confirmed. You can now log in.";
     }
-
-
 
 
 
