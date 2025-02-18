@@ -21,6 +21,7 @@ public class Book {
     private String title;
 
     private String key;
+    private String isbn_key;
 
     private String author;
 

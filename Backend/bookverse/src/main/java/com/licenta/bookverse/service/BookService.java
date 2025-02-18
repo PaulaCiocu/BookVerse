@@ -67,9 +67,14 @@ public class BookService {
             }
             String coverUrl = doc.getCoverUrl();
             book.setCoverImageUrl(coverUrl);
+            book.setIsbn_key(doc.getFirstValidIsbn());
+            String isbn = doc.getFirstValidIsbn();
+            book.setIsbn_key(isbn);
+            return isbn != null ? book : null;
 
-            return book;
-        }).collect(Collectors.toList());
+        })
+        .filter(book -> book!= null)
+        .collect(Collectors.toList());
     }
 
     private String extractKeyFromDoc(String key) {
