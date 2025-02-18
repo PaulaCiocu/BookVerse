@@ -5,10 +5,7 @@ import com.licenta.bookverse.dto.LoginResponse;
 import com.licenta.bookverse.dto.RegistrationDTO;
 import com.licenta.bookverse.dto.ResetPasswordRequest;
 import com.licenta.bookverse.entity.Person;
-import com.licenta.bookverse.exception.EmailAlreadyExistsException;
-import com.licenta.bookverse.exception.PasswordMismatchException;
-import com.licenta.bookverse.exception.UsernameAlreadyExistsException;
-import com.licenta.bookverse.exception.WeakPasswordException;
+import com.licenta.bookverse.exception.*;
 import com.licenta.bookverse.repository.PersonRepository;
 
 import lombok.AllArgsConstructor;
@@ -82,7 +79,7 @@ public class AuthenticationService {
     public LoginResponse handleForgotPassword(String email) {
         boolean emailExists = personService.checkIfEmailExists(email);
         if (!emailExists) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Email not found");
+            throw new EmailNotFound();
         }
 
         String token = jwtService.generatePasswordResetToken(email);

@@ -23,50 +23,6 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isUsernameValid = false;
   bool isPasswordValid = false;
   bool isConfirmPasswordValid = false;
-  // This function is used to build TextFields with validation
-  // Widget buildTextField({
-  //   required TextEditingController controller,
-  //   required bool isObscure,
-  //   required String hintText,
-  //   required String? Function(String?) validator,
-  // }) {
-  //   return TextFormField(
-  //     controller: controller,
-  //     obscureText: isObscure,
-  //     style: const TextStyle(
-  //       fontSize: 14,
-  //       color: Color(0xFF171719),
-  //       height: 1.36,
-  //     ),
-  //     decoration: InputDecoration(
-  //       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-  //       hintText: hintText,
-  //       filled: true,
-  //       fillColor: const Color(0xD9FFFFFF),
-  //       border: OutlineInputBorder(
-  //         borderSide: BorderSide(
-  //           color: controller.text.isEmpty
-  //               ? const Color(0xFFD7D7DC)
-  //               : Colors.green, // Green or default grey border
-  //         ),
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       errorBorder: OutlineInputBorder(
-  //         borderSide: const BorderSide(color: Colors.red),
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       focusedBorder: OutlineInputBorder(
-  //         borderSide: BorderSide(
-  //           color: controller.text.isEmpty
-  //               ? const Color(0xFFD7D7DC)
-  //               : Colors.green, // Green when validation is successful
-  //         ),
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //     ),
-  //     validator: validator,
-  //   );
-  // }
   // Update TextField widget
   Widget buildTextField({
     required TextEditingController controller,
@@ -195,6 +151,55 @@ class _RegisterPageState extends State<RegisterPage> {
       return 'Passwords do not match';
     }
     return null;
+  }
+
+  void showCustomSnackbar(BuildContext context, String errorMessage) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 60, // Adjust the distance from the top
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 335,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color:  Colors.white, // Match button color
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Insert the overlay
+    overlay.insert(overlayEntry);
+
+    // Remove after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 
   @override
@@ -335,8 +340,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      // If the form is valid, send the data to the backend
-                      final bool isRegistered = await AuthenticationController.registerUser(
+
+                       String? errorMessage = await AuthenticationController.registerUser(
                         fullName: _fullNameController.text,
                         email: _emailController.text,
                         username: _usernameController.text,
@@ -344,27 +349,19 @@ class _RegisterPageState extends State<RegisterPage> {
                         confirmPassword: _confirmPasswordController.text,
                       );
 
-                      if (isRegistered) {
-                        // Show success message or navigate to another page
-                        print("Registration succesfull!");
-                        Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => const RegistrationSuccessPage())
-                      );
-                        
-                        // You can navigate to another screen here, if needed
-                      } else {
-                        // Show error message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Registration failed, please try again.')),
-                        );
-                      }
-                    } else {
-                      // If the form is not valid, show an error message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill in all fields correctly')),
-                      );
-                    }
+                        if (errorMessage == null) {
+                          // Success, navigate to another page
+                           Navigator.push(
+                            context, 
+                            MaterialPageRoute(builder: (context) => const RegistrationSuccessPage())
+                          );
+                        } else {
+                          // Show error message in a SnackBar
+                          showCustomSnackbar(context, errorMessage);
+
+                        }
+                     
+                     }
                   },
                   child: Container(
                     width: 335,
@@ -379,7 +376,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         'Join Now',
                         style: TextStyle(
                           fontSize: 16,
-                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
@@ -405,7 +401,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       onTap: (){
                           Navigator.push(
                             context, 
-                            MaterialPageRoute(builder: (context) => LoginPage()));
+                            MaterialPageRoute(builder: (context) => const LoginPage()));
                       },
                       child: const Text(
                         "Login",

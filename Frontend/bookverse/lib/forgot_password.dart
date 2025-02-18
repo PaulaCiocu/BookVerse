@@ -1,12 +1,16 @@
+import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/login.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
+
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
 
     bool isEmailValid = false;
@@ -68,6 +72,56 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return null;
   }
 
+  void showCustomSnackbar(BuildContext context, String errorMessage) {
+  final overlay = Overlay.of(context);
+  final overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      top: 60, // Adjust the distance from the top
+      left: 20,
+      right: 20,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 335,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color:  Colors.white, // Match button color
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                spreadRadius: 2,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              errorMessage,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+    // Insert the overlay
+    overlay.insert(overlayEntry);
+
+    // Remove after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
+
+
  
   @override
   Widget build(BuildContext context) {
@@ -84,43 +138,58 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
             const SizedBox(height: 80,), 
             const Text(
-              'Please enter the email address to receive a password reset link.',
+              'Please enter your email address to receive a password reset link.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
     
             const SizedBox(height: 60),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Enter email address',
-                  style: TextStyle(
-                    fontSize: 14, 
-                    fontFamily: 'Poppins',
-                    color: Color(0xFF030303), 
-                    letterSpacing: 1.2, 
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Enter email address',
+                    style: TextStyle(
+                      fontSize: 14, 
+                      fontFamily: 'Poppins',
+                      color: Color(0xFF030303), 
+                      letterSpacing: 1.2, 
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12,),
-                // Email Input Field
-                buildTextField(
-                  controller: _emailController,
-                  isObscure: false,
-                  hintText: 'Enter your email',
-                  validator: validateEmail,
-                  isValid: isEmailValid,
-                  onChanged: _updateEmailValidation,
-                ),
-              ],
+                  const SizedBox(height: 12,),
+                  // Email Input Field
+                  buildTextField(
+                    controller: _emailController,
+                    isObscure: false,
+                    hintText: 'Enter your email',
+                    validator: validateEmail,
+                    isValid: isEmailValid,
+                    onChanged: _updateEmailValidation,
+                  ),
+                ],
+              ),
             ),
 
-            SizedBox(height: 60,),
+            const SizedBox(height: 60,),
             GestureDetector(
-              onTap: (){
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) =>  LoginPage()));
+              onTap: () async {
+                  if (_formKey.currentState?.validate() ?? false) {
+                  
+                      String? errorMessage = await AuthenticationController.forgot_password(
+                        email: _emailController.text,
+                      );
+        
+                      if (errorMessage == null) {
+                        // Success, navigate to another page
+                        showCustomSnackbar(context, "Email sent successfully!");
+                      } else {
+                        // Show error message in a SnackBar
+                        showCustomSnackbar(context, errorMessage);
+        
+                      }
+                    }
               },
               child: Container(
               width: 250, 
@@ -142,13 +211,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
               )
             ),
-            SizedBox(height: 30,), 
+            const SizedBox(height: 30,), 
 
             GestureDetector(
               onTap: (){
                   Navigator.push(
                     context, 
-                    MaterialPageRoute(builder: (context) =>  LoginPage()));
+                    MaterialPageRoute(builder: (context) =>  const LoginPage()));
               },
               child: Container(
               width: 130, 

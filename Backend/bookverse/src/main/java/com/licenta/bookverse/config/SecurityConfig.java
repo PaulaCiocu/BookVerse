@@ -31,6 +31,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/books/**",
                                 "/register",
                                 "/auth/**",          // Public API endpoints
                                 "/swagger-ui/**",    // Swagger UI

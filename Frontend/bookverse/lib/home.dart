@@ -1,47 +1,81 @@
+import 'package:bookverse/tabScreens/exploreTrails.dart';
+import 'package:bookverse/tabScreens/notifications.dart';
+import 'package:bookverse/tabScreens/searchBooks.dart';
+import 'package:bookverse/tabScreens/userProfile.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget {
+class Home extends StatefulWidget {
+  final String token; // Receive the token as a constructor parameter
+
+  // Constructor for passing the token
+  const Home({super.key, required this.token});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+
+  int screenIndex = 0;
+  List tabScreensList = [
+    ExploreTrails(),
+    SearchBooks(),
+    UserProfile(),
+    Notifications()
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Welcome to SkillSwap!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Start exploring skills or connect with others.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to another page or perform an action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-                child: Text('Explore Skills', style: TextStyle(fontSize: 18)),
-              ),
-            ],
+      bottomNavigationBar: BottomNavigationBar( 
+        onTap: (indexNumber){
+            setState(() {
+              screenIndex = indexNumber; 
+            });
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor:   Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black54,
+        currentIndex: screenIndex,
+        items: const [
+
+          //swapping screen
+          BottomNavigationBarItem( 
+            icon: Icon(
+              Icons.home,
+              size: 30,
+            ),
+            label: ""
           ),
-        ),
+          // search  button
+         BottomNavigationBarItem(
+            icon: Icon(
+              Icons.search_outlined,
+              size: 30,
+              
+            ), 
+            label: ""
+          ),  
+        // user detail screen button
+         BottomNavigationBarItem(
+            icon: Icon(
+              Icons.person,
+              size: 30,
+            ), 
+            label: ""
+          ),  
+          // user detail screen button
+         BottomNavigationBarItem(
+            icon: Icon(
+              Icons.notification_add,
+              size: 30,
+            ), 
+            label: ""
+          ),  
+        ],
       ),
+      body: tabScreensList[screenIndex],
     );
   }
 }

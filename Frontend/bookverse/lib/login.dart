@@ -3,6 +3,7 @@ import 'package:bookverse/forgot_password.dart';
 import 'package:bookverse/home.dart';
 import 'package:bookverse/register.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,9 +12,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+  
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final String _jwtToken = '';
+ 
   bool isEmailValid = false;
   bool isPasswordValid = false;
 
@@ -71,10 +75,16 @@ class LoginPageState extends State<LoginPage> {
       isPasswordValid = validatePassword(value) == null;
     });
   }
+  
   String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
+    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        .hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    
     return null;
   }
 
@@ -84,6 +94,56 @@ class LoginPageState extends State<LoginPage> {
     }
     return null;
   }
+
+  void showCustomSnackbar(BuildContext context, String errorMessage) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 60, // Adjust the distance from the top
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 335,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color:  Colors.white, // Match button color
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Insert the overlay
+    overlay.insert(overlayEntry);
+
+    // Remove after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -121,115 +181,118 @@ class LoginPageState extends State<LoginPage> {
           
                 Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, 
-                    children: [
-                      const Text(
-                        'Email',
-                        style: TextStyle(
-                          fontSize: 14, 
-                          fontFamily: 'Poppins',
-                          color: Color(0xFF030303), 
-                          letterSpacing: 1.2, 
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start, 
+                      children: [
+                        const Text(
+                          'Email',
+                          style: TextStyle(
+                            fontSize: 14, 
+                            fontFamily: 'Poppins',
+                            color: Color(0xFF030303), 
+                            letterSpacing: 1.2, 
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8,),
-                      // Email Input Field
-                      buildTextField(
-                              controller: _emailController,
-                              isObscure: false,
-                              hintText: 'Enter your email',
-                              validator: validateEmail,
-                              isValid: isEmailValid,
-                              onChanged: _updateEmailValidation,
-                            ),
-                      const SizedBox(height: 20,),
-          
-                      Row(
-                        children: [
-                          const Text(
-                            'Password',
-                            style: TextStyle(
-                              fontSize: 14, 
-                              fontFamily: 'Poppins',
-                              color: Color(0xFF000000), 
-                              letterSpacing: 1.2, 
-                            ),
-                          ),
-
-                          const SizedBox(width: 80,),
-                          
-                          GestureDetector(
-                            onTap: (){
-                                Navigator.push(
-                                  context, 
-                                  MaterialPageRoute(builder: (context) =>  ForgotPasswordPage()));
-                            },
-                            child: const Text(
-                              'Forgot your passsword?',
+                        const SizedBox(height: 8,),
+                        // Email Input Field
+                        buildTextField(
+                                controller: _emailController,
+                                isObscure: false,
+                                hintText: 'Enter your email',
+                                validator: validateEmail,
+                                isValid: isEmailValid,
+                                onChanged: _updateEmailValidation,
+                              ),
+                        const SizedBox(height: 20,),
+                              
+                        Row(
+                          children: [
+                            const Text(
+                              'Password',
                               style: TextStyle(
                                 fontSize: 14, 
                                 fontFamily: 'Poppins',
                                 color: Color(0xFF000000), 
-                                fontWeight: FontWeight.w500,
                                 letterSpacing: 1.2, 
-                                decoration: TextDecoration.underline
                               ),
                             ),
-                          )
-                        ],
-                      ),
-          
-                      const SizedBox(height: 8,),
-                      // Password Input Field
-                      buildTextField(
-                        controller: _passwordController,
-                        isObscure: true,
-                        hintText: 'Enter your password',
-                        validator: validatePassword,
-                        isValid: isPasswordValid,
-                        onChanged: _updatePasswordValidation,
-                      ),
-                      
-                      const SizedBox(height: 30,),
-                      Row(
-                        children: [
-                          const Text(
-                            "Don't have an account ?",
-                            style: TextStyle(
-                              fontSize: 14, 
-                              fontFamily: 'Poppins',
-                              color: Color(0xFF000000), 
-                              letterSpacing: 1.2, 
-                            ),
-                          ),
-          
-                          const SizedBox(width: 10,),
-                          GestureDetector(
-                            onTap: (){
-                                Navigator.push(
-                                  context, 
-                                  MaterialPageRoute(builder: (context) =>  RegisterPage()));
-                            },
-                            child: const Text(
-                              "Register",
+                    
+                            const SizedBox(width: 80,),
+                            
+                            GestureDetector(
+                              onTap: (){
+                                  Navigator.push(
+                                    context, 
+                                    MaterialPageRoute(builder: (context) =>  ForgotPasswordPage()));
+                              },
+                              child: const Text(
+                                'Forgot your passsword?',
+                                style: TextStyle(
+                                  fontSize: 14, 
+                                  fontFamily: 'Poppins',
+                                  color: Color(0xFF000000), 
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 1.2, 
+                                  decoration: TextDecoration.underline
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                              
+                        const SizedBox(height: 8,),
+                        // Password Input Field
+                        buildTextField(
+                          controller: _passwordController,
+                          isObscure: true,
+                          hintText: 'Enter your password',
+                          validator: validatePassword,
+                          isValid: isPasswordValid,
+                          onChanged: _updatePasswordValidation,
+                        ),
+                        
+                        const SizedBox(height: 30,),
+                        Row(
+                          children: [
+                            const Text(
+                              "Don't have an account ?",
                               style: TextStyle(
                                 fontSize: 14, 
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
                                 color: Color(0xFF000000), 
                                 letterSpacing: 1.2, 
-                                decoration: TextDecoration.underline
                               ),
                             ),
-                          )
-          
-                          
-                        ],
-                      ),
-          
-                     
-                    ]
+                              
+                            const SizedBox(width: 10,),
+                            GestureDetector(
+                              onTap: (){
+                                  Navigator.push(
+                                    context, 
+                                    MaterialPageRoute(builder: (context) =>  const RegisterPage()));
+                              },
+                              child: const Text(
+                                "Register",
+                                style: TextStyle(
+                                  fontSize: 14, 
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF000000), 
+                                  letterSpacing: 1.2, 
+                                  decoration: TextDecoration.underline
+                                ),
+                              ),
+                            )
+                              
+                            
+                          ],
+                        ),
+                              
+                       
+                      ]
+                    ),
                   ),
                 ),
                 Padding(
@@ -252,34 +315,33 @@ class LoginPageState extends State<LoginPage> {
                           const SizedBox(width: 10,),
                           GestureDetector(
                             onTap: () async {
-                           //   if (_formKey.currentState?.validate() ?? false) {
-                                // If the form is valid, send the data to the backend
-                                final bool isLoggedIn = await AuthenticationController.loginUser(
+                              if (_formKey.currentState?.validate() ?? false) {
+                  
+                                String? errorMessage = await AuthenticationController.loginUser(
                                   email: _emailController.text,
                                   password: _passwordController.text,
                                 );
-
-                                if (isLoggedIn) {
-                                  // Show success message or navigate to another page
-                                  print("Login succesfull!");
-                                  Navigator.push(
-                                    context, 
-                                    MaterialPageRoute(builder: (context) =>  HomePage())
-                                );
+                  
+                                if (errorMessage == null) {
+                                  // Success: Retrieve the JWT token and navigate to HomePage
+                                  final token = await AuthenticationController.getToken();
                                   
-                                  // You can navigate to another screen here, if needed
+                                  if (token != null) {
+                                    // Token successfully retrieved, navigate to the HomePage
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Home(token: token)), // Passing token to HomePage
+                                    );
+                                  } else {
+                                    showCustomSnackbar(context, "Failed to retrieve token");
+                                  }
                                 } else {
-                                  // Show error message
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Registration failed, please try again.')),
-                                  );
+                                  // Show error message in a SnackBar
+                                  showCustomSnackbar(context, errorMessage);
                                 }
-                              // } else {
-                              //   // If the form is not valid, show an error message
-                              //   ScaffoldMessenger.of(context).showSnackBar(
-                              //     const SnackBar(content: Text('Please fill in all fields correctly')),
-                              //   );
-                              // }
+
+                              }
+                                 
                             },
                             child: Container(
                               width: 48,
