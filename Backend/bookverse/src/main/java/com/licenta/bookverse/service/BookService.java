@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +26,7 @@ public class BookService {
     private static final String OPEN_LIBRARY_SEARCH_API_URL = "https://openlibrary.org/search.json?q=";  // Search API URL
     private static final String OPEN_LIBRARY_WORKS_API_URL = "https://openlibrary.org/works/";  // Works API URL
     private static final String OPEN_LIBRARY_URL_SUBJECT = "https://openlibrary.org/search.json?subject=";
+    private static final String OPEN_LIBRARY_ISBN_API_URL = "https://openlibrary.org/api/books?bibkeys=ISBN:";
 
 
     public List<Book> searchBooks(String query) {
@@ -85,14 +87,38 @@ public class BookService {
         return null;
     }
 
-    public Book getBookDetails(String bookKey) {
+    public Book getBookDetails(String bookKey, String isbn) {
         String worksUrl = OPEN_LIBRARY_WORKS_API_URL + bookKey + ".json";  // Works API URL
         WorkDetailResponse bookDetails = restTemplate.getForObject(worksUrl, WorkDetailResponse.class);
 
         if (bookDetails != null) {
-            return mapToBookDetails(bookDetails);
+            Book book = mapToBookDetails(bookDetails);
+            addIsbnDetails(book, isbn, bookKey);
+            // Fetch additional details from ISBN API if ISBN is available
+            return book;
         }
         return null; // Return null or an appropriate response if book details are not found
+    }
+
+    private void addIsbnDetails(Book book, String isbn, String bookKey) {
+        String isbnUrl = OPEN_LIBRARY_ISBN_API_URL + isbn + "&jscmd=data&format=json";
+        book.setIsbn_key(isbn);
+        book.setKey(bookKey);
+
+        try {
+            var response = restTemplate.getForObject(isbnUrl, Object.class);
+            if (response == null) return;
+
+            Map<String, Object> jsonMap = (Map<String, Object>) response;
+            Map<String, Object> bookData = (Map<String, Object>) jsonMap.get("ISBN:" + isbn);
+            if (bookData == null) return;
+
+            book.setPublish_date((String) bookData.get("publish_date"));
+            book.setPages((Integer) bookData.get("number_of_pages"));
+
+        } catch (Exception e) {
+            System.out.println("Error fetching ISBN details: " + e.getMessage());
+        }
     }
     private Book mapToBookDetails(WorkDetailResponse bookDetails) {
         Book book = new Book();

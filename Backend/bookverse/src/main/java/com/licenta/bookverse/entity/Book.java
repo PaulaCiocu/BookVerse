@@ -19,17 +19,17 @@ public class Book {
     private UUID id;  // Or Long depending on your preference
 
     private String title;
+    private String author;
 
     private String key;
     private String isbn_key;
 
-    private String author;
+    private Integer pages;
+    private String publish_date;
 
     @ElementCollection
     private List<String> subjects;
 
-
     private String description;
-
     private String coverImageUrl;
 }

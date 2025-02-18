@@ -25,8 +25,8 @@ public class BookController {
     }
 
     @GetMapping("/{bookKey}")
-    public Book getBookDetails(@PathVariable String bookKey) {
-        return bookService.getBookDetails(bookKey);
+    public Book getBookDetails(@PathVariable String bookKey, @RequestParam String isbn_key) {
+        return bookService.getBookDetails(bookKey, isbn_key);
     }
 
     @GetMapping("/searchByGenre")
