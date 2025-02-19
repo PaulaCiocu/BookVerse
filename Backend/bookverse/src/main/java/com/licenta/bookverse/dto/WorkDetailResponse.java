@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Setter
 public class WorkDetailResponse {
     private String title;
-    private List<AuthorWrapper> authors;  // List of AuthorWrapper to hold multiple authors
     private List<String> subjects;
 
     @JsonProperty("description")
@@ -45,47 +44,4 @@ public class WorkDetailResponse {
     }
 
 
-    // Method to get all author names
-    public List<String> getAuthorNames(RestTemplate restTemplate) {
-        return authors.stream()
-                .map(authorWrapper -> authorWrapper.getAuthorName(restTemplate))  // Fetch name for each author
-                .collect(Collectors.toList());  // Collect into a list
-    }
-
-    @Getter
-    @Setter
-    public static class AuthorWrapper {
-        private Author author;  // The author object itself
-
-        // Get the key of the author
-        public String getAuthorKey() {
-            return author != null ? author.getKey() : null;
-        }
-
-        // Get the author name using the key
-        public String getAuthorName(RestTemplate restTemplate) {
-            if (author != null && author.getKey() != null) {
-                String authorUrl = "https://openlibrary.org" + author.getKey() + ".json";  // Construct the URL for the author details
-                AuthorDetails authorDetails = restTemplate.getForObject(authorUrl, AuthorDetails.class);
-
-                // Return the author's name if it's found
-                if (authorDetails != null && authorDetails.getName() != null) {
-                    return authorDetails.getName();
-                }
-            }
-            return "Unknown author";  // Return a default value if no author key exists
-        }
-    }
-
-    @Getter
-    @Setter
-    public static class Author {
-        private String key;  // The key for the author
-    }
-
-    @Getter
-    @Setter
-    public static class AuthorDetails {
-        private String name;  // The name of the author
-    }
 }

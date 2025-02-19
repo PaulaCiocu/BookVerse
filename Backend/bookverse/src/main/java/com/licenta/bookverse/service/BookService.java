@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +21,8 @@ public class BookService {
 
     @Autowired
     private final BookRepository bookRepository;
+    @Autowired
+    private final GenreFilterService genreFilterService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -72,8 +76,8 @@ public class BookService {
             book.setIsbn_key(doc.getFirstValidIsbn());
             String isbn = doc.getFirstValidIsbn();
             book.setIsbn_key(isbn);
-            return isbn != null ? book : null;
-
+           // return isbn != null ? book : null;
+            return book;
         })
         .filter(book -> book!= null)
         .collect(Collectors.toList());
@@ -88,13 +92,19 @@ public class BookService {
     }
 
     public Book getBookDetails(String bookKey, String isbn) {
+
+        Optional<Book> existingBook = bookRepository.findByKey(bookKey);
+        if (existingBook.isPresent()) {
+            return existingBook.get();
+        }
+
         String worksUrl = OPEN_LIBRARY_WORKS_API_URL + bookKey + ".json";  // Works API URL
         WorkDetailResponse bookDetails = restTemplate.getForObject(worksUrl, WorkDetailResponse.class);
 
         if (bookDetails != null) {
             Book book = mapToBookDetails(bookDetails);
             addIsbnDetails(book, isbn, bookKey);
-            // Fetch additional details from ISBN API if ISBN is available
+            bookRepository.save(book);
             return book;
         }
         return null; // Return null or an appropriate response if book details are not found
@@ -116,6 +126,19 @@ public class BookService {
             book.setPublish_date((String) bookData.get("publish_date"));
             book.setPages((Integer) bookData.get("number_of_pages"));
 
+            // Retrieve author information
+            List<Map<String, Object>> authorsList = (List<Map<String, Object>>) bookData.get("authors");
+            if (authorsList != null) {
+                List<String> authorNames = new ArrayList<>();
+                for (Map<String, Object> author : authorsList) {
+                    String authorName = (String) author.get("name");
+                    authorNames.add(authorName);
+                }
+                // Join author names with a comma
+                String joinedAuthors = String.join(", ", authorNames);
+                book.setAuthor(joinedAuthors); // Assuming you have this method in the Book class
+            }
+
         } catch (Exception e) {
             System.out.println("Error fetching ISBN details: " + e.getMessage());
         }
@@ -123,25 +146,10 @@ public class BookService {
     private Book mapToBookDetails(WorkDetailResponse bookDetails) {
         Book book = new Book();
         book.setTitle(bookDetails.getTitle());
-        book.setSubjects(bookDetails.getSubjects());  // Assuming you have a method to handle genres
+        List<String> filterSubject = genreFilterService.filterGenres(bookDetails.getSubjects());
+        book.setSubjects(filterSubject);  // Assuming you have a method to handle genres
         book.setCoverImageUrl(bookDetails.getCoverUrl());
         book.setDescription(bookDetails.getDescription());
-        // Check if the book details contain authors
-        if (bookDetails.getAuthors() != null && !bookDetails.getAuthors().isEmpty()) {
-            // Extract the author key from the first element in the authors list
-            String authorKey = bookDetails.getAuthors().get(0).getAuthorKey();  // Get the key from the nested author object
-            //String authorName = bookDetails.getAuthors().get(0).getAuthorName(restTemplate);
-            // Get the list of author names
-            List<String> authorNames = bookDetails.getAuthorNames(restTemplate);
-            if (authorKey != null && !authorKey.isEmpty()) {
-                // Set the author key in the Book object (instead of trying to fetch the author name here)
-                book.setAuthor(String.join(", ", authorNames));
-            } else {
-                book.setAuthor("Unknown Author");  // If the key is null, set it as Unknown
-            }
-        } else {
-            book.setAuthor("Unknown Author");  // No author info available
-        }
 
         return book;
     }
