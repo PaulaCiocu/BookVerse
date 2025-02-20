@@ -1,0 +1,138 @@
+package com.licenta.bookverse.service.books;
+
+import com.licenta.bookverse.dto.books.EditionResponse;
+import com.licenta.bookverse.dto.books.OpenLibraryResponse;
+import com.licenta.bookverse.dto.books.WorkDetailResponse;
+import com.licenta.bookverse.entity.Book;
+import com.licenta.bookverse.repository.BookRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class BookService {
+
+    @Autowired
+    private final BookRepository bookRepository;
+    @Autowired
+    private final GenreFilterService genreFilterService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String OPEN_LIBRARY_SEARCH_API_URL = "https://openlibrary.org/search.json?q=";  // Search API URL
+    private static final String OPEN_LIBRARY_WORKS_API_URL = "https://openlibrary.org/works/";  // Works API URL
+    private static final String OPEN_LIBRARY_URL_SUBJECT = "https://openlibrary.org/search.json?subject=";
+    private static final String OPEN_LIBRARY_URL_AUTHOR = "https://openlibrary.org/search.json?author="; // Author API URL
+
+
+    public List<Book> searchBooks(String query) {
+        // First, check if books matching the query already exist in the database
+        List<Book> booksFromDb = bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase( query, query);
+        if (!booksFromDb.isEmpty()) {
+            return booksFromDb; // Return books from the database if found
+        }
+        String searchUrl = OPEN_LIBRARY_SEARCH_API_URL + query;
+        return searchBooksFromApi(searchUrl);
+    }
+    public List<Book> searchBooksByGenre(String genre) {
+        String subjectUrl = OPEN_LIBRARY_URL_SUBJECT + genre;  // Construct the subject/genre URL
+        return searchBooksFromApi(subjectUrl);
+    }
+    public List<Book> searchBooksByAuthor(String author) {
+        // First, check if books matching the author already exist in the database
+//        List<Book> booksFromDb = bookRepository.findByAuthorContainingIgnoreCase(author);
+//        if (!booksFromDb.isEmpty()) {
+//            return booksFromDb; // Return books from the database if found
+//        }
+        String authorUrl = OPEN_LIBRARY_URL_AUTHOR + author;  // Construct the author search URL
+        return searchBooksFromApi(authorUrl);
+    }
+
+    private List<Book> searchBooksFromApi(String url) {
+        OpenLibraryResponse response = restTemplate.getForObject(url, OpenLibraryResponse.class);
+        if (response == null || response.getDocs() == null) {
+            return List.of();
+        }
+        return mapToBookListFromSearchApi(response);
+    }
+    private List<Book> mapToBookListFromSearchApi(OpenLibraryResponse response) {
+        return response.getDocs().stream().map(doc -> {
+            Book book = new Book();
+
+            book.setKey(doc.extractKeyFromDoc());
+            book.setTitle(doc.getTitle());
+            book.setAuthor(doc.getAuthorFromDoc());
+            book.setCoverImageUrl(doc.getCoverUrl());
+
+            return book;
+        })
+        .collect(Collectors.toList());
+    }
+
+
+    public Book getBookDetails(String bookKey) {
+
+        Optional<Book> existingBook = bookRepository.findByKey(bookKey);
+        if (existingBook.isPresent()) {
+            return existingBook.get();
+        }
+
+        return mapToBookDetails(bookKey);
+    }
+
+
+    private Book mapToBookDetails(String bookKey) {
+        String worksUrl = OPEN_LIBRARY_WORKS_API_URL + bookKey + ".json";  // Works API URL
+        WorkDetailResponse bookDetails = restTemplate.getForObject(worksUrl, WorkDetailResponse.class);
+
+        if (bookDetails == null) {
+            return null; // Handle the case where book details are not found
+        }
+
+        Book book = new Book();
+
+        book.setKey(bookKey);
+        book.setTitle(bookDetails.getTitle());
+        List<String> filterSubject = genreFilterService.filterGenres(bookDetails.getSubjects());
+        book.setSubjects(filterSubject);
+        book.setCoverImageUrl(bookDetails.getCoverUrl());
+        book.setDescription(bookDetails.getDescription());
+
+        addEditionDetails(book, bookKey);
+
+        bookRepository.save(book);
+        return book;
+    }
+
+    private void addEditionDetails(Book book, String bookKey) {
+        String editionsUrl = "https://openlibrary.org/works/" + bookKey + "/editions.json";
+        EditionResponse response = restTemplate.getForObject(editionsUrl, EditionResponse.class);
+
+        if (response == null || response.getEntries() == null || response.getEntries().isEmpty()) {
+            System.out.println("No editions found.");
+            return;
+        }
+
+        book.setAuthor(response.getEntries().get(0).getAuthors(restTemplate));
+
+        boolean foundPages = false;
+        for (EditionResponse.EditionEntry edition : response.getEntries()) {
+            if (edition.getNumberOfPages() != null) {
+                book.setPages(edition.getNumberOfPages());
+                foundPages = true;
+            }
+            book.setPublish_date(edition.getPublishDate());
+            book.setLanguage(edition.getLanguage(restTemplate));
+            if (foundPages) break;
+        }
+
+    }
+
+}

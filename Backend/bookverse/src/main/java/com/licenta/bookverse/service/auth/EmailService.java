@@ -1,4 +1,4 @@
-package com.licenta.bookverse.service;
+package com.licenta.bookverse.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

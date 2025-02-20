@@ -19,12 +19,13 @@ public class Book {
 
     @Id
     private String key;
-    private String isbn_key;
+
 
     private String title;
     private String author;
     private Integer pages;
     private String publish_date;
+    private String language;
 
     @ElementCollection
     @CollectionTable(name = "book_subjects", joinColumns = @JoinColumn(name = "book_key")) // Only works if DB supports it

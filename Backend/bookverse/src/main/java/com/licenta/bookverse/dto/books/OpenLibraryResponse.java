@@ -1,6 +1,5 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.books;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,14 +24,10 @@ public class OpenLibraryResponse {
         private String key;
         private String title;
 
-        @JsonProperty("ia")
-        private List<String> ia; //key to get nr_pages and published date
-
         @JsonProperty("author_name")
         private List<String> authorName;
         private List<String> subject;  // List of subjects/genres
         private String description;
-
 
         @JsonProperty("cover_i")
         private Integer coverId;
@@ -44,23 +39,23 @@ public class OpenLibraryResponse {
             return null;  // If no cover, return null
         }
 
-        public String getFirstValidIsbn() {
-            if (ia != null) {
-                for (String entry : ia) {
-                    if (entry.startsWith("isbn_")) {
-                        String isbn = entry.substring(5); // Remove "isbn_" prefix
-                        if (isValidIsbn13(isbn)) {
-                            return isbn; // Return the first valid ISBN-13 found
-                        }
-                    }
-                }
+        public String extractKeyFromDoc() {
+            // The key format from Search API is like '/works/OL123456W'
+            if (key != null && key.startsWith("/works/")) {
+                return key.substring(7);  // Extract the work ID (after '/works/')
             }
-            return null; // No valid ISBN-13 found
+            return null;
         }
 
-        private boolean isValidIsbn13(String isbn) {
-            return isbn.matches("\\d{13}"); // Check if it's exactly 13 digits
+        public String getAuthorFromDoc() {
+            if (authorName != null && !authorName.isEmpty()) {
+                return String.join(", ", authorName);
+            } else {
+                return "Unknown Author";
+            }
         }
+
+
 
     }
 }

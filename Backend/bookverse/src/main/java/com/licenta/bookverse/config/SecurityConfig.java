@@ -1,5 +1,5 @@
 package com.licenta.bookverse.config;
-import com.licenta.bookverse.service.JwtAuthenticationFilter;
+import com.licenta.bookverse.service.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;

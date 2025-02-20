@@ -1,4 +1,4 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.auth;
 
 
 import jakarta.validation.constraints.Email;

@@ -1,5 +1,7 @@
 package com.licenta.bookverse.exception;
 
+import com.licenta.bookverse.exception.email.EmailAlreadyExistsException;
+import com.licenta.bookverse.exception.email.EmailNotFound;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;

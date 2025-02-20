@@ -1,4 +1,4 @@
-package com.licenta.bookverse.exception;
+package com.licenta.bookverse.exception.password;
 
 public class WeakPasswordException extends RuntimeException {
     public WeakPasswordException() {

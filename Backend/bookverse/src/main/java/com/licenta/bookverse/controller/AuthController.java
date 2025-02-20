@@ -1,8 +1,8 @@
 package com.licenta.bookverse.controller;
-import com.licenta.bookverse.dto.*;
+import com.licenta.bookverse.dto.auth.*;
 import com.licenta.bookverse.entity.Person;
-import com.licenta.bookverse.service.AuthenticationService;
-import com.licenta.bookverse.service.JwtService;
+import com.licenta.bookverse.service.auth.AuthenticationService;
+import com.licenta.bookverse.service.auth.JwtService;
 import com.licenta.bookverse.service.PersonService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

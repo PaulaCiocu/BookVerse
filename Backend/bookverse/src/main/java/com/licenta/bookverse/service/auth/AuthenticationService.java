@@ -1,18 +1,20 @@
-package com.licenta.bookverse.service;
+package com.licenta.bookverse.service.auth;
 
-import com.licenta.bookverse.dto.LoginDTO;
-import com.licenta.bookverse.dto.LoginResponse;
-import com.licenta.bookverse.dto.RegistrationDTO;
-import com.licenta.bookverse.dto.ResetPasswordRequest;
+import com.licenta.bookverse.dto.auth.LoginDTO;
+import com.licenta.bookverse.dto.auth.LoginResponse;
+import com.licenta.bookverse.dto.auth.RegistrationDTO;
+import com.licenta.bookverse.dto.auth.ResetPasswordRequest;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.exception.*;
+import com.licenta.bookverse.exception.email.EmailAlreadyExistsException;
+import com.licenta.bookverse.exception.email.EmailNotFound;
+import com.licenta.bookverse.exception.password.PasswordMismatchException;
+import com.licenta.bookverse.exception.password.WeakPasswordException;
 import com.licenta.bookverse.repository.PersonRepository;
 
+import com.licenta.bookverse.service.PersonService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;

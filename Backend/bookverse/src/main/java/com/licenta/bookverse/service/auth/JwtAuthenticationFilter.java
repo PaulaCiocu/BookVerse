@@ -1,4 +1,4 @@
-package com.licenta.bookverse.service;
+package com.licenta.bookverse.service.auth;
 
 
 import io.micrometer.common.lang.NonNull;

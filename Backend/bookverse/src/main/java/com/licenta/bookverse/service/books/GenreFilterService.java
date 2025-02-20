@@ -1,4 +1,4 @@
-package com.licenta.bookverse.service;
+package com.licenta.bookverse.service.books;
 
 import org.springframework.stereotype.Service;
 

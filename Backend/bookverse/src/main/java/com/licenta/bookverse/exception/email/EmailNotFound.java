@@ -1,4 +1,4 @@
-package com.licenta.bookverse.exception;
+package com.licenta.bookverse.exception.email;
 
 public class EmailNotFound extends RuntimeException {
     public EmailNotFound() {

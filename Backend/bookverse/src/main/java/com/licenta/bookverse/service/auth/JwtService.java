@@ -1,12 +1,10 @@
-package com.licenta.bookverse.service;
+package com.licenta.bookverse.service.auth;
 
-import com.licenta.bookverse.entity.Person;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import static javax.crypto.Cipher.SECRET_KEY;
 
 @Service
 public class JwtService {

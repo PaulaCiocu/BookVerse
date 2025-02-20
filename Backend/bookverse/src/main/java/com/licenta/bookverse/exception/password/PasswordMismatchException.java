@@ -1,4 +1,4 @@
-package com.licenta.bookverse.exception;
+package com.licenta.bookverse.exception.password;
 
 public class PasswordMismatchException extends RuntimeException {
     public PasswordMismatchException() {
