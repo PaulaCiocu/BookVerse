@@ -63,17 +63,33 @@ public class BookService {
         return mapToBookListFromSearchApi(response);
     }
     private List<Book> mapToBookListFromSearchApi(OpenLibraryResponse response) {
-        return response.getDocs().stream().map(doc -> {
-            Book book = new Book();
+        return response.getDocs().stream()
+                //return only the books in english or romanian
+                .filter(doc -> doc.getLanguage() != null && doc.getLanguage().stream()
+                        .anyMatch(lang -> "eng".equalsIgnoreCase(lang) || "rum".equalsIgnoreCase(lang)))
+                .filter(doc -> doc.getTitle() != null && doc.getTitle().matches("^[A-Za-z0-9\\s.,'’!?()\"-]+$"))
+                .filter(doc -> doc.getAuthorFromDoc() != null && doc.getAuthorFromDoc().matches("^[A-Za-z0-9\\s.,'’!?()\"-]+$"))
+                .filter(doc -> !containsExcludedWords(doc.getTitle()))
+                .filter(doc -> doc.getCoverUrl() != null)
+                .map(doc -> {
+                    Book book = new Book();
+                    book.setKey(doc.extractKeyFromDoc());
+                    book.setTitle(cleanText(doc.getTitle()));
+                    book.setAuthor(doc.getAuthorFromDoc());
+                    book.setCoverImageUrl(doc.getCoverUrl());
+                    return book;
+                })
+                .collect(Collectors.toList());
+    }
 
-            book.setKey(doc.extractKeyFromDoc());
-            book.setTitle(doc.getTitle());
-            book.setAuthor(doc.getAuthorFromDoc());
-            book.setCoverImageUrl(doc.getCoverUrl());
-
-            return book;
-        })
-        .collect(Collectors.toList());
+    private boolean containsExcludedWords(String title) {
+        String[] excludedWords = {"set", "box", "collection", "series", "coloring"};
+        for (String word : excludedWords) {
+            if (title.toLowerCase().contains(word)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -99,11 +115,12 @@ public class BookService {
         Book book = new Book();
 
         book.setKey(bookKey);
-        book.setTitle(bookDetails.getTitle());
+        book.setTitle(cleanText(bookDetails.getTitle()));
         List<String> filterSubject = genreFilterService.filterGenres(bookDetails.getSubjects());
         book.setSubjects(filterSubject);
         book.setCoverImageUrl(bookDetails.getCoverUrl());
-        book.setDescription(bookDetails.getDescription());
+        book.setDescription(cleanText(bookDetails.getDescription()));
+
 
         addEditionDetails(book, bookKey);
 
@@ -120,8 +137,6 @@ public class BookService {
             return;
         }
 
-        book.setAuthor(response.getEntries().get(0).getAuthors(restTemplate));
-
         boolean foundPages = false;
         for (EditionResponse.EditionEntry edition : response.getEntries()) {
             if (edition.getNumberOfPages() != null) {
@@ -130,9 +145,27 @@ public class BookService {
             }
             book.setPublish_date(edition.getPublishDate());
             book.setLanguage(edition.getLanguage(restTemplate));
-            if (foundPages) break;
+            if (foundPages && edition.getLanguage(restTemplate)!=null ) break;
+        }
+        for (EditionResponse.EditionEntry edition : response.getEntries()) {
+            if (edition.getAuthors(restTemplate) != null) {
+                book.setAuthor(edition.getAuthors(restTemplate));
+                break;
+            }
         }
 
     }
+
+    private String cleanText(String text) {
+        if (text == null) return null;
+        return text.replace("\u2019", "'")  // Curly apostrophe → regular apostrophe
+                .replace("\u201C", "\"") // Left curly quote → regular quote
+                .replace("\u201D", "\"") // Right curly quote → regular quote
+                .replace("\u2013", "-")  // En dash → hyphen
+                .replace("\u2014", "-")  // Em dash → hyphen
+                .replaceAll("[^\\p{Print}]", ""); // Remove non-printable characters
+    }
+
+
 
 }

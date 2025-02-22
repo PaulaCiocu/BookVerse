@@ -1,3 +1,4 @@
+import 'package:bookverse/tabScreens/bookDetailsScreen.dart';
 import 'package:bookverse/tabScreens/exploreTrails.dart';
 import 'package:bookverse/tabScreens/notifications.dart';
 import 'package:bookverse/tabScreens/searchBooks.dart';
@@ -5,9 +6,8 @@ import 'package:bookverse/tabScreens/userProfile.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  final String token; // Receive the token as a constructor parameter
+  final String token; 
 
-  // Constructor for passing the token
   const Home({super.key, required this.token});
 
   @override
@@ -15,67 +15,63 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   int screenIndex = 0;
-  List tabScreensList = [
-    ExploreTrails(),
-    SearchBooks(),
-    UserProfile(),
-    Notifications()
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomNavigationBar( 
-        onTap: (indexNumber){
-            setState(() {
-              screenIndex = indexNumber; 
-            });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor:   Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black54,
-        currentIndex: screenIndex,
-        items: const [
-
-          //swapping screen
-          BottomNavigationBarItem( 
-            icon: Icon(
-              Icons.home,
-              size: 30,
+  String? selectedBookKey; // Store the selected book key
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        IndexedStack(
+          index: screenIndex,
+          children: [
+            ExploreTrails(),
+            SearchBooks(onBookSelected: (bookKey) {
+              setState(() {
+                selectedBookKey = bookKey; // Store the selected book key
+              });
+            }),
+            UserProfile(),
+            Notifications(),
+          ],
+        ),
+        // Show BookDetailScreen on top if selectedBookKey is set
+        if (selectedBookKey != null)
+          Positioned.fill(
+            child: BookDetailScreen(
+              bookKey: selectedBookKey!,
+              onClose: () {
+                setState(() {
+                  selectedBookKey = null; // Close book details
+                });
+              },
             ),
-            label: ""
           ),
-          // search  button
-         BottomNavigationBarItem(
-            icon: Icon(
-              Icons.search_outlined,
-              size: 30,
-              
-            ), 
-            label: ""
-          ),  
-        // user detail screen button
-         BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              size: 30,
-            ), 
-            label: ""
-          ),  
-          // user detail screen button
-         BottomNavigationBarItem(
-            icon: Icon(
-              Icons.notification_add,
-              size: 30,
-            ), 
-            label: ""
-          ),  
-        ],
-      ),
-      body: tabScreensList[screenIndex],
-    );
-  }
+      ],
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      onTap: (index) {
+      setState(() {
+        if (selectedBookKey != null) {
+          selectedBookKey = null; // Close book details if it's open
+        } else {
+          screenIndex = index; // Otherwise, switch screens
+        }
+      });
+    },
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.black54,
+      currentIndex: screenIndex,
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home, size: 30), label: ""),
+        BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 30), label: ""),
+        BottomNavigationBarItem(icon: Icon(Icons.person, size: 30), label: ""),
+        BottomNavigationBarItem(icon: Icon(Icons.notifications, size: 30), label: ""),
+      ],
+    ),
+  );
+}
+
 }

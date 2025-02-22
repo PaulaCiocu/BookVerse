@@ -45,6 +45,14 @@ public class Person implements UserDetails {
     @Column(nullable = false)
     private boolean confirmed = false;
 
+
+    // Profile fields
+    private String bio; // User bio
+    private String profilePictureUrl; // URL for the profile picture
+    private Integer nrOfConnections = 0; // Number of connections
+
+    @ElementCollection
+    private List<UUID> connectedUserIds; // List of connected user IDs
     // Getters, Setters, Constructors
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

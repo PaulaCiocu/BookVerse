@@ -28,6 +28,8 @@ public class OpenLibraryResponse {
         private List<String> authorName;
         private List<String> subject;  // List of subjects/genres
         private String description;
+        private List<String> language;
+
 
         @JsonProperty("cover_i")
         private Integer coverId;
@@ -54,6 +56,7 @@ public class OpenLibraryResponse {
                 return "Unknown Author";
             }
         }
+
 
 
 

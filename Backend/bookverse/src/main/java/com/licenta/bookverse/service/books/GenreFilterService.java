@@ -22,6 +22,10 @@ public class GenreFilterService {
     );
 
     public List<String> filterGenres(List<String> subjects) {
+        if (subjects == null) {
+            return Collections.emptyList(); // Return an empty list if subjects is null
+        }
+
         Set<String> filteredGenres = new HashSet<>();
 
         for (String subject : subjects) {
@@ -38,5 +42,6 @@ public class GenreFilterService {
 
         return new ArrayList<>(filteredGenres);
     }
+
 
 }

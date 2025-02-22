@@ -28,19 +28,26 @@ public class EditionResponse {
 
         public String getLanguage(RestTemplate restTemplate) {
             if (languages != null && !languages.isEmpty()) {
-                String languageKey = languages.get(0).getKey();
-                String languageUrl = "https://openlibrary.org" + languageKey + ".json";
-                try {
-                    Map<String, Object> responseLanguage = restTemplate.getForObject(languageUrl, Map.class);
-                    if (responseLanguage != null && responseLanguage.containsKey("name")) {
-                        return (String) responseLanguage.get("name");
+                for (Language language : languages) { // Assuming 'Language' is your language class
+                    String languageKey = language.getKey();
+                    String languageUrl = "https://openlibrary.org" + languageKey + ".json";
+                    try {
+                        Map<String, Object> responseLanguage = restTemplate.getForObject(languageUrl, Map.class);
+                        if (responseLanguage != null && responseLanguage.containsKey("name")) {
+                            String languageName = (String) responseLanguage.get("name");
+                            // Return if it's English or Romanian
+                            if (languageName.equalsIgnoreCase("English") || languageName.equalsIgnoreCase("Romanian")) {
+                                return languageName; // Return valid language
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error fetching language details: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    System.out.println("Error fetching language details: " + e.getMessage());
                 }
             }
-            return null;
+            return null; // Return null if no valid language is found
         }
+
 
         public String getAuthors(RestTemplate restTemplate) {
             if (authors != null && !authors.isEmpty()) {
@@ -56,9 +63,9 @@ public class EditionResponse {
                         System.out.println("Error fetching author details: " + e.getMessage());
                     }
                 }
-                return authorNames.isEmpty() ? "Unknown" : String.join(", ", authorNames);
+                return authorNames.isEmpty() ? null : String.join(", ", authorNames);
             }
-            return "Unknown";
+            return null;
         }
     }
 
