@@ -330,7 +330,7 @@ class LoginPageState extends State<LoginPage> {
                                     // Token successfully retrieved, navigate to the HomePage
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(builder: (context) => Home(token: token)), // Passing token to HomePage
+                                      MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text)), // Passing token to HomePage
                                     );
                                   } else {
                                     showCustomSnackbar(context, "Failed to retrieve token");

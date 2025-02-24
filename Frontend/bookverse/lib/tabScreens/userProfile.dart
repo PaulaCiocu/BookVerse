@@ -7,7 +7,11 @@ import 'package:http/http.dart' as http;
 
 class UserProfile extends StatefulWidget {
   final String userEmail; // User ID to fetch profile details
-  const UserProfile({required this.userEmail});
+  final Function(String userEmail) onReadSelected;
+  final Function(String userEmail) onAchievementsSelected;
+  final Function(String userEmail) onTrailsSelected;
+
+  const UserProfile({required this.userEmail, required this.onReadSelected, required this.onAchievementsSelected, required this.onTrailsSelected});
 
   @override
   _UserProfileState createState() => _UserProfileState();
@@ -26,28 +30,6 @@ class _UserProfileState extends State<UserProfile> {
     }
   }
 
-   void _navigateToScreen(int index) {
-    Widget screen;
-    switch (index) {
-      case 0:
-        screen = const Readingscreen(); // Create an instance of the Reading screen
-        break;
-      case 1:
-        screen = const AchievmentsScreen(); // Create an instance of the Achievements screen
-        break;
-      case 2:
-        screen = const TrailsSreen(); // Create an instance of the Trails screen
-        break;
-      default:
-        return; // Do nothing if index is out of range
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => screen), // Navigate to the selected screen
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +41,7 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(
-          future: _fetchUserProfile(),
+          future: _userProfileFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -114,39 +96,50 @@ class _UserProfileState extends State<UserProfile> {
                   ),
 
                   const SizedBox(height: 100,),
-                  // Bottom Navigation Bar for Tabs
-                  // Bottom Navigation Bar for Tabs
-                  BottomNavigationBar(
-                    backgroundColor: Colors.white,
-                    elevation: 0,
-                    currentIndex: _selectedIndex,
-                    onTap: (index) {
-                      setState(() {
-                        _selectedIndex = index; // Update the selected index
-                        
-                      });
-                      _navigateToScreen(index);
-                    },
-                    items: const [
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.menu_book_rounded, size: 25),
-                        label: "Reading",
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                         widget.onReadSelected(user['email']);
+                        },
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.menu_book_rounded, size: 25), // Icon for Reading
+                            SizedBox(height: 4),
+                            Text("Reading", style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
                       ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.star, size: 25),
-                        label: "Achievements",
+                      GestureDetector(
+                        onTap: () {
+                          widget.onAchievementsSelected(user['email']);
+                        },
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star, size: 25), // Icon for Achievements
+                            SizedBox(height: 4),
+                            Text("Achievements", style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
                       ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.terrain, size: 25),
-                        label: "Trails",
+                      GestureDetector(
+                        onTap: () {
+                         widget.onTrailsSelected(user['email']);
+                        },
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.terrain, size: 25), // Icon for Trails
+                            SizedBox(height: 4),
+                            Text("Trails", style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
                       ),
                     ],
-                    selectedItemColor: Colors.black54, // Set the selected item color to black
-                    unselectedItemColor: Colors.black38, // Set unselected item color to a lighter shade
-                    selectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, // Make the selected label bold
-                    ),
-                    
                   ),
                 ],
               );
@@ -157,6 +150,5 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 }
-
 
 
