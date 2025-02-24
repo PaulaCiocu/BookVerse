@@ -1,5 +1,6 @@
 package com.licenta.bookverse.service;
 
+import com.licenta.bookverse.dto.auth.UserProfileDTO;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.repository.PersonRepository;
 import lombok.AllArgsConstructor;
@@ -58,6 +59,20 @@ public class PersonService {
         // Mark the user as confirmed
         person.setConfirmed(true);
         personRepository.save(person);
+    }
+
+    public Person editProfile(String email, UserProfileDTO updatedPerson) {
+        Person person = personRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if(updatedPerson.getFullName()!= null) {
+            person.setFullName(updatedPerson.getFullName());
+        }
+        if(updatedPerson.getBio()!= null) {
+            person.setBio(updatedPerson.getBio());
+        }
+        // Save updated person
+        Person savedPerson = personRepository.save(person);
+        return savedPerson;
     }
 
 

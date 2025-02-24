@@ -1,6 +1,7 @@
 package com.licenta.bookverse.controller;
 
 
+import com.licenta.bookverse.dto.auth.UserProfileDTO;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.repository.PersonRepository;
 import com.licenta.bookverse.service.PersonService;
@@ -12,10 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,4 +40,8 @@ public class PersonController {
         return ResponseEntity.ok(persons);
     }
 
+    @PutMapping("/edit/{email}")
+    public ResponseEntity<Person> updateProfile(@PathVariable String email, @RequestBody UserProfileDTO updatedPerson) {
+        return ResponseEntity.ok(personService.editProfile(email, updatedPerson));
+    }
 }

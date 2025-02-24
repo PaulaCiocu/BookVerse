@@ -31,7 +31,7 @@ Widget build(BuildContext context) {
                 selectedBookKey = bookKey; // Store the selected book key
               });
             }),
-            UserProfile(),
+            UserProfile(userEmail: 'fuknolegnu@gufum.com'),
             Notifications(),
           ],
         ),
