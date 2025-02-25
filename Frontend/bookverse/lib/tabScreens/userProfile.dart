@@ -41,7 +41,7 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(
-          future: _userProfileFuture,
+          future: _fetchUserProfile(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -85,13 +85,13 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ),
 
-                      const SizedBox(height: 30),
-                      Text(
-                        user['nr_of_connections']?.toString() ?? '0', // Convert to string or show '0' if null
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text('Connections', style: TextStyle(fontSize: 14)),
+                      // const SizedBox(height: 30),
+                      // Text(
+                      //   user['nr_of_connections']?.toString() ?? '0', // Convert to string or show '0' if null
+                      //   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      // ),
+                      // const SizedBox(height: 10),
+                      // const Text('Connections', style: TextStyle(fontSize: 14)),
                     ],
                   ),
 
@@ -102,7 +102,7 @@ class _UserProfileState extends State<UserProfile> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                         widget.onReadSelected(user['email']);
+                         widget.onReadSelected(user['id']);
                         },
                         child: const Column(
                           mainAxisSize: MainAxisSize.min,

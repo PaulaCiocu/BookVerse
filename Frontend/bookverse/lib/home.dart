@@ -11,8 +11,9 @@ import 'package:flutter/material.dart';
 class Home extends StatefulWidget {
   final String token;
   final String userEmail;
+  final String userId;
 
-  const Home({super.key, required this.token, required this.userEmail});
+  const Home({super.key, required this.token, required this.userEmail, required this.userId});
 
   @override
   State<Home> createState() => _HomeState();
@@ -22,7 +23,7 @@ class _HomeState extends State<Home> {
   int screenIndex = 0;
   String? selectedBookKey; // Store the selected book key
   String? selectedTabScreenProfile;
-  String? readUserEmail;
+  String? readUserId;
   String? achievementsUserEmail;
   String? trailsUserEmail;
 
@@ -41,9 +42,9 @@ class _HomeState extends State<Home> {
                   selectedBookKey = bookKey; // Store the selected book key
                 });
               }),
-              UserProfile(userEmail: widget.userEmail, onReadSelected: (userEmail) { 
+              UserProfile(userEmail: widget.userEmail, onReadSelected: (id) { 
                   setState(() {
-                    readUserEmail = userEmail; // Store the selected book key
+                    readUserId = id; // Store the selected book key
                   });
                 }, onAchievementsSelected: (userEmail) { 
                   setState(() {
@@ -66,16 +67,16 @@ class _HomeState extends State<Home> {
                   setState(() {
                     selectedBookKey = null; // Close book details
                   });
-                },
+                }, userId: widget.userId,
               ),
             ),
-          if (readUserEmail != null)
+          if (readUserId != null)
             Positioned.fill(
               child: Readingscreen(
-                user_email: readUserEmail!,
+                user_id: readUserId!,
                 onClose: () {
                   setState(() {
-                    readUserEmail = null; // Close book details
+                    readUserId = null; // Close book details
                   });
                 },
               ),
@@ -112,8 +113,8 @@ class _HomeState extends State<Home> {
             if (selectedBookKey != null) {
               selectedBookKey = null; // Close book details if it's open
             }
-            if (readUserEmail != null) {
-              readUserEmail = null; 
+            if (readUserId != null) {
+              readUserId = null; 
             } 
             if (achievementsUserEmail != null) {
               achievementsUserEmail = null; 

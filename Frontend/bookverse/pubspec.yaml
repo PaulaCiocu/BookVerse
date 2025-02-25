@@ -64,6 +64,7 @@ flutter:
   - assets/welcome_image.jpeg
   - assets/login_image.jpeg
   - assets/book_background.png
+  - assets/book_reading_background.png
   
 
   # An image asset can refer to one or more resolution-specific "variants", see

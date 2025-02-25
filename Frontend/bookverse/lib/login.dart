@@ -325,12 +325,13 @@ class LoginPageState extends State<LoginPage> {
                                 if (errorMessage == null) {
                                   // Success: Retrieve the JWT token and navigate to HomePage
                                   final token = await AuthenticationController.getToken();
+                                  final userId = await AuthenticationController.getUserId();
                                   
-                                  if (token != null) {
+                                  if (token != null && userId!= null) {
                                     // Token successfully retrieved, navigate to the HomePage
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text)), // Passing token to HomePage
+                                      MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text, userId: userId)), // Passing token to HomePage
                                     );
                                   } else {
                                     showCustomSnackbar(context, "Failed to retrieve token");

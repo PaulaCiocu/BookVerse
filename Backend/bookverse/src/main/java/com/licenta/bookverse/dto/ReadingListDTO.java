@@ -1,17 +1,17 @@
 package com.licenta.bookverse.dto;
 
+import com.licenta.bookverse.entity.Book;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
+import java.util.List;
 
 @Getter
 @Setter
-public class AddToReadingListRequest {
-    private String bookId; // Use UUID type if book_id is a UUID
-    private UUID personId; // Assuming personId is a UUID
+public class ReadingListDTO {
+    private Book book;
     private ReadingListStatus status; // Optional, default could be "Not Started"
-
+    private int pagesRead;
     // Getters and Setters
 }
 

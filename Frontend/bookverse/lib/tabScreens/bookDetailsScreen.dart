@@ -5,14 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 class BookDetailScreen extends StatefulWidget {
   final String bookKey;
+  final String userId;
   final VoidCallback onClose;
-  const BookDetailScreen({required this.bookKey, required this.onClose});
+  const BookDetailScreen({required this.bookKey, required this.onClose, required this.userId});
 
   @override
   _BookDetailScreenState createState() => _BookDetailScreenState();
 }
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
+  bool _isAddedToList = false; // Track if the book is added
   Future<Map<String, dynamic>>? _bookDetailsFuture; // Change to nullable
   Future<Map<String, dynamic>> _fetchBookDetails() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/books/${widget.bookKey}'));
@@ -23,10 +25,41 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
   }
 
+  Future<void> addToReadingList() async {
+    final url = 'http://10.0.2.2:8080/reading-list/add/${widget.userId}/${widget.bookKey}';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _isAddedToList = true; // Update state when added
+      });
+    } else {
+      print('Failed to add book: ${response.statusCode} - ${response.body}');
+    }
+  }
+  
+  Future<void> _checkIfBookInReadingList() async {
+  final url = 'http://10.0.2.2:8080/reading-list/check/${widget.userId}/${widget.bookKey}';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    setState(() {
+      _isAddedToList = response.body.toLowerCase() == 'true';
+    });
+  } else {
+    print('Failed to check reading list status: ${response.statusCode}');
+  }
+}
+
   @override
   void initState() {
     super.initState();
     _bookDetailsFuture = _fetchBookDetails(); // Fetch book details on initialization
+    _checkIfBookInReadingList();
   }
   bool _isExpanded = false;
   @override
@@ -149,6 +182,28 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         ),
                       ),
                     ),
+
+                                        // Add some spacing before the button
+                    const SizedBox(height: 20),
+
+                    // ADd to reading Button
+                    ElevatedButton.icon(
+                      onPressed: _isAddedToList ? null : addToReadingList, // Disable button if already added
+                      icon: const Icon(Icons.menu_book_rounded, color: Colors.black87),
+                      label: Text(_isAddedToList ? "Added to Reading List" : "Add to Reading"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+
+                    
+                    const SizedBox(height: 20), 
+
                   
                   ],
                 );
