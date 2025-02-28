@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @Builder
 public class TrailDTOGetRequest {
-
+        private Long trailId;
         private String title;
         private String description;
         private UUID creatorId;

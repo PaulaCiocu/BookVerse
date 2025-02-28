@@ -21,6 +21,12 @@ public class TrailController {
 
     private final TrailsService trailService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TrailDTOGetRequest> getTrailById(@PathVariable Integer id) {
+        TrailDTOGetRequest trail = trailService.getTrailById(id);
+        return ResponseEntity.ok(trail);
+    }
+
     @GetMapping("/person/{personId}")
     public ResponseEntity<List<TrailDTOGetRequest>> getTrailsByPerson(@PathVariable UUID personId) {
         return ResponseEntity.ok(trailService.getTrailsByPerson(personId));
@@ -30,7 +36,6 @@ public class TrailController {
     public ResponseEntity<List<TrailDTOGetRequest>> getTrailsExceptOfPerson(@PathVariable UUID personId) {
         return ResponseEntity.ok(trailService.getTrailsExceptForPerson(personId));
     }
-
 
     @PostMapping("/create")
     public ResponseEntity<Void> createTrail(@RequestBody TrailDTO dto) {

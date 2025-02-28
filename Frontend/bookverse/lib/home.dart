@@ -5,6 +5,7 @@ import 'package:bookverse/tabScreens/searchBooks.dart';
 import 'package:bookverse/tabScreens/userProfile.dart';
 import 'package:bookverse/tabScreens/user_screens/achievmentsScreen.dart';
 import 'package:bookverse/tabScreens/user_screens/readingScreen.dart';
+import 'package:bookverse/tabScreens/user_screens/trailDetails.dart';
 import 'package:bookverse/tabScreens/user_screens/trailsSreen.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int screenIndex = 0;
   String? selectedBookKey; // Store the selected book key
+  String? selectedTrailKey;
   String? selectedTabScreenProfile;
   String? readUserId;
   String? achievementsUserEmail;
@@ -36,7 +38,11 @@ class _HomeState extends State<Home> {
           IndexedStack(
             index: screenIndex,
             children: [
-              ExploreTrails(),
+              ExploreTrails(onTrailsSelected: (String trailKey) { 
+                setState(() {
+                  selectedTrailKey = trailKey; // Store the selected book key
+                });
+               },),
               SearchBooks(onBookSelected: (bookKey) {
                 setState(() {
                   selectedBookKey = bookKey; // Store the selected book key
@@ -58,6 +64,18 @@ class _HomeState extends State<Home> {
               Notifications(),
             ],
           ),
+
+          if (selectedTrailKey != null)
+            Positioned.fill(
+              child: TrailDetails(
+                trailId: selectedTrailKey!,
+                onClose: () {
+                  setState(() {
+                    selectedTrailKey = null; 
+                  });
+                }, userId: widget.userId, 
+              ),
+            ),
           // Show BookDetailScreen on top if selectedBookKey is set
           if (selectedBookKey != null)
             Positioned.fill(
@@ -110,6 +128,9 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {
+            if (selectedTrailKey != null) {
+              selectedTrailKey = null; // Close book details if it's open
+            }
             if (selectedBookKey != null) {
               selectedBookKey = null; // Close book details if it's open
             }

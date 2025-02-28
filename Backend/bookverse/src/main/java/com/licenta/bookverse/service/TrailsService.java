@@ -24,11 +24,28 @@ public class TrailsService {
     private final BookRepository bookRepository;
     private final PersonRepository personRepository;
 
+    public TrailDTOGetRequest getTrailById(Integer trailId) {
+        Trail trail = trailRepository.findById(trailId)
+                .orElseThrow(() -> new RuntimeException("Trail not found"));
+
+        return TrailDTOGetRequest.builder()
+                .trailId(trail.getId())
+                .title(trail.getTitle())
+                .description(trail.getDescription())
+                .genre(trail.getGenres())
+                .trailBookList(trail.getTrailBooks())
+                .numberOfReadings(trail.getNumberOfReadings())
+                .creatorId(trail.getCreator().getId())
+                .build();
+    }
+
+
     public List<TrailDTOGetRequest> getTrailsByPerson(UUID personId) {
         List<Trail> trails = trailRepository.findByCreatorId(personId);
 
         return trails.stream().map(trail ->
                 TrailDTOGetRequest.builder()
+                        .trailId(trail.getId())
                         .title(trail.getTitle())
                         .description(trail.getDescription())
                         .genre(trail.getGenres())
@@ -45,6 +62,7 @@ public class TrailsService {
         return allTrails.stream()
                 .filter(trail -> !trail.getCreator().getId().equals(personId)) // Filter out trails created by the specified person
                 .map(trail -> TrailDTOGetRequest.builder()
+                        .trailId(trail.getId())
                         .title(trail.getTitle())
                         .description(trail.getDescription())
                         .genre(trail.getGenres())
