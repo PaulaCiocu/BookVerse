@@ -22,30 +22,42 @@ class _TrailDetailsState extends State<TrailDetails> {
   void initState() {
     super.initState();
     _trailFuture = fetchTrailDetails(); // Fetch trail details initially
+    _checkIfBookInReadingList();
   }
+
+  Future<void> _checkIfBookInReadingList() async {
+  print("is added to list $_isAddedToList");
+  final url = 'http://10.0.2.2:8080/reading-trails/exists/${widget.userId}/${widget.trailId}';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    setState(() {
+      _isAddedToList = response.body.toLowerCase() == 'true';
+    });
+  } else {
+    print('Failed to check reading list status: ${response.statusCode}');
+  }
+}
  Future<void> addToReadingList() async {
-    // final url = 'http://10.0.2.2:8080/reading-list/add/${widget.userId}/${widget.bookKey}';
+    final url = 'http://10.0.2.2:8080/reading-trails/add/${widget.userId}/${widget.trailId}/CREATED';
 
-    // final response = await http.post(
-    //   Uri.parse(url),
-    //   headers: {'Content-Type': 'application/json'},
-    // );
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
 
-    // if (response.statusCode == 200) {
-    //   setState(() {
-    //     _isAddedToList = true; // Update state when added
-    //   });
-    // } else {
-    //   print('Failed to add book: ${response.statusCode} - ${response.body}');
-    // }
+    if (response.statusCode == 201) {
+      setState(() {
+        _isAddedToList = true; // Update state when added
+      });
+    } else {
+      print('Failed to add book: ${response.statusCode} - ${response.body}');
+    }
   }
   Future<Map<String, dynamic>> fetchTrailDetails() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/${widget.trailId}'));
 
     if (response.statusCode == 200) {
-       setState(() {
-        _isAddedToList = true; // Update state when added
-      });
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load trail details');
@@ -174,14 +186,14 @@ class _TrailDetailsState extends State<TrailDetails> {
                               );
                             }).toList(),
                           ),
-          
-                              // ADd to reading Button
+
+                          const SizedBox( height: 20,),
+                            // ADd to reading Button
                           ElevatedButton.icon(
                             onPressed: _isAddedToList ? null : addToReadingList, // Disable button if already added
-                           // icon: const Icon(Icons.terrain, color: Colors.black87),
                             label: Text(_isAddedToList ? "Added to Trails List" : "Add to Trails"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
+                              backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA), // Orange when false
                               foregroundColor: Colors.black87,
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               shape: RoundedRectangleBorder(
@@ -189,6 +201,7 @@ class _TrailDetailsState extends State<TrailDetails> {
                               ),
                             ),
                           ),
+
                         ],
                       ),
                     )
