@@ -31,13 +31,15 @@ public class ReadingTrailService {
                 .orElseThrow(() -> new RuntimeException("Person not found"));
         Trail trail = (Trail) trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
-
+        // Calculate totalBooks by checking the size of the trailBooks list
+        int totalBooks = trail.getTrailBooks().size();
         // Create a new ReadingTrailList with the specified createdType
         ReadingTrailList readingTrailList = ReadingTrailList.builder()
                 .person(person)
                 .trail(trail)
                 .createdType(createdType)
                 .status(ReadingListStatus.NOT_STARTED)  // Set the initial status as "Not Started"
+                .totalBooks(totalBooks)
                 .build();
 
         readingTrailListRepository.save(readingTrailList);

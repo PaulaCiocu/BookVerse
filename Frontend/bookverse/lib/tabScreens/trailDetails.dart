@@ -39,7 +39,7 @@ class _TrailDetailsState extends State<TrailDetails> {
   }
 }
  Future<void> addToReadingList() async {
-    final url = 'http://10.0.2.2:8080/reading-trails/add/${widget.userId}/${widget.trailId}/CREATED';
+    final url = 'http://10.0.2.2:8080/reading-trails/add/${widget.userId}/${widget.trailId}/FOLLOWED';
 
     final response = await http.post(
       Uri.parse(url),

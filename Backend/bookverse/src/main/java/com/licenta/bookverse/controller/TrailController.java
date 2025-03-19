@@ -38,9 +38,9 @@ public class TrailController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createTrail(@RequestBody TrailDTO dto) {
-        trailService.createTrail(dto); // Call the service method to create the trail
-        return ResponseEntity.status(HttpStatus.CREATED).build(); // Return a 201 Created response with no body
+    public ResponseEntity<Long> createTrail(@RequestBody TrailDTO dto) {
+        Long trailId = trailService.createTrail(dto); // Get the created trail's ID
+        return ResponseEntity.status(HttpStatus.CREATED).body(trailId); // Return the trail ID
     }
 
 }

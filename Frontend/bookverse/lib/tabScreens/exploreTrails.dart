@@ -4,8 +4,9 @@ import 'package:http/http.dart' as http; // Add http package
 import 'dart:convert'; // For jsonDecode
 
 class ExploreTrails extends StatefulWidget {
+  final String userId;
   final Function(String trailKey) onTrailsSelected;
-  const ExploreTrails({super.key, required this.onTrailsSelected});
+  const ExploreTrails({super.key, required this.onTrailsSelected, required this.userId});
 
   @override
   State<ExploreTrails> createState() => _ExploreTrailsState();
@@ -27,7 +28,7 @@ class _ExploreTrailsState extends State<ExploreTrails> {
     });
     
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/except/person/1a84e09a-c439-4308-b174-8b6a76864e0e'));
+      final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/except/person/${widget.userId}'));
 
       print('Response status: ${response.statusCode}'); // Debugging log
       print('Response body: ${response.body}'); // Log the body of the response

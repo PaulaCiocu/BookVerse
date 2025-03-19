@@ -84,6 +84,10 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                   itemBuilder: (context, index) {
                                     final trail = trails[index]['trail'];
                                     final createdType = trails[index]['createdType'];
+                                    final booksRead = trails[index]['progress'] ?? 0; // Fetch the progress from the backend
+                                    final totalBooks = trails[index]['totalBooks'] ?? 2; // Fetch the total number of books in the trail, default min 2
+                                    final progress = (booksRead / totalBooks).clamp(0.0, 1.0);final progressPercentage = (progress * 100).toStringAsFixed(0); // Convert to percentage string
+                                    print(progress);
                                     return Card(
                                       color: Colors.white,
                                       margin: const EdgeInsets.only(
@@ -92,34 +96,66 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          ListTile(
-                                            title: Text(
-                                              trail['title'] ?? 'No Title',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black87,
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: ListTile(
+                                                  title: Text(
+                                                    trail['title'] ?? 'No Title',
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  subtitle: Text(
+                                                    createdType ?? 'Created type',
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Colors.black45,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  leading: ClipOval(
+                                                    child: Image.asset(
+                                                      'assets/book_background.png',
+                                                      width: 40,
+                                                      height: 40,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                            subtitle: Text(
-                                              createdType ?? 'Created type',
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Colors.black45,
-                                                fontSize: 12,
+
+                                              SizedBox(
+                                                width: 60, // Set width for the circular progress
+                                                height: 60,
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    CircularProgressIndicator(
+                                                      value: progress,
+                                                      backgroundColor: Colors.grey[300], // Background color of the progress circle
+                                                      color: const Color.fromARGB(255, 251, 207, 146), // Color of the progress
+                                                      strokeWidth: 4, // You can also adjust the stroke width if needed
+                                                    ),
+                                                    Text(
+                                                      '$progressPercentage%', // Display progress percentage
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w500,
+                                                        fontSize: 12, // Adjust font size for better visibility
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            leading: ClipOval(
-                                              child: Image.asset(
-                                                'assets/book_background.png',
-                                                width: 40,
-                                                height: 40,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
+                                            
+                                            ],
                                           ),
-                                        ],
+
+                                          // Circular Progress Indicator with percentage
+                                          ],
                                       ),
                                     );
                                   },

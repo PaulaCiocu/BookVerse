@@ -30,6 +30,7 @@ public class ReadingTrailList {
     @Enumerated(EnumType.STRING)
     private CreatedType createdType; // "Created" or "Followed"
 
+    private int totalBooks = 0;
     private int progress = 0; // For example, number of books read within the trail or other progress criteria
 }
 

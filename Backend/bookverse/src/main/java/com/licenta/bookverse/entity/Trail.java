@@ -34,7 +34,6 @@ public class Trail {
     private String description; // Description of the trail
 
     private Integer numberOfReadings = 0; // Number of times the trail has been followed
-
     @ElementCollection
     @CollectionTable(name = "trail_genres", joinColumns = @JoinColumn(name = "trail_id"))
     @Column(name = "genre")

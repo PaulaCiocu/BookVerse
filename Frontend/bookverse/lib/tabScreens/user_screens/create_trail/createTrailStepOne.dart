@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bookverse/tabScreens/user_screens/create_trail/SuccessPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -112,6 +113,20 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
     }
   }
 
+Future<void> addToReadingList(int trailId) async {
+  final url = 'http://10.0.2.2:8080/reading-trails/add/${widget.userId}/$trailId/CREATED';
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {'Content-Type': 'application/json'},
+  );
+
+  if (response.statusCode == 201) {
+    print("Added to reading list");
+  } else {
+    print('Failed to add book: ${response.statusCode} - ${response.body}');
+  }
+}
   Future<void> createReadingTrail(String title, String description, List books) async {
       final url = Uri.parse('http://10.0.2.2:8080/trails/create'); 
       final userId = widget.userId;
@@ -134,6 +149,16 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
         );
       if (response.statusCode == 201 ) {
         print('Trail created successfully');
+        // Extract trail ID from response body
+        final int trailId = int.parse(response.body);         
+        
+        print('Trail ID: $trailId'); // Debugging output
+        addToReadingList(trailId);
+        //add trail to reading list 
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SuccessPage()),
+      );
       } else {
         print('Failed to create trail. Status code: ${response.statusCode}');
       }

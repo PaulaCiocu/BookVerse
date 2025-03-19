@@ -9,7 +9,6 @@ import com.licenta.bookverse.entity.TrailBook;
 import com.licenta.bookverse.repository.BookRepository;
 import com.licenta.bookverse.repository.PersonRepository;
 import com.licenta.bookverse.repository.TrailRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +73,7 @@ public class TrailsService {
                 .collect(Collectors.toList());
     }
 
-    public void createTrail(TrailDTO trailDTO) {
+    public Long createTrail(TrailDTO trailDTO) {
         // Fetch the creator (Person)
         Person creator = personRepository.findById(trailDTO.getCreatorId())
                 .orElseThrow(() -> new RuntimeException("Creator not found"));
@@ -110,7 +109,8 @@ public class TrailsService {
         }
 
         // Save the trail in the database
-        trailRepository.save(trail);
+        Trail savedTrail = trailRepository.save(trail);
+        return savedTrail.getId();
     }
 
 }

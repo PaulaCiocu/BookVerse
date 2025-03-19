@@ -83,7 +83,6 @@ class _ReadingscreenState extends State<Readingscreen> {
                         // Calculate progress percentage
                         final progress = (pagesRead / totalPages).clamp(0.0, 1.0);
                         final progressPercentage = (progress * 100).toStringAsFixed(0); // Convert to percentage string
- // Circular Progress Indicator with percentage
                         
                         print('Total Pages for ${bookData['title']}: $totalPages');
 

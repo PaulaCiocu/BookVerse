@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
                 setState(() {
                   selectedTrailKey = trailKey; // Store the selected book key
                 });
-               },),
+               }, userId: widget.userId,),
               SearchBooks(onBookSelected: (bookKey) {
                 setState(() {
                   selectedBookKey = bookKey; // Store the selected book key
