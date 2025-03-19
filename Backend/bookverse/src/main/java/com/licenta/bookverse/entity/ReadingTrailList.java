@@ -1,4 +1,5 @@
 package com.licenta.bookverse.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.licenta.bookverse.dto.ReadingListStatus;
 import com.licenta.bookverse.dto.books.CreatedType;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ public class ReadingTrailList {
 
     @ManyToOne
     @JoinColumn(name = "person_id")
+    @JsonIgnore // Prevent serialization to avoid infinite loop
     private Person person; // The person who added the trail
 
     @ManyToOne

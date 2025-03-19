@@ -1,6 +1,8 @@
 package com.licenta.bookverse.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +24,7 @@ public class Trail {
 
     @ManyToOne
     @JoinColumn(name = "person_id", nullable = false)
+    @JsonIgnore
     private Person creator; // The person who created the trail
 
     @Column(nullable = false)

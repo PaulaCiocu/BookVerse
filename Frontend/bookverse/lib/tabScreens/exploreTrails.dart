@@ -1,4 +1,4 @@
-import 'package:bookverse/tabScreens/user_screens/trailDetails.dart';
+import 'package:bookverse/tabScreens/trailDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Add http package
 import 'dart:convert'; // For jsonDecode

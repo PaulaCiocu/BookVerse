@@ -128,7 +128,7 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                       GestureDetector(
                         onTap: () {
-                         widget.onTrailsSelected(user['email']);
+                         widget.onTrailsSelected(user['id']);
                         },
                         child: const Column(
                           mainAxisSize: MainAxisSize.min,

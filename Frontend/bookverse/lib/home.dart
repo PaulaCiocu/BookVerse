@@ -5,7 +5,7 @@ import 'package:bookverse/tabScreens/searchBooks.dart';
 import 'package:bookverse/tabScreens/userProfile.dart';
 import 'package:bookverse/tabScreens/user_screens/achievmentsScreen.dart';
 import 'package:bookverse/tabScreens/user_screens/readingScreen.dart';
-import 'package:bookverse/tabScreens/user_screens/trailDetails.dart';
+import 'package:bookverse/tabScreens/trailDetails.dart';
 import 'package:bookverse/tabScreens/user_screens/trailsSreen.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +27,7 @@ class _HomeState extends State<Home> {
   String? selectedTabScreenProfile;
   String? readUserId;
   String? achievementsUserEmail;
-  String? trailsUserEmail;
+  String? trailsUserId;
 
 
   @override
@@ -56,9 +56,9 @@ class _HomeState extends State<Home> {
                   setState(() {
                     achievementsUserEmail = userEmail; // Store the selected book key
                   });
-              }, onTrailsSelected: (String userEmail) { 
+              }, onTrailsSelected: (String id) { 
                   setState(() {
-                    trailsUserEmail = userEmail; // Store the selected book key
+                    trailsUserId = id; // Store the selected book key
                   });
                },),
               Notifications(),
@@ -112,13 +112,13 @@ class _HomeState extends State<Home> {
               ),
             ),
 
-            if (trailsUserEmail != null)
+            if (trailsUserId != null)
             Positioned.fill(
               child: TrailsScreen(
-                user_email: trailsUserEmail!,
+                userId: trailsUserId!,
                 onClose: () {
                   setState(() {
-                    trailsUserEmail = null; // Close book details
+                    trailsUserId = null; // Close book details
                   });
                 },
               ),
@@ -140,8 +140,8 @@ class _HomeState extends State<Home> {
             if (achievementsUserEmail != null) {
               achievementsUserEmail = null; 
             } 
-            if (trailsUserEmail != null) {
-              trailsUserEmail = null; 
+            if (trailsUserId != null) {
+              trailsUserId = null; 
             } 
             else {
               screenIndex = index; // Switch screens
