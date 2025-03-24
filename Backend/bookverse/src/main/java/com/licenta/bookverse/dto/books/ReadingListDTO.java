@@ -1,6 +1,8 @@
 package com.licenta.bookverse.dto;
 
 import com.licenta.bookverse.entity.Book;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,10 +10,14 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 public class ReadingListDTO {
-    private Book book;
-    private ReadingListStatus status; // Optional, default could be "Not Started"
+
+    private String bookKey;
+    private String title;
+    private String author;
+    private String coverImageUrl;
     private int pagesRead;
-    // Getters and Setters
+    private int totalPages;
 }
 
