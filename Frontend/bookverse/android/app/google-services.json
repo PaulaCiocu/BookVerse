@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676297522863",
+    "project_id": "bookverse-68d8f",
+    "storage_bucket": "bookverse-68d8f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676297522863:android:1e8e37342f284252351e5a",
+        "android_client_info": {
+          "package_name": "com.example.bookverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8p9estc5Lsk3gefF_aRaSwlT-gXf5GWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
