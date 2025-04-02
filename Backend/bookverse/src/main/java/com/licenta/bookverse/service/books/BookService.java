@@ -1,8 +1,8 @@
 package com.licenta.bookverse.service.books;
 
-import com.licenta.bookverse.dto.books.EditionResponse;
-import com.licenta.bookverse.dto.books.OpenLibraryResponse;
-import com.licenta.bookverse.dto.books.WorkDetailResponse;
+import com.licenta.bookverse.dto.books.responses.EditionResponse;
+import com.licenta.bookverse.dto.books.responses.OpenLibraryResponse;
+import com.licenta.bookverse.dto.books.responses.WorkDetailResponse;
 import com.licenta.bookverse.entity.Book;
 import com.licenta.bookverse.repository.BookRepository;
 import lombok.RequiredArgsConstructor;

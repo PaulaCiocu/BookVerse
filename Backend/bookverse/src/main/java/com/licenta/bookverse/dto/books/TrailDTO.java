@@ -1,6 +1,5 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.books;
 
-import com.licenta.bookverse.entity.TrailBook;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +15,7 @@ public class   TrailDTO {
     private String description;
     private UUID creatorId;
     private List<BookOrderDTO> books; // List of books with their order
+    private String imageUrl;
 
     @Getter
     @Setter

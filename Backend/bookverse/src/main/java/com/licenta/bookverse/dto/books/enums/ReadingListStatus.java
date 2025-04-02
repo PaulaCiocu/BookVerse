@@ -1,4 +1,4 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.books.enums;
 
 public enum ReadingListStatus {
     NOT_STARTED,

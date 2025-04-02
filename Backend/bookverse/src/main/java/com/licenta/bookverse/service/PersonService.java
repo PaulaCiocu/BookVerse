@@ -70,6 +70,10 @@ public class PersonService {
         if(updatedPerson.getBio()!= null) {
             person.setBio(updatedPerson.getBio());
         }
+
+        if(updatedPerson.getProfilePictureUrl()!= null && !updatedPerson.getProfilePictureUrl().isEmpty()) {
+            person.setProfilePictureUrl(updatedPerson.getProfilePictureUrl());
+        }
         // Save updated person
         Person savedPerson = personRepository.save(person);
         return savedPerson;

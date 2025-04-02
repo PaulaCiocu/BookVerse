@@ -1,12 +1,13 @@
-import 'package:bookverse/tabScreens/bookDetailsScreen.dart';
-import 'package:bookverse/tabScreens/exploreTrails.dart';
-import 'package:bookverse/tabScreens/notifications.dart';
-import 'package:bookverse/tabScreens/searchBooks.dart';
-import 'package:bookverse/tabScreens/userProfile.dart';
-import 'package:bookverse/tabScreens/user_screens/achievmentsScreen.dart';
-import 'package:bookverse/tabScreens/user_screens/readingScreen.dart';
-import 'package:bookverse/tabScreens/trailDetails.dart';
-import 'package:bookverse/tabScreens/user_screens/trailsSreen.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/bookDetailsScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/exploreTrails.dart';
+import 'package:bookverse/tabScreens/home_screens/notifications.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/searchBooks.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/settingsScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/userProfile.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievmentsScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readingScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/trailDetails.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailsSreen.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -26,7 +27,7 @@ class _HomeState extends State<Home> {
   String? selectedTrailKey;
   String? selectedTabScreenProfile;
   String? readUserId;
-  String? achievementsUserEmail;
+  String? achievementsUserId;
   String? trailsUserId;
 
 
@@ -52,16 +53,16 @@ class _HomeState extends State<Home> {
                   setState(() {
                     readUserId = id; // Store the selected book key
                   });
-                }, onAchievementsSelected: (userEmail) { 
+                }, onAchievementsSelected: (id) { 
                   setState(() {
-                    achievementsUserEmail = userEmail; // Store the selected book key
+                    achievementsUserId = id; // Store the selected book key
                   });
               }, onTrailsSelected: (String id) { 
                   setState(() {
                     trailsUserId = id; // Store the selected book key
                   });
                },),
-              Notifications(),
+              SettingsScreen(userEmail: widget.userEmail, userId: widget.userId,),
             ],
           ),
 
@@ -100,13 +101,13 @@ class _HomeState extends State<Home> {
               ),
             ),
 
-            if (achievementsUserEmail != null)
+            if (achievementsUserId != null)
             Positioned.fill(
               child: AchievmentsScreen(
-                user_email: achievementsUserEmail!,
+                user_id: achievementsUserId!,
                 onClose: () {
                   setState(() {
-                    achievementsUserEmail = null; // Close book details
+                    achievementsUserId = null; // Close book details
                   });
                 },
               ),
@@ -137,8 +138,8 @@ class _HomeState extends State<Home> {
             if (readUserId != null) {
               readUserId = null; 
             } 
-            if (achievementsUserEmail != null) {
-              achievementsUserEmail = null; 
+            if (achievementsUserId != null) {
+              achievementsUserId = null; 
             } 
             if (trailsUserId != null) {
               trailsUserId = null; 
@@ -157,7 +158,7 @@ class _HomeState extends State<Home> {
           BottomNavigationBarItem(icon: Icon(Icons.home, size: 30), label: "Explore"),
           BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 30), label: "Search"),
           BottomNavigationBarItem(icon: Icon(Icons.person, size: 30), label: "Profile"),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications, size: 30), label: "Notifications"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings, size: 30), label: "Settings"),
         ],
       ),
     );

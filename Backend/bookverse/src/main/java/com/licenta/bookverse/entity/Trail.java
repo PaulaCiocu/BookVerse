@@ -42,5 +42,7 @@ public class Trail {
     @OneToMany(mappedBy = "trail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrailBook> trailBooks = new ArrayList<>(); // Initialize the list
 
+    private int totalPages = 0;
 
+    private String imageUrl;
 }

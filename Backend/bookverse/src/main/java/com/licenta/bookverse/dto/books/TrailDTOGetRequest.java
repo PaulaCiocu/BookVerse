@@ -1,4 +1,4 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.books;
 
 import com.licenta.bookverse.entity.TrailBook;
 import lombok.Builder;
@@ -19,5 +19,5 @@ public class TrailDTOGetRequest {
         private List<String> genre;
         private List<TrailBook> trailBookList;
         private Integer numberOfReadings;
-
+        private String imageUrl;
 }

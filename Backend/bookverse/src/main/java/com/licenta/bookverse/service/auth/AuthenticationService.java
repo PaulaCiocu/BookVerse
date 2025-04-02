@@ -4,16 +4,19 @@ import com.licenta.bookverse.dto.auth.LoginDTO;
 import com.licenta.bookverse.dto.auth.LoginResponse;
 import com.licenta.bookverse.dto.auth.RegistrationDTO;
 import com.licenta.bookverse.dto.auth.ResetPasswordRequest;
+import com.licenta.bookverse.entity.Achievement;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.exception.*;
 import com.licenta.bookverse.exception.email.EmailAlreadyExistsException;
 import com.licenta.bookverse.exception.email.EmailNotFound;
 import com.licenta.bookverse.exception.password.PasswordMismatchException;
 import com.licenta.bookverse.exception.password.WeakPasswordException;
+import com.licenta.bookverse.repository.AchievementRepository;
 import com.licenta.bookverse.repository.PersonRepository;
 
 import com.licenta.bookverse.service.PersonService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +29,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthenticationService {
     private final PersonRepository personRepository;
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private AchievementRepository achievementRepository;
     private final AuthenticationManager authenticationManager;
     private final PersonService personService;
     private final JwtService jwtService;
@@ -70,6 +75,10 @@ public class AuthenticationService {
         person.setPassword(encodedPassword);
         person.setEmail(registrationDTO.getEmail());
         personRepository.save(person);
+
+        Achievement achievement = new Achievement();
+        achievement.setPerson(person);
+        achievementRepository.save(achievement);
 
         String token = jwtService.generateRegistrationConfirmationToken(registrationDTO.getEmail());
         System.out.println(token);

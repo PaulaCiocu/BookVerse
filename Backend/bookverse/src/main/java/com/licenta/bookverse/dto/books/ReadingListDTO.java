@@ -1,12 +1,8 @@
-package com.licenta.bookverse.dto;
+package com.licenta.bookverse.dto.books;
 
-import com.licenta.bookverse.entity.Book;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter

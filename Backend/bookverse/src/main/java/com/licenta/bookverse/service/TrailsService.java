@@ -1,7 +1,7 @@
 package com.licenta.bookverse.service;
 
-import com.licenta.bookverse.dto.TrailDTO;
-import com.licenta.bookverse.dto.TrailDTOGetRequest;
+import com.licenta.bookverse.dto.books.TrailDTO;
+import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
 import com.licenta.bookverse.entity.Book;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.entity.Trail;
@@ -35,6 +35,7 @@ public class TrailsService {
                 .trailBookList(trail.getTrailBooks())
                 .numberOfReadings(trail.getNumberOfReadings())
                 .creatorId(trail.getCreator().getId())
+                .imageUrl(trail.getImageUrl())
                 .build();
     }
 
@@ -68,6 +69,7 @@ public class TrailsService {
                         .trailBookList(trail.getTrailBooks())
                         .numberOfReadings(trail.getNumberOfReadings())
                         .creatorId(trail.getCreator().getId())
+                        .imageUrl(trail.getImageUrl())
                         .build()
                 )
                 .collect(Collectors.toList());
@@ -84,7 +86,10 @@ public class TrailsService {
                 .description(trailDTO.getDescription())
                 .creator(creator)
                 .numberOfReadings(0)
+                .imageUrl(trailDTO.getImageUrl())
                 .build();
+
+        int totalPages = 0;
 
         if (trailDTO.getBooks() != null) {
             List<TrailBook> trailBookList = new ArrayList<>();
@@ -102,11 +107,13 @@ public class TrailsService {
 
                 trailBookList.add(trailBook);
                 genres.addAll(book.getSubjects());
+                totalPages += book.getPages();
                 nextOrderIndex++;
             }
             trail.setTrailBooks(trailBookList); // Associate the trailBooks with the trail
             trail.setGenres(new ArrayList<>(genres)); // Convert Set to List
         }
+        trail.setTotalPages(totalPages);
 
         // Save the trail in the database
         Trail savedTrail = trailRepository.save(trail);

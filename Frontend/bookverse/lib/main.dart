@@ -1,8 +1,16 @@
-import 'package:bookverse/login.dart';
+import 'package:bookverse/firebase_options.dart';
+import 'package:bookverse/auth_screens/login.dart';
+import 'package:bookverse/home.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Ensure Firebase initializes properly
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,15 +19,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,  // Disable the debug banner
+      debugShowCheckedModeBanner: false,
       title: 'BookVerse',
       theme: ThemeData(
         fontFamily: 'Poppins',
-        scaffoldBackgroundColor: Colors.white, // Set background to white
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
-      home: const WelcomePage(),
+      home: const WelcomePage(), // Show WelcomePage when app starts
     );
   }
 }
@@ -30,79 +38,71 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Title Text
-            const SizedBox( height: 50,),
-
-            const Text(
-              'BookVerse',
-              style: TextStyle(
-                fontSize: 38, 
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600, 
-                color: Color(0xFF030303), 
-                letterSpacing: 1.2, 
+        child: GestureDetector(
+          onTap: () async {
+            // Check if the user is already logged in
+            final isLoggedIn = await _checkLoginStatus();
+            if (isLoggedIn) {
+               
+              final prefs = await SharedPreferences.getInstance();
+              final token = prefs.getString('jwt_token') ?? '';
+              final email = prefs.getString('user_email') ?? '';
+              final userId = prefs.getString('user_id') ?? '';
+              
+            
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home(token: token, userEmail: email, userId: userId,)));
+            } else {
+              // If not logged in, navigate to LoginPage
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()));
+            }
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'BookVerse',
+                style: TextStyle(
+                  fontSize: 38,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF030303),
+                  letterSpacing: 1.2,
+                ),
               ),
-            ),
-            const SizedBox(height: 50),
-
-            // Image (Placeholder)
-            Image.asset(
-              'assets/welcome_image.jpeg', // Add your image in assets folder
-              height: 220,
-              width: 220,
-              fit: BoxFit.cover,
-            ),
-
-            const SizedBox(height: 100),
-
-            // Message
-            const Text(
-              'Discover new reading paths',
-              style: TextStyle(
-                fontSize: 18, 
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600, 
-                color: Color(0xFF030303), 
-                letterSpacing: 0.8, 
+              const SizedBox(height: 50),
+              Image.asset(
+                'assets/welcome_image.jpeg',
+                height: 220,
+                width: 220,
+                fit: BoxFit.cover,
               ),
-            ),
-            // Message
-            const Text(
-              'BookVerse',
-              style: TextStyle(
-                fontSize: 18, 
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600, 
-                color: Color(0xFF030303), 
-                letterSpacing: 1.2, 
+              const SizedBox(height: 100),
+              const Text(
+                'Discover new reading paths',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF030303),
+                  letterSpacing: 0.8,
+                ),
               ),
-            ),
-
-            const SizedBox(height: 50),
-
-            GestureDetector(
-              onTap: () {
-                // Navigate to the next page (e.g., login or main screen)
-                Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const LoginPage())
-                );
-              },
-              child: Container(
+              const SizedBox(height: 50),
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-               width: 158, 
+                width: 158,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFDCAA), // Background color: #ffdcaa
-                  borderRadius: BorderRadius.circular(8), // border-radius: 8px
+                  color: const Color(0xFFFFDCAA),
+                  borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1), // box-shadow
+                      color: Colors.black.withOpacity(0.1),
                       spreadRadius: 0,
                       blurRadius: 10,
                       offset: const Offset(0, 0),
@@ -113,29 +113,35 @@ class WelcomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.my_library_books, // Book icon
+                      Icons.my_library_books,
                       size: 21,
-                      color: Color(0xFF000000), // Icon color: #000000
+                      color: Color(0xFF000000),
                     ),
-                    SizedBox(width: 7), // gap between icon and text
+                    SizedBox(width: 7),
                     Text(
                       'Get Started',
                       style: TextStyle(
                         fontSize: 14,
-                        fontFamily: 'Roboto', // font-family: "Roboto"
-                        color: Color(0xFF000000), // Text color: #000000
-                        height: 24 / 14, // line-height: 24px
+                        fontFamily: 'Roboto',
+                        color: Color(0xFF000000),
+                        height: 24 / 14,
                       ),
                     ),
                   ],
                 ),
               ),
-            )
-
-          
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  // Function to check if the user is logged in
+  Future<bool> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token'); // Get the token from SharedPreferences
+    return token != null; // If a token exists, the user is logged in
+  }
 }
+

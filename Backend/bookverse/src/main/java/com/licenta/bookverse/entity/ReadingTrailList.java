@@ -1,7 +1,7 @@
 package com.licenta.bookverse.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.licenta.bookverse.dto.ReadingListStatus;
-import com.licenta.bookverse.dto.books.CreatedType;
+import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
+import com.licenta.bookverse.dto.books.enums.CreatedType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,5 +32,7 @@ public class ReadingTrailList {
 
     private int totalBooks = 0;
     private int progress = 0; // For example, number of books read within the trail or other progress criteria
+    private int totalPages=0;
+    private int pagesRead = 0;
 }
 

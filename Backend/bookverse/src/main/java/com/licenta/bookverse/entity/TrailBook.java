@@ -28,4 +28,5 @@ public class TrailBook {
     private Book book; // Reference to the book
 
     private Integer orderIndex; // Order of the book in the trail
+    private int pagesRead =0;
 }

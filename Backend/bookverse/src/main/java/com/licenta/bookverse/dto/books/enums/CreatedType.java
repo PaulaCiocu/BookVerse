@@ -1,4 +1,4 @@
-package com.licenta.bookverse.dto.books;
+package com.licenta.bookverse.dto.books.enums;
 
 public enum CreatedType {
     CREATED,  // The person created the trail

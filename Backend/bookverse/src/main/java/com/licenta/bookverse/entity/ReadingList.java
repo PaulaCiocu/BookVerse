@@ -1,8 +1,7 @@
 package com.licenta.bookverse.entity;
 
-import com.licenta.bookverse.dto.ReadingListStatus;
+import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import jakarta.persistence.*;
-import jdk.jshell.Snippet;
 import lombok.*;
 
 @Getter

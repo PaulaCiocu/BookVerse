@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Achievements {
+@Builder
+public class Achievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,7 +22,14 @@ public class Achievements {
     @JsonIgnore
     private Person person;
 
-    private int totalBooksRead;
-    private int totalTrailsCompleted;
-    private int totalPagesRead;
+    private int totalBooksRead = 0;
+    private int bookInProgress = 0;
+    private int totalTrailsCompleted = 0;
+    private int trailsInProgress = 0;
+    private int totalPagesRead = 0;
+
+    public UUID getPersonId() {
+        return person != null ? person.getId() : null;
+    }
+
 }

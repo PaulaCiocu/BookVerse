@@ -1,8 +1,7 @@
 package com.licenta.bookverse.controller;
 
-import com.licenta.bookverse.dto.ReadingListDTO;
-import com.licenta.bookverse.dto.ReadingListStatus;
-import com.licenta.bookverse.entity.Book;
+import com.licenta.bookverse.dto.books.ReadingListDTO;
+import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.service.ReadingListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +45,29 @@ public class ReadingListController {
         readingListService.updateStatusForBook(personId, bookId, newStatus);
         return ResponseEntity.ok("Reading list status updated successfully");
     }
+
+    @PutMapping("/update-progress/{personId}/{bookId}")
+    public ResponseEntity<String> updateReadingProgress(
+            @PathVariable UUID personId,
+            @PathVariable String bookId,
+            @RequestParam int pagesRead) {
+        // Call the service to update the progress
+        readingListService.updateReadingProgress(personId, bookId, pagesRead);
+        return ResponseEntity.ok("Reading list nr pages updated successfully");
+
+    }
+
+    @DeleteMapping("/delete/{personId}/{bookKey}")
+    public ResponseEntity<String> deleteReadingBook(@PathVariable UUID personId, @PathVariable String bookKey) {
+        String message = readingListService.deleteBookFromReadingList( personId, bookKey);
+        return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/isBookNotInTrail/{personId}/{bookKey}")
+    public ResponseEntity<Boolean> deleteReadingBookNotInTrail(@PathVariable UUID personId, @PathVariable String bookKey) {
+        boolean isNotInTrail = readingListService.deleteBookIfNotInTrail(personId, bookKey);
+        return ResponseEntity.ok(isNotInTrail);
+    }
+
 
 }

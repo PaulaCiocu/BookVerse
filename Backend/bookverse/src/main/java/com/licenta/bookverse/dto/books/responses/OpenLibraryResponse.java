@@ -1,4 +1,4 @@
-package com.licenta.bookverse.dto.books;
+package com.licenta.bookverse.dto.books.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
