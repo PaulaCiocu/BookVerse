@@ -1,5 +1,6 @@
 package com.licenta.bookverse.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +22,8 @@ public class TrailBook {
     @ManyToOne
     @JoinColumn(name = "trail_id", nullable = false)
     @JsonIgnore // Prevent serialization to avoid infinite loop
-    private Trail trail; // Reference to the trail
+    @JsonBackReference // Avoids infinite recursion during serialization
+    private Trail trail;
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)

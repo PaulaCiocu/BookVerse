@@ -144,46 +144,6 @@ Future<void> addToReadingList(int trailId) async {
     print('Failed to add book: ${response.statusCode} - ${response.body}');
   }
 }
-//   Future<void> createReadingTrail(String title, String description, List books) async {
-//       final url = Uri.parse('http://10.0.2.2:8080/trails/create'); 
-//       final userId = widget.userId;
-//       print('User id: $userId');
-//       print('Books id : $books');
-//       final Map<String, dynamic> payload = {
-//         'title': title,
-//         'description': description,
-//         'creatorId': widget.userId,
-//         'books': books.map((book) => {'bookKey': book}).toList(),
-//       };
-
-//       try {
-//         final response = await http.post(
-//           url,
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//           body: json.encode(payload),
-//         );
-//       if (response.statusCode == 201 ) {
-//         print('Trail created successfully');
-//         // Extract trail ID from response body
-//         final int trailId = int.parse(response.body);         
-        
-//         print('Trail ID: $trailId'); // Debugging output
-//         addToReadingList(trailId);
-//         //add trail to reading list 
-//         Navigator.pushReplacement(
-//           context,
-//           MaterialPageRoute(builder: (context) => SuccessPage()),
-//       );
-//       } else {
-//         print('Failed to create trail. Status code: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       print('Error creating trail: $e');
-//     }
-// }
-
 Future<String> uploadImage(File imageFile) async {
   try {
     // Create a reference to Firebase Storage
@@ -311,6 +271,7 @@ Widget build(BuildContext context) {
                 minHeight: 120,
               ),
               const SizedBox(height: 40),
+              //search
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -395,11 +356,9 @@ Widget build(BuildContext context) {
                             ),
                             onPressed: () {
                               setState(() {
-                                // Check if the book is already in the _addedBooks list
                                 if (!_addedBooks.contains(book)) {
                                   _addedBooks.add(book);
                                 } else {
-                                  // Optionally, you can show a message or alert here if you want to inform the user
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('This book is already added.')),
                                   );

@@ -86,17 +86,81 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                   itemCount: trails.length,
                                   itemBuilder: (context, index) {
                                     final trail = trails[index];
-                                    //final booksRead = trail['progress'] ?? 0;
+
+                                    if (trail['trail']['deleted'] == true) {
+                                      return Card(
+                                        color: Colors.grey.shade300,
+                                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                                        elevation: 1,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                             ListTile(
+                                                title: Text(
+                                                  trail['trail']['title'] ?? 'No Title',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                                subtitle: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      trail['trail']['description'] ?? 'No description available',
+                                                      style: const TextStyle(
+                                                        color: Colors.black45,
+                                                        fontSize: 12,
+                                                      ),
+                                                      maxLines: 5,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 6),
+                                                   ],
+                                                ),
+                                                leading: ClipOval(
+                                                  child: trail['trail']['imageUrl'] != null
+                                                      ? Image.network(
+                                                          trail['trail']['imageUrl'],
+                                                          width: 40,
+                                                          height: 40,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.asset(
+                                                          'assets/user_profile_backgrounds_screen.png',
+                                                          width: 40,
+                                                          height: 40,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                ),
+                                              ),
+                                           
+                                            const Center(
+                                              child: Text(
+                                                "This trail was deleted by the owner.",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 8,)
+                                          ],
+                                        ),
+                                      );
+                                    }
+
                                     final pagesRead = trail['pagesRead'] ?? 0;
-                                    //final totalBooks = trail['totalBooks'] ?? 2;
                                     final totalBooksPages = trail['trail']['totalPages'] ?? 1;
-                                    final progress = (pagesRead / totalBooksPages).clamp(0.0, 1.0);final progressPercentage = (progress * 100).toStringAsFixed(0); // Convert to percentage string
+                                    final progress = (pagesRead / totalBooksPages).clamp(0.0, 1.0);
+                                    final progressPercentage = (progress * 100).toStringAsFixed(0);
                                     final trailBooks = trail['trail']['trailBooks'] as List<dynamic>;
-                                    print(totalBooksPages);
+
                                     return Card(
                                       color: Colors.white,
-                                      margin: const EdgeInsets.only(
-                                          top: 8.0, bottom: 8.0, left: 20.0, right: 20.0),
+                                      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
                                       elevation: 1,
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,21 +180,18 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                                   subtitle: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      
                                                       Text(
                                                         trail['trail']['description'] ?? 'No description available',
                                                         style: const TextStyle(
                                                           color: Colors.black45,
                                                           fontSize: 12,
                                                         ),
-                                                        maxLines: 5, 
+                                                        maxLines: 5,
                                                         overflow: TextOverflow.ellipsis,
                                                       ),
                                                       const SizedBox(height: 6),
-                                                      
                                                       GestureDetector(
                                                         onTap: () {
-                                                          // Navigate to the TrailProgressScreen with the trail details
                                                           Navigator.push(
                                                             context,
                                                             MaterialPageRoute(
@@ -145,66 +206,60 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                                           'View trail ..',
                                                           style: TextStyle(
                                                             fontSize: 12,
-                                                           // fontWeight: FontWeight.w500,
-                                                            color: Colors.black54,  // Text color
+                                                            color: Colors.black54,
                                                           ),
                                                         ),
                                                       ),
-
                                                     ],
                                                   ),
-                                                 leading: ClipOval(
-                                                  child: trail['trail']['imageUrl'] != null
-                                                      ? Image.network(
-                                                          trail['trail']['imageUrl'],
-                                                          width: 40,
-                                                          height: 40,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.asset(
-                                                          'assets/user_profile_backgrounds_screen.png',
-                                                          width: 40,
-                                                          height: 40,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                ),
-
+                                                  leading: ClipOval(
+                                                    child: trail['trail']['imageUrl'] != null
+                                                        ? Image.network(
+                                                            trail['trail']['imageUrl'],
+                                                            width: 40,
+                                                            height: 40,
+                                                            fit: BoxFit.cover,
+                                                          )
+                                                        : Image.asset(
+                                                            'assets/user_profile_backgrounds_screen.png',
+                                                            width: 40,
+                                                            height: 40,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                  ),
                                                 ),
                                               ),
-
                                               SizedBox(
-                                                width: 60, // Set width for the circular progress
+                                                width: 60,
                                                 height: 60,
                                                 child: Stack(
                                                   alignment: Alignment.center,
                                                   children: [
                                                     CircularProgressIndicator(
                                                       value: progress,
-                                                      backgroundColor: Colors.grey[300], // Background color of the progress circle
-                                                      color: const Color.fromARGB(255, 251, 207, 146), // Color of the progress
-                                                      strokeWidth: 4, // You can also adjust the stroke width if needed
+                                                      backgroundColor: Colors.grey[300],
+                                                      color: const Color.fromARGB(255, 251, 207, 146),
+                                                      strokeWidth: 4,
                                                     ),
                                                     Text(
-                                                      '$progressPercentage%', // Display progress percentage
+                                                      '$progressPercentage%',
                                                       style: const TextStyle(
                                                         fontWeight: FontWeight.w500,
-                                                        fontSize: 12, // Adjust font size for better visibility
+                                                        fontSize: 12,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              // Button moved inside ListTile
-    
                                             ],
                                           ),
-                                              
-                                          ],
+                                        ],
                                       ),
                                     );
                                   },
                                 ),
                         ],
+
                       ),
                     ),
               const SizedBox(height: 60),

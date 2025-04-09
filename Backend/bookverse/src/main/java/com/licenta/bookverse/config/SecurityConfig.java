@@ -31,6 +31,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/trail-books/**",
+                                "/api/reviews/**",
                                 "/achievements/**",
                                 "/reading-trails/**",
                                 "/trails/**",

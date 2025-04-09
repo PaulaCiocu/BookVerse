@@ -107,7 +107,194 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                   itemCount: trails.length,
                                   itemBuilder: (context, index) {
                                     final trail = trails[index];
-                                  
+                                    if (trail['trail']['deleted'] == true) {
+                                      return Card(
+                                        color: Colors.grey.shade300,
+                                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                                        elevation: 1,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                             ListTile(
+                                                title: Text(
+                                                  trail['trail']['title'] ?? 'No Title',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                                subtitle: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      trail['trail']['description'] ?? 'No description available',
+                                                      style: const TextStyle(
+                                                        color: Colors.black45,
+                                                        fontSize: 12,
+                                                      ),
+                                                      maxLines: 5,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 6),
+                                                 
+                                                    GestureDetector(
+                                                      onTap: () async {
+                                                        // Show confirmation dialog
+                                                        bool? unfollowConfirmed = await showDialog<bool>(
+                                                          context: context,
+                                                          builder: (BuildContext context) {
+                                                            return AlertDialog(
+                                                              backgroundColor: Colors.white,
+                                                              contentPadding: EdgeInsets.zero,
+                                                              shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius.circular(16),  // Optional: Rounded corners for the dialog
+                                                              ),
+                                                              title: const Column(
+                                                                children: [
+                                                                  Text(
+                                                                    'Unavailable -> UNFOLLOW Trail', 
+                                                                    style: TextStyle(
+                                                                      color: Colors.black87,
+                                                                      fontWeight: FontWeight.w500,
+                                                                      fontSize: 18
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(height: 20,),
+                                                                  Text(
+                                                                    'Are you sure you want to unfollow this trail?', 
+                                                                    style: TextStyle(
+                                                                      color: Colors.black54,
+                                                                      fontSize: 16
+                                                                    ),
+                                                                  ),
+                                                                  // SizedBox(height: 10,),
+                                                                ],
+                                                              ),
+                                                              actions: <Widget>[
+                                                                Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop(false); // User cancels logout
+                                                                      },
+                                                                      child: const Text('CANCEL', style: TextStyle(color: Colors.grey, fontSize: 12),),
+                                                                    ),
+                                                                    const SizedBox(width: 20,),
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop(true); // User confirms logout
+                                                                      },
+                                                                      child: const Text('YES', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                    
+                                                        if (unfollowConfirmed == true) {
+                                                          
+                                                          // Ask user if they want to keep the books in their reading list
+                                                          bool? keepBooksConfirmed = await showDialog<bool>(
+                                                            context: context,
+                                                            builder: (BuildContext context) {
+                                                              return AlertDialog(
+                                                                backgroundColor: Colors.white,
+                                                                title: const Text(
+                                                                  'Keep Books in List?',
+                                                                  style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 18),
+                                                                ),
+                                                                content: const Text(
+                                                                  'Do you want to keep the books from this trail in your reading list?',
+                                                                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                                                                ),
+                                                                actions: <Widget>[
+                                                                  Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    children: [
+                                                                      TextButton(
+                                                                        onPressed: () {
+                                                                          Navigator.of(context).pop(false); 
+                                                                        },
+                                                                        child: const Text('NO', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                                                                      ),
+                                                                      const SizedBox(width: 20),
+                                                                      TextButton(
+                                                                        onPressed: () {
+                                                                          Navigator.of(context).pop(true);
+                                                                        },
+                                                                        child: const Text('YES', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          );
+                                                    
+                                                            unfollowTrailFromReadingList(trail['trail']['id'].toString(), keepBooksConfirmed!);
+                                                    
+                                                        }
+                                                          _refreshTrails();
+                                                      },
+                                                              
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.only(bottom: 12.0, top: 6),
+                                                        child: Container(
+                                                          width: 200,
+                                                          height: 20,
+                                                          decoration: BoxDecoration(
+                                                            color:  Colors.grey.shade400,
+                                                            borderRadius: BorderRadius.circular(3),
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors.grey.shade300,
+                                                                blurRadius: 3,
+                                                                offset: const Offset(0, 2),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          child: const Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Text(
+                                                                'Unavailable -> UNFOLLOW Trail',
+                                                                style: TextStyle(fontSize: 12, color: Colors.black87),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                   ],
+                                                ),
+                                                leading: ClipOval(
+                                                  child: trail['trail']['imageUrl'] != null
+                                                      ? Image.network(
+                                                          trail['trail']['imageUrl'],
+                                                          width: 40,
+                                                          height: 40,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.asset(
+                                                          'assets/user_profile_backgrounds_screen.png',
+                                                          width: 40,
+                                                          height: 40,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                ),
+                                              ),
+                                           
+                                            
+                                                   
+                                          ],
+                                        ),
+                                      );
+                                    }
+
                                     return Card(
                                       color: Colors.white,
                                       margin: const EdgeInsets.only(

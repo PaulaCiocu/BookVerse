@@ -437,38 +437,7 @@ Widget build(BuildContext context) {
                                               ),
                                             ),
                                           ),
-                                          // GestureDetector(
-                                          //   onTap: () {
-                                              
-                                          //   },
-                                          //   child: Padding(
-                                          //     padding: const EdgeInsets.only(bottom: 12.0, top: 6),
-                                          //     child: Container(
-                                          //       width: 80,
-                                          //       height: 20,
-                                          //       decoration: BoxDecoration(
-                                          //         color: const Color(0xFFFFDCAA),
-                                          //         borderRadius: BorderRadius.circular(3),
-                                          //         boxShadow: [
-                                          //           BoxShadow(
-                                          //             color: Colors.grey.shade300,
-                                          //             blurRadius: 3,
-                                          //             offset: const Offset(0, 2),
-                                          //           ),
-                                          //         ],
-                                          //       ),
-                                          //       child: const Row(
-                                          //         mainAxisAlignment: MainAxisAlignment.center,
-                                          //         children: [
-                                          //           Text(
-                                          //             'REMOVE',
-                                          //             style: TextStyle(fontSize: 12, color: Colors.black87),
-                                          //           ),
-                                          //         ],
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          // ),
+                                          
                                         ],
                                       ),
                                     ),

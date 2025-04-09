@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TrailBookRepository extends JpaRepository<TrailBook, Long> {
 
 
+    TrailBook findByBook_Key(String bookKey);
 }

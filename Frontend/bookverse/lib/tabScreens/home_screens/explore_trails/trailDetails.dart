@@ -1,3 +1,4 @@
+import 'package:bookverse/tabScreens/home_screens/explore_trails/seeAnotherUsersProfileScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/search_screen/bookDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -112,6 +113,29 @@ class _TrailDetailsState extends State<TrailDetails> {
                           Text(
                             "Readings: ${trail?['numberOfReadings'] ?? 0}",
                             style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.only(left:24.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Creator: ${trail['personName'] ?? 'Unknown'}",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FontStyle.italic
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.info_outline, size: 16),
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeanotherusersprofileScreen(userId: trail['creatorId'],)));
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(

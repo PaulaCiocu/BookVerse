@@ -31,14 +31,42 @@ public class TrailController {
     }
 
     @GetMapping("/except/person/{personId}")
-    public ResponseEntity<List<TrailDTOGetRequest>> getTrailsExceptOfPerson(@PathVariable UUID personId) {
-        return ResponseEntity.ok(trailService.getTrailsExceptForPerson(personId));
+    public ResponseEntity<List<TrailDTOGetRequest>> getTrailsExceptOfPerson(@PathVariable UUID personId,
+                                                                            @RequestParam(required = false) String genre,
+                                                                            @RequestParam(required = false) String author,
+                                                                            @RequestParam(required = false) String bookTitle,
+                                                                            @RequestParam(required = false) String trailName
+                                                                            ) {
+        return ResponseEntity.ok(trailService.getTrailsExceptForPerson(personId, genre, author, bookTitle,trailName));
     }
 
     @PostMapping("/create")
     public ResponseEntity<Long> createTrail(@RequestBody TrailDTO dto) {
         Long trailId = trailService.createTrail(dto); // Get the created trail's ID
         return ResponseEntity.status(HttpStatus.CREATED).body(trailId); // Return the trail ID
+    }
+
+    @PutMapping("/updatebooks/{trailId}")
+    public ResponseEntity<Long> updateTrail(
+            @PathVariable Integer trailId,
+            @RequestBody List<String> bookList
+    ) {
+        Long updatedTrail = trailService.updateTrailBooks( trailId, bookList);
+        return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
+    }
+    @PutMapping("/{trailId}")
+    public ResponseEntity<Long> updateTrail(
+            @PathVariable Integer trailId,
+            @RequestBody TrailDTO updatedTrailDTO
+    ) {
+        Long updatedTrail = trailService.updateTrail(trailId, updatedTrailDTO);
+        return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{trailId}/{userId}/{keepBooks}")
+    public ResponseEntity<String> deleteTrail(@PathVariable Long trailId, @PathVariable UUID userId, @PathVariable Boolean keepBooks) {
+        trailService.deleteTrail(trailId,userId, keepBooks);
+        return new ResponseEntity<>("Trail marked up for deletion!", HttpStatus.OK);
     }
 
 }

@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,10 @@ public class Person implements UserDetails {
     private String bio; // User bio
     private String profilePictureUrl; // URL for the profile picture
     private Integer nrOfConnections = 0; // Number of connections
+
+//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Review> reviews = new ArrayList<>();
+
 
     @ElementCollection
     private List<UUID> connectedUserIds; // List of connected user IDs

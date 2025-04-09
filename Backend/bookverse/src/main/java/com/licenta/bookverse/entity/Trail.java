@@ -45,4 +45,6 @@ public class Trail {
     private int totalPages = 0;
 
     private String imageUrl;
+
+    private boolean isDeleted = false;
 }

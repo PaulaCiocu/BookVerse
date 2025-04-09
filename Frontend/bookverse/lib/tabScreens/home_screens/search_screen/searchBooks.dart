@@ -74,8 +74,8 @@ class _SearchBooksState extends State<SearchBooks> {
                        child: TextField(
                          controller: _searchController,
                          decoration: InputDecoration(
-                           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                           hintText: 'Search books by',
+                           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                           hintText: 'Search books by $_selectedFilter',
                            border: InputBorder.none,
                            suffixIcon: IconButton(
                              icon: const Icon(Icons.search),
@@ -85,40 +85,24 @@ class _SearchBooksState extends State<SearchBooks> {
                        ),
                      ),
                    ),
-                   const SizedBox(width: 8),
-                   // Filter Dropdown
-                   Container(
-                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                     decoration: BoxDecoration(
-                       color: Colors.white,
-                       borderRadius: BorderRadius.circular(12),
-                       boxShadow: [
-                         BoxShadow(
-                           color: Colors.grey.shade300,
-                           blurRadius: 8,
-                           offset: const Offset(0, 2),
-                         ),
-                       ],
-                     ),
-                     child: DropdownButton<String>(
-                       value: _selectedFilter,
-                       items: ['Title', 'Author', 'Genre']
-                           .map((filter) => DropdownMenuItem(
-                                 value: filter,
-                                 child: Text(filter),
-                               ))
-                           .toList(),
-                       onChanged: (value) {
-                         if (value != null) {
-                           setState(() {
-                             _selectedFilter = value;
-                           });
-                         }
-                       },
-                       underline: const SizedBox(), // Remove the underline of DropdownButton
-                       isExpanded: false,  // Adjust to not take full space
-                     ),
-                   ),
+                    SizedBox(width: 12,),
+                    PopupMenuButton<String>(
+                      onSelected: (String value) {
+                        setState(() {
+                          _selectedFilter = value; // Update the selected filter
+                        });
+                      },
+                      color: Colors.white, // Set the background color of the popup menu
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12), // Rounded corners for the menu
+                      ),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(value: "Title", child: Text("Title")),
+                        const PopupMenuItem(value: "Author", child: Text("Author")),
+                        const PopupMenuItem(value: "Genre", child: Text("Genre")),
+                      ],
+                      icon: const Icon(Icons.filter_list),
+                    ),
                  ],
                ),
              ),

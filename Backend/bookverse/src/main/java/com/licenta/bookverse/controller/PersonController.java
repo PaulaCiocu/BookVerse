@@ -28,6 +28,13 @@ public class PersonController {
     @Autowired
     private PersonRepository personRepository;
 
+    @GetMapping("personId/{id}")
+    public ResponseEntity<Person> getPersonById(@PathVariable UUID id) {
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(person);
+    }
+    
     @GetMapping("/{email}")
     public ResponseEntity<Person> getPersonByEmail(@PathVariable String email) {
         Person person = personRepository.findByEmail(email)
