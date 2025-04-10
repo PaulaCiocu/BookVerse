@@ -1,39 +1,48 @@
-import 'dart:convert';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievmentsScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readingScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailsSreen.dart';
+import 'dart:async';
+
+import 'package:bookverse/controller/AppEvents.dart';
+import 'package:bookverse/controller/userProfileController.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class UserProfile extends StatefulWidget {
-  final String userEmail; // User ID to fetch profile details
-  final Function(String userEmail) onReadSelected;
-  final Function(String userEmail) onAchievementsSelected;
-  final Function(String userEmail) onTrailsSelected;
+  final String userId;
+  final Function(String userId) onReadSelected;
+  final Function(String userId) onAchievementsSelected;
+  final Function(String userId) onTrailsSelected;
 
-  const UserProfile({super.key, required this.userEmail, required this.onReadSelected, required this.onAchievementsSelected, required this.onTrailsSelected});
+  const UserProfile({super.key,  required this.onReadSelected, required this.onAchievementsSelected, required this.onTrailsSelected, required this.userId});
 
   @override
   _UserProfileState createState() => _UserProfileState();
 }
 
 class _UserProfileState extends State<UserProfile> {
-  Future<Map<String, dynamic>>? _userProfileFuture; // Change to nullable
-  int _selectedIndex = 0; // Track the selected index for BottomNavigationBar
+  Future<Map<String, dynamic>>? _userProfile;
+  late StreamSubscription _profileUpdateSubscription;
 
-  Future<Map<String, dynamic>> _fetchUserProfile() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/person/${widget.userEmail}'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load user profile');
-    }
+  
+  void _loadUserProfile() {
+    setState(() {
+      _userProfile = UserProfilecontroller.fetchUserProfileById(widget.userId);
+    });
   }
+
 
   @override
   void initState() {
     super.initState();
-    _userProfileFuture = _fetchUserProfile(); // Fetch user profile on initialization
+    _loadUserProfile();
+
+    _profileUpdateSubscription = AppEvents.profileUpdated.stream.listen((_) {
+      _loadUserProfile(); 
+    });
+  }
+
+
+  @override
+  void dispose() {
+    _profileUpdateSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -41,7 +50,7 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(
-          future: _fetchUserProfile(),
+          future: _userProfile,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -81,7 +90,7 @@ class _UserProfileState extends State<UserProfile> {
                         ],
                       ),
 
-                      const SizedBox(height: 120), // Space between avatar and name
+                      const SizedBox(height: 120), 
     
                       Text(user['fullName'] ?? 'Unknown User', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87)),
                       const SizedBox(height: 30),
@@ -133,7 +142,7 @@ class _UserProfileState extends State<UserProfile> {
                             children: [
                               Image.asset('assets/badges/medal_icon.png', width: 35, height: 35),
                               SizedBox(height: 4),
-                              Text("Achievements", style: TextStyle(fontSize: 16, color: Colors.black87)),
+                              const Text("Achievements", style: TextStyle(fontSize: 16, color: Colors.black87)),
                             ],
                           ),
                         ),

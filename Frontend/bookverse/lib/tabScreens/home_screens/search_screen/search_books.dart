@@ -1,10 +1,11 @@
 import 'dart:convert';
+
+import 'package:bookverse/controller/booksController.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class SearchBooks extends StatefulWidget {
   final Function(String bookKey) onBookSelected;
-
   
   const SearchBooks({super.key, required this.onBookSelected});
 
@@ -14,36 +15,18 @@ class SearchBooks extends StatefulWidget {
 
 class _SearchBooksState extends State<SearchBooks> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'Title'; // Default search by Title
+  String _selectedFilter = 'Title';
   List<dynamic> _books = [];
 
   Future<void> _searchBooks() async {
     final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-
-    String endpoint = '';
-    switch (_selectedFilter) {
-      case 'Title':
-        endpoint = '/books/search?query=$query';
-        break;
-      case 'Author':
-        endpoint = '/books/search/author?author=$query';
-        break;
-      case 'Genre':
-        endpoint = '/books/searchByGenre?genre=$query';
-        break;
-    }
-
-    final uri = Uri.parse('http://10.0.2.2:8080$endpoint');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _books = json.decode(response.body);
+    final bookList = await BooksController.searchBooks(_selectedFilter, query);
+    setState(() {
+         _books = bookList;
       });
-    }
+    
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,16 +68,16 @@ class _SearchBooksState extends State<SearchBooks> {
                        ),
                      ),
                    ),
-                    SizedBox(width: 12,),
+                    const SizedBox(width: 12,),
                     PopupMenuButton<String>(
                       onSelected: (String value) {
                         setState(() {
-                          _selectedFilter = value; // Update the selected filter
+                          _selectedFilter = value; 
                         });
                       },
-                      color: Colors.white, // Set the background color of the popup menu
+                      color: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners for the menu
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       itemBuilder: (context) => [
                         const PopupMenuItem(value: "Title", child: Text("Title")),
@@ -134,15 +117,14 @@ class _SearchBooksState extends State<SearchBooks> {
                                 ),
                               )
                             : ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0), // Adjust the radius for rounded corners
+                                borderRadius: BorderRadius.circular(8.0), 
                                 child: const Icon(
                                   Icons.book,
-                                  size: 50, // Adjust size if needed
+                                  size: 50,
                                 ),
                               ),
-                                  
                           onTap: () {
-                            widget.onBookSelected(book['key']); // Change screen without hiding the navbar
+                            widget.onBookSelected(book['key']); 
                           },
                         );
                       },

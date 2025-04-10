@@ -1,5 +1,5 @@
-import 'package:bookverse/tabScreens/home_screens/explore_trails/seeAnotherUsersProfileScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/search_screen/bookDetailsScreen.dart';
+import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/see_another_user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,50 +19,29 @@ class _TrailDetailsState extends State<TrailDetails> {
   Future<Map<String, dynamic>>? _trailFuture;
   bool _isAddedToList = false; 
 
+  Future<void> addToReadingList() async {
+    final isAdded = await TrailController.addToReadingList(widget.userId, widget.trailId);
+    setState(() {
+      _isAddedToList = isAdded;
+    });
+  }
+
+  Future<void> _checkIfTrailInReadingList() async {
+    final isAdded = await TrailController.checkIfTrailInReadingList(widget.userId, widget.trailId);
+    setState(() {
+      _isAddedToList = isAdded;
+    });
+  }
+
+  void _loadTrailDetails() {
+    _trailFuture = TrailController.fetchTrailDetails(widget.trailId);
+  }
+
   @override
   void initState() {
     super.initState();
-    _trailFuture = fetchTrailDetails(); // Fetch trail details initially
-    _checkIfBookInReadingList();
-  }
-
-  Future<void> _checkIfBookInReadingList() async {
-  print("is added to list $_isAddedToList");
-  final url = 'http://10.0.2.2:8080/reading-trails/exists/${widget.userId}/${widget.trailId}';
-  final response = await http.get(Uri.parse(url));
-
-  if (response.statusCode == 200) {
-    setState(() {
-      _isAddedToList = response.body.toLowerCase() == 'true';
-    });
-  } else {
-    print('Failed to check reading list status: ${response.statusCode}');
-  }
-}
- Future<void> addToReadingList() async {
-    final url = 'http://10.0.2.2:8080/reading-trails/add/${widget.userId}/${widget.trailId}/FOLLOWED';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 201) {
-      setState(() {
-        _isAddedToList = true; // Update state when added
-      });
-    } else {
-      print('Failed to add book: ${response.statusCode} - ${response.body}');
-    }
-  }
-  Future<Map<String, dynamic>> fetchTrailDetails() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/${widget.trailId}'));
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load trail details');
-    }
+    _loadTrailDetails();
+    _checkIfTrailInReadingList();
   }
 
   @override
@@ -98,7 +77,6 @@ class _TrailDetailsState extends State<TrailDetails> {
                             ),
                     ),
 
-                
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -107,7 +85,7 @@ class _TrailDetailsState extends State<TrailDetails> {
                         children: [
                           Text(
                             trail['title'] ?? 'No Title',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 20),
                           Text(
@@ -131,7 +109,7 @@ class _TrailDetailsState extends State<TrailDetails> {
                                 IconButton(
                                   icon: const Icon(Icons.info_outline, size: 16),
                                   onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeanotherusersprofileScreen(userId: trail['creatorId'],)));
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeAnotherUserProfileScreen(userId: trail['creatorId'],)));
                                   },
                                 ),
                               ],
@@ -146,7 +124,7 @@ class _TrailDetailsState extends State<TrailDetails> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Genre:', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                              const Text('Genre:', style: TextStyle(fontSize: 12,)),
                               const SizedBox(width: 5),
                               Expanded(
                                 child: Text(
@@ -154,20 +132,16 @@ class _TrailDetailsState extends State<TrailDetails> {
                                       ? trail['genre'].join(", ")
                                       : 'No genre info available',
                                   overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
+                                  maxLines: 3,
                                   style: const TextStyle(
-                                    color: Colors.black54
+                                    color: Colors.black54,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-          
-          
-                          const SizedBox(height: 20),
-                          // Number of Readings
-                          
-                              
+                          const SizedBox(height: 30),
                           // Display Books in the Trail
                           const Text(
                             "Books",
@@ -175,57 +149,49 @@ class _TrailDetailsState extends State<TrailDetails> {
                           ),
                           const SizedBox(height: 8),
                               
-                          Column(
-                            children: (trail['trailBookList'] as List<dynamic>? ?? []).map((bookEntry) {
-                              var book = bookEntry['book'];
-                              return GestureDetector(
-                                onTap: () {
-                                  // // Navigate to BookDetails screen when the book is tappeda
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) => BookDetailScreen(bookKey: book['key'], userId: widget.userId, onClose: () {  }, ),
-                                  //   ),
-                                  // );
-                                  
-          
-                                },
-                                child: Card(
-                                  elevation: 3,
-                                  margin: const EdgeInsets.symmetric(vertical: 8),
-                                  color: Colors.white,
-                                  child: ListTile(
-                                    leading: ClipOval(
-                                      child: Image.network(
-                                        book['coverImageUrl'] ?? 'assets/default_image.png', // Fallback to a default image if null
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    title: Text(
-                                      book['title'] ?? 'No Title',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("${book['author'] ?? 'Unknown'}"),
-                                      ],
+                          Card(
+                            elevation: 3,
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            color: Colors.white,
+                            child: Column(
+                              children: (trail['trailBookList'] as List<dynamic>? ?? []).map((bookEntry) {
+                                var book = bookEntry['book'];
+                                return ListTile(
+                                  leading: ClipOval(
+                                    child: Image.network(
+                                      book['coverImageUrl'] ?? 'assets/default_image.png', // Fallback to a default image if null
+                                      width: 45,
+                                      height: 45,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
+                                  title: Text(
+                                    book['title'] ?? 'No Title',
+                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${book['author'] ?? 'Unknown'}", 
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontStyle: FontStyle.italic
+                                        ),),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
 
                           const SizedBox( height: 20,),
-                            // ADd to reading Button
+                          //add to reading button
                           ElevatedButton.icon(
-                            onPressed: _isAddedToList ? null : addToReadingList, // Disable button if already added
+                            onPressed: _isAddedToList ? null : addToReadingList,
                             label: Text(_isAddedToList ? "Added to Trails List" : "Add to Trails"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA), // Orange when false
+                              backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA), 
                               foregroundColor: Colors.black87,
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               shape: RoundedRectangleBorder(
@@ -233,7 +199,6 @@ class _TrailDetailsState extends State<TrailDetails> {
                               ),
                             ),
                           ),
-
                         ],
                       ),
                     )

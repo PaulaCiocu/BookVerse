@@ -1,5 +1,5 @@
 import 'package:bookverse/auth_screens/login.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/created_trailsScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/created_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/edit_profileScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/followed_trailsScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/reading_listSceen.dart';
@@ -60,7 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.person),
                       title: const Text('Edit Profile'),
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(userEmail: widget.userEmail,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen( userId: widget.userId, email: widget.userEmail,)));
                       },
                     ),
                     // Change Password section
@@ -83,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.map),
                       title: const Text('Created Trails'),
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => CreatedTrailsscreen(userId: widget.userId,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => CreatedTrailsScreen(userId: widget.userId,)));
                       },
                     ),
                     // Edit Read List section (optional)

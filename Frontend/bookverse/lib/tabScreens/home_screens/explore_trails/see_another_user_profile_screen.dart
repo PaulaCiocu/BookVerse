@@ -1,49 +1,39 @@
-import 'dart:convert';
-
+import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/controller/userProfileController.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-class SeeanotherusersprofileScreen extends StatefulWidget {
+class SeeAnotherUserProfileScreen extends StatefulWidget {
   final String userId;
-  const SeeanotherusersprofileScreen({super.key, required this.userId});
+  const SeeAnotherUserProfileScreen({super.key, required this.userId});
 
   @override
-  State<SeeanotherusersprofileScreen> createState() => _SeeanotherusersprofileScreenState();
+  State<SeeAnotherUserProfileScreen> createState() => _SeeAnotherUserProfileScreenState();
 }
 
-class _SeeanotherusersprofileScreenState extends State<SeeanotherusersprofileScreen> {
-  Future<Map<String, dynamic>>? _userProfile; // Change to nullable
+class _SeeAnotherUserProfileScreenState extends State<SeeAnotherUserProfileScreen> {
+  Future<Map<String, dynamic>>? _userProfile; 
   List<dynamic> trails = [];
-  Future<Map<String, dynamic>> _fetchUserProfile() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/person/personId/${widget.userId}'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load user profile');
-    }
+ 
+  void _loadUserProfile() {
+    setState(() {
+      _userProfile = UserProfilecontroller.fetchUserProfileById(widget.userId);
+    });
   }
 
-  Future<void> fetchTrails() async {
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-trails/person/${widget.userId}'));
-      if (response.statusCode == 200) {
-        setState(() {
-          trails = json.decode(response.body);
-        });
-      } else {
-        throw Exception('Failed to load trails');
-      }
-    } catch (error) {
-      print('Error fetching trails: $error');
-    }
+  Future<void> _loadTrails() async {
+    final trailsList = await TrailController.fetchTrails(widget.userId);
+    setState(() {
+      trails = trailsList;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _userProfile = _fetchUserProfile(); // Fetch user profile on initialization
-    fetchTrails();
+    _loadUserProfile();
+    _loadTrails();
   }
+
   @override
   Widget build(BuildContext context) {
      return Scaffold(
@@ -61,7 +51,7 @@ class _SeeanotherusersprofileScreenState extends State<SeeanotherusersprofileScr
       body: SafeArea(
         child: SingleChildScrollView(
           child: FutureBuilder<Map<String, dynamic>>(
-            future: _fetchUserProfile(),
+            future: _userProfile,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -125,9 +115,7 @@ class _SeeanotherusersprofileScreenState extends State<SeeanotherusersprofileScr
                     ),
           
                     const SizedBox(height: 50,),
-                    trails.isEmpty
-                    ? const Center(child: Text("No trails available."))
-                    : ListView.builder(
+                    ListView.builder(
                         shrinkWrap: true,
                         itemCount: trails.length,
                         itemBuilder: (context, index) {

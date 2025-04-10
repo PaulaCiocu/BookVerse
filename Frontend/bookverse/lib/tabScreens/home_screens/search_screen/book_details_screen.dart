@@ -1,6 +1,6 @@
-import 'dart:convert';
+import 'package:bookverse/controller/booksController.dart';
+import 'package:bookverse/controller/reviewController.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class BookDetailScreen extends StatefulWidget {
   final String bookKey;
@@ -8,6 +8,7 @@ class BookDetailScreen extends StatefulWidget {
   final VoidCallback onClose;
 
   const BookDetailScreen({
+    super.key, 
     required this.bookKey,
     required this.onClose,
     required this.userId,
@@ -21,11 +22,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   bool _isAddedToList = false;
   Future<Map<String, dynamic>>? _bookDetailsFuture;
   List<dynamic> reviews = [];
-  TextEditingController _contentController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   int rating = 1; 
-
+  bool _isExpanded = false;
   bool isContentValid = false;
+
   // Update TextField widget
   Widget buildTextField({
     required TextEditingController controller,
@@ -79,99 +81,42 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     });
   }
 
-   String? validateContent(String? value) {
+  String? validateContent(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Content can not be empty';
     }
     return null;
-      }
-  Future<bool> createReview({
-    required int rating,
-    required String content,
-  }) async {
-    final url = Uri.parse(
-      'http://10.0.2.2:8080/api/reviews/create/${widget.bookKey}/${widget.userId}?content=$content&rating=$rating',
-    );
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        print('Review created successfully');
-        return true;
-      } else {
-        print('Failed to create review: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error creating review: $e');
-      return false;
-    }
   }
 
-
-
-
-
-  Future<void> fetchReviews() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/reviews/book/${widget.bookKey}'));
-    if (response.statusCode == 200) {
-      setState(() {
-        reviews = json.decode(response.body);
-      });
-    }
+  Future<void> _addToReadingList() async {
+    final isAdded = await BooksController.addToReadingList(widget.userId, widget.bookKey);
+    setState(() {
+      _isAddedToList =  isAdded;
+    });
   }
 
-  Future<Map<String, dynamic>> _fetchBookDetails() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/books/${widget.bookKey}'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load book details');
-    }
+  Future<void> _fetchReviews() async {
+    final reviewList = await ReviewController.fetchReviews(widget.bookKey);
+    setState(() {
+      reviews = reviewList;
+    });
   }
 
-  Future<void> addToReadingList() async {
-    final url = 'http://10.0.2.2:8080/reading-list/add/${widget.userId}/${widget.bookKey}';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _isAddedToList = true;
-      });
-    } else {
-      print('Failed to add book: ${response.statusCode} - ${response.body}');
-    }
-  }
-
-  Future<void> _checkIfBookInReadingList() async {
-    final url = 'http://10.0.2.2:8080/reading-list/check/${widget.userId}/${widget.bookKey}';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _isAddedToList = response.body.toLowerCase() == 'true';
-      });
-    } else {
-      print('Failed to check reading list status: ${response.statusCode}');
-    }
+  Future<void> _loadData() async {
+    _bookDetailsFuture =  BooksController.fetchBookDetails(widget.bookKey);
+    final isAddedToList = await BooksController.checkIfBookInReadingList(widget.userId, widget.bookKey);
+    setState(() {
+      _isAddedToList = isAddedToList;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    fetchReviews();
-    _bookDetailsFuture = _fetchBookDetails();
-    _checkIfBookInReadingList();
+    _fetchReviews();
+    _loadData();
   }
 
-  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +238,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        onPressed: _isAddedToList ? null : addToReadingList,
+                        onPressed: _isAddedToList ? null : _addToReadingList,
                         icon: const Icon(Icons.menu_book_rounded, color: Colors.black87),
                         label: Text(_isAddedToList ? "Added to Reading List" : "Add to Reading"),
                         style: ElevatedButton.styleFrom(
@@ -373,7 +318,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                               color: Colors.grey,
                                             ),
                                           ),
-                                          Icon(Icons.star, size: 20, color: Colors.amber,)
+                                          const Icon(Icons.star, size: 20, color: Colors.amber,)
                                         ],
                                       ),
                                     ),
@@ -381,10 +326,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                 },
                               ),
                             ),
-                            const SizedBox(height: 20), // Space between reviews and button
+                            const SizedBox(height: 20), 
                             ElevatedButton(
                                 onPressed: () {
-                                  // Show dialog to add review
                                   showDialog(
                                     context: context,
                                     
@@ -461,43 +405,43 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                         actions: [
                                           TextButton(
                                             onPressed: () {
-                                              
-                                              Navigator.pop(context); // Close the dialog
+                                              Navigator.pop(context);
                                             },
                                             child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontSize: 14),),
                                           ),
                                           TextButton(
-  onPressed: () async {
-    if (_formKey.currentState?.validate() ?? false) {
-      bool success = await createReview(
-        rating: rating,
-        content: _contentController.text,
-      );
+                                            onPressed: () async {
+                                              if (_formKey.currentState?.validate() ?? false) {
+                                                bool success = await ReviewController.createReview(
+                                                  userId: widget.userId,
+                                                  bookKey: widget.bookKey,
+                                                  rating: rating,
+                                                  content: _contentController.text,
+                                                );
 
-      if (success) {
-        fetchReviews(); // Refresh the reviews list
-        Navigator.pop(context); // Close the form dialog
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Review submitted successfully!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to submit the review. Please try again."),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  },
-  child: const Text('Submit', style: TextStyle(fontSize: 16, color: Colors.black87)),
-),
+                                                if (success) {
+                                                  _fetchReviews(); 
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("Review submitted successfully!"),
+                                                      backgroundColor: Colors.green,
+                                                      duration: Duration(seconds: 3),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("Failed to submit the review. Please try again."),
+                                                      backgroundColor: Colors.red,
+                                                      duration: Duration(seconds: 3),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: const Text('Submit', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                                          ),
 
                                         ],
                                       );

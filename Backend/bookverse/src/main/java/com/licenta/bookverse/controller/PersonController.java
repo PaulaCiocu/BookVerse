@@ -34,7 +34,7 @@ public class PersonController {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return ResponseEntity.ok(person);
     }
-    
+
     @GetMapping("/{email}")
     public ResponseEntity<Person> getPersonByEmail(@PathVariable String email) {
         Person person = personRepository.findByEmail(email)

@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:bookverse/controller/AppEvents.dart';
+import 'package:bookverse/controller/userProfileController.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class EditProfileScreen extends StatefulWidget {
-  final String userEmail;
-  const EditProfileScreen({super.key, required this.userEmail});
+  final String userId;
+  final String email;
+  const EditProfileScreen({super.key, required this.userId, re, required this.email});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -146,38 +149,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  // Fetch user profile data on screen load
   Future<void> _fetchUserData() async {
-    final url = Uri.parse('http://10.0.2.2:8080/person/${widget.userEmail}');
-    
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        
-        // Set the initial values of the profile fields
-        setState(() {
-          _nameController.text = data['fullName'] ?? '';
-          _bioController.text = data['bio'] ?? '';
-          // selectedAvatar = data['profilePictureUrl'] ?? '';
-        });
-      } else {
-        print('Failed to load user data');
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-    }
+    final data = await UserProfilecontroller.fetchUserProfileById(widget.userId);
+    setState(() {
+      _nameController.text = data['fullName'] ?? '';
+      _bioController.text = data['bio'] ?? '';
+    });
+      
   }
 
    @override
   void initState() {
     super.initState();
-    _fetchUserData(); // Call the function to load data when the screen is loaded
+    _fetchUserData(); 
   }
 
  Future<bool> updateProfile(String fullName, String bio) async {
-  final url = Uri.parse('http://10.0.2.2:8080/person/edit/${widget.userEmail}');
+  final url = Uri.parse('http://10.0.2.2:8080/person/edit/${widget.email}');
   final headers = {
     'Content-Type': 'application/json',
   };
@@ -324,7 +312,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                         bool success = await updateProfile(name, bio);
                         if (success) {
+                          AppEvents.notifyProfileUpdated();
+                          
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
+                         
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile.')));
                         }

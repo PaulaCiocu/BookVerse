@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailProgreesScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/createTrailStepOne.dart';
 import 'package:flutter/material.dart';
@@ -17,35 +18,21 @@ class TrailsScreen extends StatefulWidget {
 }
 
 class _TrailsScreenState extends State<TrailsScreen> {
-  List<dynamic> trails = [];
+  List<dynamic> _trails =[];
   bool isLoading = true;
+
+  Future<void> _loadTrails() async {
+    final trailsList = await TrailController.fetchTrails(widget.userId);
+    setState(() {
+      _trails = trailsList;
+      isLoading = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchTrails();
-  }
-
-  Future<void> fetchTrails() async {
-    setState(() => isLoading = true);
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-trails/person/${widget.userId}'));
-      if (response.statusCode == 200) {
-        setState(() {
-          trails = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load trails');
-      }
-    } catch (error) {
-      print('Error fetching trails: $error');
-      setState(() => isLoading = false);
-    }
-  }
-
-  Future<void> _refreshTrails() async {
-    await fetchTrails(); // Call fetchTrails when user pulls down
+    _loadTrails();
   }
 
   @override
@@ -75,193 +62,190 @@ class _TrailsScreenState extends State<TrailsScreen> {
               const SizedBox(height: 60),  
               isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: _refreshTrails,
-                      child: Column(
-                        children: [
-                          trails.isEmpty
-                              ? const Center(child: Text("No trails available."))
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: trails.length,
-                                  itemBuilder: (context, index) {
-                                    final trail = trails[index];
-
-                                    if (trail['trail']['deleted'] == true) {
-                                      return Card(
-                                        color: Colors.grey.shade300,
-                                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-                                        elevation: 1,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                             ListTile(
-                                                title: Text(
-                                                  trail['trail']['title'] ?? 'No Title',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      trail['trail']['description'] ?? 'No description available',
-                                                      style: const TextStyle(
-                                                        color: Colors.black45,
-                                                        fontSize: 12,
-                                                      ),
-                                                      maxLines: 5,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                   ],
-                                                ),
-                                                leading: ClipOval(
-                                                  child: trail['trail']['imageUrl'] != null
-                                                      ? Image.network(
-                                                          trail['trail']['imageUrl'],
-                                                          width: 40,
-                                                          height: 40,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.asset(
-                                                          'assets/user_profile_backgrounds_screen.png',
-                                                          width: 40,
-                                                          height: 40,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                ),
-                                              ),
-                                           
-                                            const Center(
-                                              child: Text(
-                                                "This trail was deleted by the owner.",
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.grey,
-                                                ),
+                  : Column(
+                    children: [
+                      _trails.isEmpty
+                          ? const Center(child: Text("No trails available."))
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: _trails.length,
+                              itemBuilder: (context, index) {
+                                final trail = _trails[index];
+                  
+                                if (trail['trail']['deleted'] == true) {
+                                  return Card(
+                                    color: Colors.grey.shade300,
+                                    margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                                    elevation: 1,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                         ListTile(
+                                            title: Text(
+                                              trail['trail']['title'] ?? 'No Title',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black87,
                                               ),
                                             ),
-                                            SizedBox(height: 8,)
-                                          ],
+                                            subtitle: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  trail['trail']['description'] ?? 'No description available',
+                                                  style: const TextStyle(
+                                                    color: Colors.black45,
+                                                    fontSize: 12,
+                                                  ),
+                                                  maxLines: 5,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 6),
+                                               ],
+                                            ),
+                                            leading: ClipOval(
+                                              child: trail['trail']['imageUrl'] != null
+                                                  ? Image.network(
+                                                      trail['trail']['imageUrl'],
+                                                      width: 40,
+                                                      height: 40,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.asset(
+                                                      'assets/user_profile_backgrounds_screen.png',
+                                                      width: 40,
+                                                      height: 40,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            ),
+                                          ),
+                                       
+                                        const Center(
+                                          child: Text(
+                                            "This trail was deleted by the owner.",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    }
-
-                                    final pagesRead = trail['pagesRead'] ?? 0;
-                                    final totalBooksPages = trail['trail']['totalPages'] ?? 1;
-                                    final progress = (pagesRead / totalBooksPages).clamp(0.0, 1.0);
-                                    final progressPercentage = (progress * 100).toStringAsFixed(0);
-                                    final trailBooks = trail['trail']['trailBooks'] as List<dynamic>;
-
-                                    return Card(
-                                      color: Colors.white,
-                                      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-                                      elevation: 1,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        SizedBox(height: 8,)
+                                      ],
+                                    ),
+                                  );
+                                }
+                  
+                                final pagesRead = trail['pagesRead'] ?? 0;
+                                final totalBooksPages = trail['trail']['totalPages'] ?? 1;
+                                final progress = (pagesRead / totalBooksPages).clamp(0.0, 1.0);
+                                final progressPercentage = (progress * 100).toStringAsFixed(0);
+                                final trailBooks = trail['trail']['trailBooks'] as List<dynamic>;
+                  
+                                return Card(
+                                  color: Colors.white,
+                                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                                  elevation: 1,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: ListTile(
-                                                  title: Text(
-                                                    trail['trail']['title'] ?? 'No Title',
+                                          Expanded(
+                                            child: ListTile(
+                                              title: Text(
+                                                trail['trail']['title'] ?? 'No Title',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    trail['trail']['description'] ?? 'No description available',
                                                     style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w500,
-                                                      color: Colors.black87,
+                                                      color: Colors.black45,
+                                                      fontSize: 12,
                                                     ),
+                                                    maxLines: 5,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
-                                                  subtitle: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        trail['trail']['description'] ?? 'No description available',
-                                                        style: const TextStyle(
-                                                          color: Colors.black45,
-                                                          fontSize: 12,
-                                                        ),
-                                                        maxLines: 5,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                      const SizedBox(height: 6),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) => Trailprogreesscreen(
-                                                                trail: trail['trail'],
-                                                                createdType: trail['createdType'],
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: const Text(
-                                                          'View trail ..',
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Colors.black54,
+                                                  const SizedBox(height: 6),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => Trailprogreesscreen(
+                                                            trail: trail['trail'],
+                                                            createdType: trail['createdType'],
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  leading: ClipOval(
-                                                    child: trail['trail']['imageUrl'] != null
-                                                        ? Image.network(
-                                                            trail['trail']['imageUrl'],
-                                                            width: 40,
-                                                            height: 40,
-                                                            fit: BoxFit.cover,
-                                                          )
-                                                        : Image.asset(
-                                                            'assets/user_profile_backgrounds_screen.png',
-                                                            width: 40,
-                                                            height: 40,
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 60,
-                                                height: 60,
-                                                child: Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    CircularProgressIndicator(
-                                                      value: progress,
-                                                      backgroundColor: Colors.grey[300],
-                                                      color: const Color.fromARGB(255, 251, 207, 146),
-                                                      strokeWidth: 4,
-                                                    ),
-                                                    Text(
-                                                      '$progressPercentage%',
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.w500,
+                                                      );
+                                                    },
+                                                    child: const Text(
+                                                      'View trail ..',
+                                                      style: TextStyle(
                                                         fontSize: 12,
+                                                        color: Colors.black54,
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
+                                              leading: ClipOval(
+                                                child: trail['trail']['imageUrl'] != null
+                                                    ? Image.network(
+                                                        trail['trail']['imageUrl'],
+                                                        width: 40,
+                                                        height: 40,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.asset(
+                                                        'assets/user_profile_backgrounds_screen.png',
+                                                        width: 40,
+                                                        height: 40,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 60,
+                                            height: 60,
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                CircularProgressIndicator(
+                                                  value: progress,
+                                                  backgroundColor: Colors.grey[300],
+                                                  color: const Color.fromARGB(255, 251, 207, 146),
+                                                  strokeWidth: 4,
+                                                ),
+                                                Text(
+                                                  '$progressPercentage%',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
-                        ],
-
-                      ),
-                    ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ],
+                  
+                  ),
               const SizedBox(height: 60),
               GestureDetector(
                 onTap: () {

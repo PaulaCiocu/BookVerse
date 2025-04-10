@@ -1,4 +1,3 @@
-import 'package:bookverse/tabScreens/home_screens/explore_trails/trailDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,8 +15,8 @@ class ExploreTrails extends StatefulWidget {
 class _ExploreTrailsState extends State<ExploreTrails> {
   List<dynamic> trails = [];
   bool isLoading = true;
-  String selectedFilter = "All"; // Default filter
-  TextEditingController searchController = TextEditingController(); // Controller for search input
+  String selectedFilter = "All"; 
+  TextEditingController searchController = TextEditingController(); 
 
   @override
   void initState() {

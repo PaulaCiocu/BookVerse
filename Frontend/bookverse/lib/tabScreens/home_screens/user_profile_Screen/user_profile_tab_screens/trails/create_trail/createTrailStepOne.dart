@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/SuccessPage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,8 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _books = [];
   List<dynamic> _addedBooks = []; // This will store books added to the trail
-  
+  String _selectedFilter = 'Title';
+
   bool isTitleValid = false;
   bool isDescriptionValid = false;
 
@@ -118,16 +120,10 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
 
   Future<void> _searchBooks() async {
     final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-
-    final uri = Uri.parse('http://10.0.2.2:8080/books/search?query=$query');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _books = json.decode(response.body);
-      });
-    }
+    final bookList = await BooksController.searchBooks(_selectedFilter, query);
+    setState(() {
+      _books = bookList;
+    });
   }
 
 Future<void> addToReadingList(int trailId) async {

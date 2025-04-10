@@ -1,12 +1,12 @@
-import 'package:bookverse/tabScreens/home_screens/search_screen/bookDetailsScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_screen.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/exploreTrails.dart';
 import 'package:bookverse/tabScreens/home_screens/notifications.dart';
-import 'package:bookverse/tabScreens/home_screens/search_screen/searchBooks.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/search_books.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/settingsScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/userProfile.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievmentsScreen.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readingScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/explore_trails/trailDetails.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailsSreen.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +49,7 @@ class _HomeState extends State<Home> {
                   selectedBookKey = bookKey; // Store the selected book key
                 });
               }),
-              UserProfile(userEmail: widget.userEmail, onReadSelected: (id) { 
+              UserProfile( onReadSelected: (id) { 
                   setState(() {
                     readUserId = id; // Store the selected book key
                   });
@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
                   setState(() {
                     trailsUserId = id; // Store the selected book key
                   });
-               },),
+               }, userId: widget.userId,),
               SettingsScreen(userEmail: widget.userEmail, userId: widget.userId,),
             ],
           ),
@@ -91,8 +91,8 @@ class _HomeState extends State<Home> {
             ),
           if (readUserId != null)
             Positioned.fill(
-              child: Readingscreen(
-                user_id: readUserId!,
+              child: ReadingScreen(
+                userId: readUserId!,
                 onClose: () {
                   setState(() {
                     readUserId = null; // Close book details
