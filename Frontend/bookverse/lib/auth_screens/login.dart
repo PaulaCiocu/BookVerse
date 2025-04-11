@@ -1,9 +1,10 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/auth_screens/forgot_password.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
 import 'package:bookverse/home.dart';
 import 'package:bookverse/auth_screens/register.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,52 +23,10 @@ class LoginPageState extends State<LoginPage> {
   bool isEmailValid = false;
   bool isPasswordValid = false;
 
-  Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: isObscure,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xD9FFFFFF),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      validator: validator,
-      onChanged: onChanged,
-    );
-  }
-
   void _updateEmailValidation(String value) {
     setState(() {
-      isEmailValid = validateEmail(value) == null;
+      isEmailValid = validateEmail('Email') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
@@ -77,17 +36,6 @@ class LoginPageState extends State<LoginPage> {
     });
   }
   
-  String? validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
-    }
-    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        .hasMatch(value)) {
-      return 'Enter a valid email address';
-    }
-    
-    return null;
-  }
 
   String? validatePassword(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -159,14 +107,14 @@ class LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
-            child: Column( // Wrap the children in a Column widget
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Image (Placeholder)
+              
                 const SizedBox(height: 40,),
                 
                 Image.asset(
-                  'assets/login_image.jpeg', // Add your image in assets folder
+                  'assets/login_image.jpeg', 
                   height: 220,
                   width: 220,
                   fit: BoxFit.cover,
@@ -206,13 +154,13 @@ class LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 8,),
                         // Email Input Field
                         buildTextField(
-                                controller: _emailController,
-                                isObscure: false,
-                                hintText: 'Enter your email',
-                                validator: validateEmail,
-                                isValid: isEmailValid,
-                                onChanged: _updateEmailValidation,
-                              ),
+                          controller: _emailController,
+                          isObscure: false,
+                          hintText: 'Enter your email',
+                          validator: (value) => value!.isEmpty ? 'Email is required' : null,
+                          isValid: isEmailValid,
+                          onChanged: _updateEmailValidation,
+                        ),
                         const SizedBox(height: 20,),
                               
                         Row(

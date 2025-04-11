@@ -7,13 +7,13 @@ class UpdateSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Remove the default back button
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.close, color: Colors.black87),
             onPressed: () {
-              Navigator.pop(context); // Close the page when pressed
+              Navigator.pop(context); 
             },
           ),
         ],

@@ -1,13 +1,12 @@
 import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_screen.dart';
-import 'package:bookverse/tabScreens/home_screens/explore_trails/exploreTrails.dart';
-import 'package:bookverse/tabScreens/home_screens/notifications.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/explore_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/search_screen/search_books.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/settingsScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/userProfile.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievmentsScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readingScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/settings.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievments.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readings.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailsSreen.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -104,7 +103,7 @@ class _HomeState extends State<Home> {
             if (achievementsUserId != null)
             Positioned.fill(
               child: AchievmentsScreen(
-                user_id: achievementsUserId!,
+                userId: achievementsUserId!,
                 onClose: () {
                   setState(() {
                     achievementsUserId = null; // Close book details

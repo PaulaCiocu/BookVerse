@@ -1,8 +1,8 @@
 import 'package:bookverse/auth_screens/login.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/created_trails.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/edit_profileScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/followed_trailsScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/reading_listSceen.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/edit_profile.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/followed_trails.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/reading_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,8 +18,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
-  // Logout method
-
   Future<String?> getStoredJwtToken() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getString('jwt_token');
@@ -27,13 +25,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> logout() async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('jwt_token');  // Remove the JWT token from SharedPreferences
-
-  // Navigate to the login screen and remove all previous routes from the stack
+  await prefs.remove('jwt_token');  
   Navigator.pushAndRemoveUntil(
     context,
-    MaterialPageRoute(builder: (context) => LoginPage()),  // Navigate to the login screen
-    (Route<dynamic> route) => false,  // This condition removes all previous routes
+    MaterialPageRoute(builder: (context) => LoginPage()),
+    (Route<dynamic> route) => false,
   );
 }
 
@@ -55,7 +51,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: Text('Settings', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
                     ),
                     const SizedBox(height: 10),
-                    // Edit Profile section
                     ListTile(
                       leading: const Icon(Icons.person),
                       title: const Text('Edit Profile'),
@@ -63,15 +58,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen( userId: widget.userId, email: widget.userEmail,)));
                       },
                     ),
-                    // Change Password section
-                    ListTile(
-                      leading: const Icon(Icons.lock),
-                      title: const Text('Change Password'),
-                      onTap: () {
-                        // Add your password change logic here
-                      },
-                    ),
-                    // Modify Created Trails section
                     ListTile(
                       leading: const Icon(Icons.follow_the_signs),
                       title: const Text('Followed Trails'),
@@ -86,7 +72,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => CreatedTrailsScreen(userId: widget.userId,)));
                       },
                     ),
-                    // Edit Read List section (optional)
                     ListTile(
                       leading: const Icon(Icons.library_books),
                       title: const Text('Reading List'),
@@ -95,7 +80,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     ),
                     
-                    // Notifications settings section
                     ListTile(
                       leading: const Icon(Icons.notifications),
                       title: const Text('Notifications'),

@@ -1,5 +1,5 @@
 import 'package:bookverse/controller/trailController.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/updateTrailScreen.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/update_trail.dart';
 import 'package:flutter/material.dart';
 
 class CreatedTrailsScreen extends StatefulWidget {

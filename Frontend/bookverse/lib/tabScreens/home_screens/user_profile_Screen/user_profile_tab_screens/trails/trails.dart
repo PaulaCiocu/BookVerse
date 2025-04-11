@@ -1,15 +1,11 @@
-import 'dart:convert';
 import 'package:bookverse/controller/trailController.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trailProgreesScreen.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/createTrailStepOne.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trail_progress.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/create_trail.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class TrailsScreen extends StatefulWidget {
   final String userId;
   final VoidCallback onClose;
-
-
 
   const TrailsScreen({super.key, required this.userId, required this.onClose,});
 
@@ -39,7 +35,7 @@ class _TrailsScreenState extends State<TrailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(  // Make everything scrollable
+        child: SingleChildScrollView( 
           child: Column(
             children: [
               SizedBox(
@@ -141,7 +137,6 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                 final totalBooksPages = trail['trail']['totalPages'] ?? 1;
                                 final progress = (pagesRead / totalBooksPages).clamp(0.0, 1.0);
                                 final progressPercentage = (progress * 100).toStringAsFixed(0);
-                                final trailBooks = trail['trail']['trailBooks'] as List<dynamic>;
                   
                                 return Card(
                                   color: Colors.white,

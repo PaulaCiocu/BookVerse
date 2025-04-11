@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bookverse/controller/booksController.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/SuccessPage.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/success_page.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -22,13 +24,13 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _books = [];
-  List<dynamic> _addedBooks = []; // This will store books added to the trail
-  String _selectedFilter = 'Title';
+  final List<dynamic> _addedBooks = [];
+  final String _selectedFilter = 'Title';
 
   bool isTitleValid = false;
   bool isDescriptionValid = false;
 
-  File? _selectedImage; // Store selected image
+  File? _selectedImage; 
   final ImagePicker _picker = ImagePicker();
 
 
@@ -42,80 +44,18 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
   }
 }
 
-  Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-    int maxLines = 1,
-    double minHeight = 50,
-  }) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(minHeight: minHeight),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isObscure,
-        maxLines: maxLines,
-        style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(12),
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        validator: validator,
-        onChanged: onChanged,
-      ),
-    );
-  }
-
   void _updateTitleValidation(String value) {
     setState(() {
-      isTitleValid = validateTitle(value) == null;
+      isTitleValid = validateField(value, 'Title') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
   void _updateDescriptionValidation(String value) {
     setState(() {
-      isDescriptionValid = validateDescription(value) == null;
+      isDescriptionValid = validateField(value, 'Description') == null;
+      _formKey.currentState!.validate(); 
     });
-  }
-
-  String? validateTitle(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Title is required';
-    }
-    return null;
-  }
-
-  String? validateDescription(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Description is required';
-    }
-    return null;
   }
 
   Future<void> _searchBooks() async {
@@ -140,15 +80,12 @@ Future<void> addToReadingList(int trailId) async {
     print('Failed to add book: ${response.statusCode} - ${response.body}');
   }
 }
+
+
 Future<String> uploadImage(File imageFile) async {
   try {
-    // Create a reference to Firebase Storage
     final storageRef = FirebaseStorage.instance.ref().child('trail_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
-    
-    // Upload the file
     await storageRef.putFile(imageFile);
-    
-    // Get the image URL
     String imageUrl = await storageRef.getDownloadURL();
     return imageUrl;
   } catch (e) {
@@ -206,12 +143,12 @@ Widget build(BuildContext context) {
         "Create Trail",
         style: TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 20, // Slightly larger text for readability
-          color: Colors.black87, // Text color
+          fontSize: 20, 
+          color: Colors.black87, 
         ),
       ),
-      backgroundColor: const Color(0xFFFFDCAA), // Set AppBar background color
-      elevation: 0, // Remove shadow for a clean look
+      backgroundColor: const Color(0xFFFFDCAA), 
+      elevation: 0
     ),
     body: SingleChildScrollView(
       child: Padding(
@@ -245,13 +182,12 @@ Widget build(BuildContext context) {
                       ),
                 ),
               ),
-              const SizedBox(height: 20),
-              const SizedBox(height: 30),
+              const SizedBox(height: 50),
               buildTextField(
                 controller: _titleController,
                 isObscure: false,
                 hintText: 'Title',
-                validator: (value) => value!.isEmpty ? 'Title is required' : null,
+                validator: (value) => validateField(value, 'Title', minLength: 5),
                 isValid: isTitleValid,
                 onChanged: _updateTitleValidation
               ),
@@ -260,7 +196,7 @@ Widget build(BuildContext context) {
                 controller: _descriptionController,
                 isObscure: false,
                 hintText: 'Description',
-                validator: (value) => value!.isEmpty ? 'Description is required' : null,
+                validator: (value) => validateField(value, 'Description', minLength: 5),
                 isValid: isDescriptionValid,
                 onChanged: _updateDescriptionValidation,
                 maxLines: 5,

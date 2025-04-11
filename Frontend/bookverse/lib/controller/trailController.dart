@@ -59,6 +59,27 @@ class TrailController {
       }
   }
 
+  static Future<List<dynamic>> fetchTrailsFollowed(String userId) async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-trails/followed/person/$userId'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load trails');
+    }
+  }
+
+
+  static Future<bool> unfollowTrailFromReadingList(String userId, String trailId, bool keepBooksConfirmed) async {
+    final url = Uri.parse('http://10.0.2.2:8080/reading-trails/delete/$userId/$trailId/$keepBooksConfirmed');
+    final response = await http.delete(url);
+    if (response.statusCode == 200) {
+      print("Deleted successfully");
+      return true;
+    } else {
+      throw Exception('Failed to delete trail: ${response.body}');
+    }
+  }
+
   static Future<bool> deleteCreatedTrail(String userId,String trailId, bool keepBooksConfirmed) async {
     final url = Uri.parse('http://10.0.2.2:8080/trails/delete/$trailId/$userId/$keepBooksConfirmed');
     final response = await http.delete(url);
@@ -67,6 +88,27 @@ class TrailController {
       return true;
     } else {
       throw Exception('Failed to delete trail: ${response.body}');
+    }
+  }
+
+  static Future<bool> updateTrail(String userId, String trailId, String title, String description, List bookIds, String imageUrl) async {
+    final url = Uri.parse('http://10.0.2.2:8080/trails/$trailId');
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    final body = json.encode({
+      'title': title,
+      'description': description,
+      'creatorId': userId,
+      'books': bookIds.map((book) => {'bookKey': book}).toList(),
+      'imageUrl': imageUrl, 
+    });
+    
+    final response = await http.put(url, headers: headers, body: body);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to update profile: ${response.body}');
     }
   }
 }

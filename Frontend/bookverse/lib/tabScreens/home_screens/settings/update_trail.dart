@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bookverse/tabScreens/home_screens/settings/update_success_Screen.dart';
+import 'package:bookverse/controller/booksController.dart';
+import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/update_success.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -21,94 +24,17 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-    final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final String _selectedFilter = 'Title';
+
 
   bool isTitleValid = false;
   bool isDescriptionValid = false;
   List<dynamic> _addedBooks = [];
   List<dynamic> _books = [];
-  File? _selectedImage; // Store selected image
+  File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
   String defaulImage= '';
-
-
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
-  }
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      // Create a reference to Firebase Storage
-      final storageRef = FirebaseStorage.instance.ref().child('trail_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
-      
-      // Upload the file
-      await storageRef.putFile(imageFile);
-      
-      // Get the image URL
-      String imageUrl = await storageRef.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return '';
-    }
-  }
-
-
- Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-    int maxLines = 1,
-    double minHeight = 50,
-  }) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(minHeight: minHeight),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isObscure,
-        maxLines: maxLines,
-        style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(12),
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        validator: validator,
-        onChanged: onChanged,
-    
-      ),
-    );
-  }
 
   void _updateNameValidation(String value) {
     setState(() {
@@ -145,57 +71,44 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
     _addedBooks = List.from(widget.trail['trail']['trailBooks'] ?? []);
     defaulImage = widget.trail['trail']['imageUrl'] ?? '';
   }
-
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+  Future<String> uploadImage(File imageFile) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child('trail_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await storageRef.putFile(imageFile);
+      String imageUrl = await storageRef.getDownloadURL();
+      return imageUrl;
+    } catch (e) {
+      print('Error uploading image: $e');
+      return '';
+    }
+  }
   Future<void> _searchBooks() async {
-      final query = _searchController.text.trim();
-      if (query.isEmpty) return;
-
-      final uri = Uri.parse('http://10.0.2.2:8080/books/search?query=$query');
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _books = json.decode(response.body);
-        });
-      }
+    final query = _searchController.text.trim();
+    final bookList = await BooksController.searchBooks(_selectedFilter, query);
+    setState(() {
+      _books = bookList;
+    });
   }
 
   Future<void> updateTrail( String title, String description, List bookIds) async {
-    final url = Uri.parse('http://10.0.2.2:8080/trails/${widget.trail['trail']['id']}');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
- 
     String? imageUrl = _selectedImage != null ? await uploadImage(_selectedImage!) : null;
-    print(imageUrl);
- 
-    // Prepare the request body
-    final body = json.encode({
-      'title': title,
-      'description': description,
-      'creatorId': widget.userId,
-      'books': bookIds.map((book) => {'bookKey': book}).toList(),
-      'imageUrl': imageUrl, 
-    });
-    
-
-    // Send the PUT request to update the profile
-    final response = await http.put(url, headers: headers, body: body);
-
-    // Check the response status to confirm the update
-    if (response.statusCode == 200) {
-       // Navigate to SuccessPage
+    final update = await TrailController.updateTrail(widget.userId, widget.trail['trail']['id'], title, description, bookIds, imageUrl!);
+    if (update) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UpdateSuccessScreen()),
+        MaterialPageRoute(builder: (context) => const UpdateSuccessScreen()),
       );
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Updated succesfully!')),);
-    
-    } else {
-      print('Failed to update profile: ${response.body}');
-   
     }
+   
   }
 
 
@@ -365,8 +278,8 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                                 setState(() {
                                   if (!_addedBooks.any((b) => b['book']['key'] == book['key'])) {
                                     _addedBooks.add({
-                                      'id': _addedBooks.length,  // Assigning a new ID
-                                      'book': book,  // Keeping the original structure
+                                      'id': _addedBooks.length,  
+                                      'book': book, 
                                       'orderIndex': _addedBooks.length, 
                                       'pagesRead': 0,
                                     });
@@ -393,7 +306,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
                   ),
-                ),                // Books Added Section
+                ),  
                 
               // Books Added Section
               Container(
@@ -496,15 +409,14 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                           updateTrail(title, description, bookIds);
                           
                       } else {
-                        // If any condition fails
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Please fill in all fields and add at least 2 books.')),
                           );
                       }
                     },
                     child: Container(
-                      width: 120, // Increased width for better text fit
-                      height: 40, // Increased height for better touch interaction
+                      width: 120, 
+                      height: 40, 
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFDCAA), // #ffdcaa
                         borderRadius: BorderRadius.circular(10),

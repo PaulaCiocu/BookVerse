@@ -1,7 +1,5 @@
-import 'dart:convert';
-
+import 'package:bookverse/controller/booksController.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class ReadingListsceen extends StatefulWidget {
   final String userId;
@@ -12,8 +10,28 @@ class ReadingListsceen extends StatefulWidget {
 }
 
 class _ReadingListsceenState extends State<ReadingListsceen> {
-   List<dynamic> books = [];
+  List<dynamic> books = [];
   bool isLoading = true;
+
+  Future<void> updateProgress(String bookId, int newPagesRead) async {
+    final update = await BooksController.updateProgress(widget.userId, bookId, newPagesRead);
+    if (update) {
+      setState(() {
+        final updatedBookIndex = books.indexWhere((book) => book['bookKey'] == bookId);
+        if (updatedBookIndex != -1) {
+          books[updatedBookIndex]['pagesRead'] = newPagesRead;
+        }
+      });
+    }
+  }
+
+  Future<void> fetchReadingList() async {
+    final readingList = await BooksController.fetchReadingListBooks(widget.userId);
+    setState(() {
+        books = readingList;
+        isLoading = false;
+      });
+  }
 
   @override
   void initState() {
@@ -21,92 +39,7 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
     fetchReadingList();
   }
 
-  Future<void> fetchReadingList() async {
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-list/books/${widget.userId}'));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          books = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load reading list');
-      }
-    } catch (error) {
-      print('Error fetching reading list: $error');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  // Function to update progress for a specific book
-Future<void> updateProgress(String bookId, int newPagesRead) async {
-  try {
-    final url = Uri.parse(
-      'http://10.0.2.2:8080/reading-list/update-progress/${widget.userId}/$bookId?pagesRead=$newPagesRead'
-    );
-
-    final response = await http.put(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        // Find the book and update its progress locally
-        final updatedBookIndex = books.indexWhere((book) => book['bookKey'] == bookId);
-        if (updatedBookIndex != -1) {
-          books[updatedBookIndex]['pagesRead'] = newPagesRead; // Update the pagesRead
-        }
-      });
-    } else {
-      throw Exception('Failed to update progress: ${response.statusCode}');
-    }
-  } catch (error) {
-    print('Error updating progress: $error');
-  }
-}
-
-Future<bool> canBookBeDeleted(String bookId) async {
-  try {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-list/isBookNotInTrail/${widget.userId}/$bookId'));
-
-    if (response.statusCode == 200) {
-      // Assuming the response body is a boolean value
-      return json.decode(response.body);
-    } else {
-      // Handle unexpected responses, e.g. server error or wrong status code
-      throw Exception('Failed to load reading list');
-    }
-  } catch (error) {
-    print('Error fetching reading list: $error');
-    // Handle error gracefully, maybe return false or show a message
-    return false;
-  }
-}
-
-Future<bool> removeBooksFromReadingList(String bookId) async {
-    final url = Uri.parse('http://10.0.2.2:8080/reading-list/delete/${widget.userId}/$bookId');
-    
-    try {
-      final response = await http.delete(url);
-
-      if (response.statusCode == 200) {
-        // Trail deleted successfully
-        print("Deleted successfully");
-        return true;
-      } else {
-        // Failed to delete trail
-        print('Failed to delete trail: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Error deleting trail: $e');
-      return false;
-    }
-  }
+  
 
   Future<void> showProgressDialog(BuildContext context, String bookId, int currentPagesRead) async {
   TextEditingController controller = TextEditingController(text: currentPagesRead.toString());
@@ -118,14 +51,14 @@ Future<bool> removeBooksFromReadingList(String bookId) async {
       return AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0), // Rounded corners for the dialog
+          borderRadius: BorderRadius.circular(12.0), 
         ),
         title: const Text(
           'Update Reading Progress',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w500,
-            color: Colors.black87, // Title color
+            color: Colors.black87, 
           ),
         ),
         content: Form(
@@ -205,22 +138,22 @@ Future<bool> removeBooksFromReadingList(String bookId) async {
 }
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       title: const Text(
         "Reading List",
         style: TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 20, // Slightly larger text for readability
-          color: Colors.black87, // Text color
+          fontSize: 20,
+          color: Colors.black87, 
         ),
       ),
-      backgroundColor: const Color(0xFFFFDCAA), // Set AppBar background color
-      elevation: 0, // Remove shadow for a clean look
+      backgroundColor: const Color(0xFFFFDCAA),
+      elevation: 0, 
     ),
     body: SafeArea(
-      child: SingleChildScrollView(  // Wrap everything in a SingleChildScrollView
+      child: SingleChildScrollView( 
         child: Column(
           children: [
             const SizedBox(height: 40),
@@ -229,7 +162,6 @@ Widget build(BuildContext context) {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87),
             ),
             const SizedBox(height: 40.0),
-            // Directly place your ListView.builder here
             isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : books.isEmpty
@@ -243,8 +175,6 @@ Widget build(BuildContext context) {
                             final book = books[index];
                             final pagesRead = book['pagesRead'] ?? 0;
                             final totalPages = book['totalPages'] ?? 1;
-                            final progress = (pagesRead / totalPages).clamp(0.0, 1.0);
-                            final progressPercentage = (progress * 100).toStringAsFixed(0);
                       
                             return Card(
                               color: Colors.white,
@@ -365,9 +295,9 @@ Widget build(BuildContext context) {
                                               );
 
                                               if (removeBooksConfirmed == true) {
-                                                final bool canDelete = await canBookBeDeleted(book['bookKey']);
+                                                final bool canDelete = await BooksController.canBookBeDeleted(widget.userId, book['bookKey']);
                                                 
-                                               if (canDelete == false) {
+                                                if (canDelete == false) {
                                                   showDialog<bool>(
                                                     context: context,
                                                     builder: (BuildContext context) {
@@ -383,7 +313,7 @@ Widget build(BuildContext context) {
                                                                 style: TextStyle(
                                                                   color: Colors.black87,
                                                                   fontWeight: FontWeight.w500,
-                                                                  fontSize: 18,
+                                                                  fontSize: 16,
                                                                 ),
                                                               ),
                                                             ),
@@ -399,10 +329,8 @@ Widget build(BuildContext context) {
                                                     },
                                                   );
                                                 }
-
                                                 else{
-                                                  removeBooksFromReadingList(book['bookKey']);
-                                                 
+                                                  BooksController.removeBooksFromReadingList(widget.userId, book['bookKey']);
                                                 }
                                                 
                                               }

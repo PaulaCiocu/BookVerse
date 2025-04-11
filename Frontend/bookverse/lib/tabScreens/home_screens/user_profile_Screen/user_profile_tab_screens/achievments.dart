@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AchievmentsScreen extends StatefulWidget {
-  final String user_id;
+  final String userId;
   final VoidCallback onClose;
 
   const AchievmentsScreen({
     super.key,
     required this.onClose,
-    required this.user_id,
+    required this.userId,
   });
 
   @override
@@ -28,7 +28,7 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
 
   void fetchAchievements() async {
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/achievements/person/${widget.user_id}'));
+      final response = await http.get(Uri.parse('http://10.0.2.2:8080/achievements/person/${widget.userId}'));
 
       if (response.statusCode == 200) {
         setState(() {

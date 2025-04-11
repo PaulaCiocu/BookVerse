@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:bookverse/controller/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,83 +42,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool isBioValid = false;
   String? selectedAvatar;
 
- Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-    int maxLines = 1,
-    double minHeight = 50,
-  }) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(minHeight: minHeight),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isObscure,
-        maxLines: maxLines,
-        style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(12),
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        validator: validator,
-        onChanged: onChanged,
-      ),
-    );
-  }
-
   void _updateNameValidation(String value) {
     setState(() {
-      isNameValid = validateName(value) == null;
+      isNameValid = validateField(value, 'Name') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
   void _updateBioValidation(String value) {
     setState(() {
-      isBioValid = validateBio(value) == null;
+      isBioValid = validateField(value, 'Quote') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
-    String? validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Title is required';
-    }
-    return null;
-  }
-
-  String? validateBio(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Description is required';
-    }
-    return null;
-  }
-  
-// Function to load image from assets as bytes
   Future<Uint8List?> loadAssetImage(String assetPath) async {
     try {
       final ByteData data = await rootBundle.load(assetPath);
@@ -248,7 +187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _bioController,
                 isObscure: false,
                 hintText: 'Quote',
-                validator: (value) => value!.isEmpty ? 'Bio is required' : null,
+                validator: (value) => value!.isEmpty ? 'Quote is required' : null,
                 isValid: isBioValid,
                 onChanged: _updateBioValidation
               ),

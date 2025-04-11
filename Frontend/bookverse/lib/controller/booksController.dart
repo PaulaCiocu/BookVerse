@@ -47,6 +47,17 @@ class BooksController {
     }
   }
 
+  static Future<bool> removeBooksFromReadingList(String userId, String bookId) async {
+    final url = Uri.parse('http://10.0.2.2:8080/reading-list/delete/$userId/$bookId');
+    final response = await http.delete(url);
+    if (response.statusCode == 200) {
+      print("Deleted successfully");
+      return true;
+    } else {
+      throw Exception('Failed to delete trail: ${response.body}');
+    }
+  }
+
   static Future<List<dynamic>> searchBooks(String selectedFilter, String query) async {
     if (query.isEmpty) return [];
     String endpoint = '';
@@ -71,8 +82,27 @@ class BooksController {
     }
   }
 
+  static Future<bool> canBookBeDeleted(String userId, String bookId) async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-list/isBookNotInTrail/$userId/$bookId'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load reading list');
+    }
+  }
 
-
-  
-
+  static Future<bool> updateProgress(String userId, String bookId, int newPagesRead) async {
+    final url = Uri.parse(
+      'http://10.0.2.2:8080/reading-list/update-progress/$userId/$bookId?pagesRead=$newPagesRead'
+    );
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to update progress: ${response.statusCode}');
+    }
+  }
 }

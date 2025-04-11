@@ -1,8 +1,7 @@
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/see_another_user_profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class TrailDetails extends StatefulWidget {
   final String trailId;

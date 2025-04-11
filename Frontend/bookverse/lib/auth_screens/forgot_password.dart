@@ -1,5 +1,6 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/auth_screens/login.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -16,48 +17,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     bool isEmailValid = false;
   bool isPasswordValid = false;
 
-  Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: isObscure,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xD9FFFFFF),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      validator: validator,
-      onChanged: onChanged,
-    );
-  }
 
   void _updateEmailValidation(String value) {
     setState(() {
