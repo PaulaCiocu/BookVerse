@@ -1,6 +1,5 @@
-import 'dart:convert';
+import 'package:bookverse/controller/achievments_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class AchievmentsScreen extends StatefulWidget {
   final String userId;
@@ -20,78 +19,62 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
   bool isLoading = true;
   Map<String, dynamic>? achievements;
 
+  void fetchAchievements() async {
+    final achievmentsList = await AchievmentsController.fetchAchievements(widget.userId);
+    setState(() {
+      achievements = achievmentsList;
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchAchievements();
   }
-
-  void fetchAchievements() async {
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/achievements/person/${widget.userId}'));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          achievements = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load achievements');
-      }
-    } catch (error) {
-      print('Error fetching achievements: $error');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
- // Define function to check and show milestones
-Widget buildAchievementBadge(String label, bool isUnlocked, String imagePath) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0), 
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    elevation: 2, 
-    color: isUnlocked ? Colors.white : Colors.grey[300], 
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0), 
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Pushes icon/image to the right
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                imagePath, // Use Image.network(imagePath) if using an online image
-                width: 20,
-                height: 20,
-                color: isUnlocked ? null : Colors.black.withOpacity(0.5), // Optional: Dim the image when locked
-              ),
-              const SizedBox(width: 8), 
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14, 
-                  fontWeight: FontWeight.w500,
-                  color: isUnlocked ? Colors.black : Colors.grey,
-                ),
-              ),
-            ],
-          ),
-          Icon(
-            isUnlocked ? Icons.lock_open : Icons.lock, 
-            color: Colors.grey, 
-            size: 18,
-          ),
-        ],
+  
+  Widget buildAchievementBadge(String label, bool isUnlocked, String imagePath) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0), 
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
       ),
-    ),
-  );
-}
-
-
-
-
+      elevation: 2, 
+      color: isUnlocked ? Colors.white : Colors.grey[300], 
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0), 
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  imagePath, 
+                  width: 20,
+                  height: 20,
+                  color: isUnlocked ? null : Colors.black.withOpacity(0.5), 
+                ),
+                const SizedBox(width: 8), 
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.w500,
+                    color: isUnlocked ? Colors.black : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+            Icon(
+              isUnlocked ? Icons.lock_open : Icons.lock, 
+              color: Colors.grey, 
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

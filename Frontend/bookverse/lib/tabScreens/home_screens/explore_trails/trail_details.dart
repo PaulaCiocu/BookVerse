@@ -49,10 +49,10 @@ class _TrailDetailsState extends State<TrailDetails> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: FutureBuilder<Map<String, dynamic>>(
-            future: _trailFuture, // Call the function in the body
+            future: _trailFuture, 
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator()); // Show loader
+                return const Center(child: CircularProgressIndicator()); 
               } else if (snapshot.hasError) {
                 return const Center(child: Text("Failed to load trail details")); // Error message
               } else {

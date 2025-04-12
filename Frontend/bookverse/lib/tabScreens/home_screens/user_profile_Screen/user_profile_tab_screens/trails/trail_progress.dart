@@ -12,7 +12,7 @@ class Trailprogreesscreen extends StatefulWidget {
 class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
    @override
   Widget build(BuildContext context) {
-    final trail = widget.trail;  // Access the trail data from the widget's state
+    final trail = widget.trail; 
 
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +24,7 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: double.infinity, // Take full width
+                width: double.infinity, 
                 child: trail['imageUrl'] != null
                     ? Image.network(
                         trail['imageUrl']!,

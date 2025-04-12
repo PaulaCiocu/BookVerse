@@ -14,16 +14,17 @@ class UserProfile extends StatefulWidget {
 
   @override
   _UserProfileState createState() => _UserProfileState();
+
+  static updateProfile(String? selectedAvatar, String email, String name, String bio) {}
 }
 
 class _UserProfileState extends State<UserProfile> {
   Future<Map<String, dynamic>>? _userProfile;
   late StreamSubscription _profileUpdateSubscription;
-
   
   void _loadUserProfile() {
     setState(() {
-      _userProfile = UserProfilecontroller.fetchUserProfileById(widget.userId);
+      _userProfile = UserProfileController.fetchUserProfileById(widget.userId);
     });
   }
 

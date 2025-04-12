@@ -1,8 +1,67 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:bookverse/controller/imageController.dart';
 import 'package:http/http.dart' as http;
 
 class TrailController {
+
+  static Future<bool> createReadingTrail(String userId, File selectedImage, String title, String description, List books) async {
+    final url = Uri.parse('http://10.0.2.2:8080/trails/create');
+    String? imageUrl = await ImageController.uploadImage(selectedImage);
+    print(imageUrl);
+    final Map<String, dynamic> payload = {
+      'title': title,
+      'description': description,
+      'creatorId': userId,
+      'books': books.map((book) => {'bookKey': book}).toList(),
+      'imageUrl': imageUrl,  
+    };
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(payload),
+      );
+      if (response.statusCode == 201) {
+        print('Trail created successfully');
+        final int trailId = int.parse(response.body);
+        TrailController.addToReadingListTrailCreated(userId, trailId);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<dynamic>> fetchTrailsExcept({String? genre, String? author, String? bookTitle, String? trailName, required String userId }) async {
+    final Map<String, String> queryParams = {};
+    if (genre != null && genre.isNotEmpty) {
+      queryParams['genre'] = genre;
+    } else if (author != null && author.isNotEmpty) {
+      queryParams['author'] = author;
+    } else if (bookTitle != null && bookTitle.isNotEmpty) {
+      queryParams['bookTitle'] = bookTitle;
+    } else if (trailName != null && trailName.isNotEmpty) {
+      queryParams['trailName'] = trailName;
+    }
+    Uri uri = Uri.parse('http://10.0.2.2:8080/trails/except/person/$userId')
+        .replace(queryParameters: queryParams);
+    final response = await http.get(uri);
+    print(response.body);
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+      return jsonData;
+        
+    } else {
+      throw Exception('Failed to load trails. Status code: ${response.statusCode}');
+    }
+  }
+
 
   static Future<Map<String, dynamic>> fetchTrailDetails(String trailId) async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/$trailId'));
@@ -38,6 +97,20 @@ class TrailController {
   static Future<bool> addToReadingList(String userId, String trailId) async {
     final url = 'http://10.0.2.2:8080/reading-trails/add/$userId/$trailId/FOLLOWED';
 
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      throw Exception('Failed to add book: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  static Future<bool> addToReadingListTrailCreated(String userId, int trailId) async {
+    final url = 'http://10.0.2.2:8080/reading-trails/add/$userId/$trailId/CREATED';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},

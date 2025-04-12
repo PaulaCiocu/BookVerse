@@ -62,16 +62,13 @@ public class AuthenticationService {
             throw new PasswordMismatchException();
         }
 
-        if(personRepository.findByUsername(registrationDTO.getUsername()).isPresent()){
-            throw new UsernameAlreadyExistsException();
-        }
         if(personRepository.findByEmail(registrationDTO.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException();
         }
         String encodedPassword = passwordEncoder.encode(registrationDTO.getPassword());
         Person person = new Person();
         person.setFullName(registrationDTO.getFullName());
-        person.setUsername(registrationDTO.getUsername());
+      //  person.setUsername(registrationDTO.getUsername());
         person.setPassword(encodedPassword);
         person.setEmail(registrationDTO.getEmail());
         personRepository.save(person);

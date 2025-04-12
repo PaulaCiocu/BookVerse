@@ -16,7 +16,7 @@ class _SeeAnotherUserProfileScreenState extends State<SeeAnotherUserProfileScree
  
   void _loadUserProfile() {
     setState(() {
-      _userProfile = UserProfilecontroller.fetchUserProfileById(widget.userId);
+      _userProfile = UserProfileController.fetchUserProfileById(widget.userId);
     });
   }
 

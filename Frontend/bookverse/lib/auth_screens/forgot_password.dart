@@ -1,6 +1,7 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/auth_screens/login.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -20,22 +21,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   void _updateEmailValidation(String value) {
     setState(() {
-      isEmailValid = validateEmail(value) == null;
+      isEmailValid = validateEmail('Email') == null;
+      _formKey.currentState!.validate();
     });
-  }
-
-  String? validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
-    }
-    return null;
   }
 
   void showCustomSnackbar(BuildContext context, String errorMessage) {
   final overlay = Overlay.of(context);
   final overlayEntry = OverlayEntry(
     builder: (context) => Positioned(
-      top: 60, // Adjust the distance from the top
+      top: 60, 
       left: 20,
       right: 20,
       child: Material(
@@ -45,13 +40,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color:  Colors.white, // Match button color
-            boxShadow: [
+            color:  Colors.white, 
+            boxShadow: const [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black45,
                 blurRadius: 8,
                 spreadRadius: 2,
-                offset: const Offset(0, 2),
+                offset: Offset(0, 2),
               ),
             ],
           ),
@@ -123,7 +118,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     controller: _emailController,
                     isObscure: false,
                     hintText: 'Enter your email',
-                    validator: validateEmail,
+                    validator: (value) => value!.isEmpty ? 'Email is required' : null,
                     isValid: isEmailValid,
                     onChanged: _updateEmailValidation,
                   ),

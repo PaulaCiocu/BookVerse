@@ -32,23 +32,16 @@ class LoginPageState extends State<LoginPage> {
 
   void _updatePasswordValidation(String value) {
     setState(() {
-      isPasswordValid = validatePassword(value) == null;
+      isPasswordValid = validateField(value, 'Password') == null;
+      _formKey.currentState!.validate(); 
     });
-  }
-  
-
-  String? validatePassword(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Password is required';
-    }
-    return null;
   }
 
   void showCustomSnackbar(BuildContext context, String errorMessage) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 60, // Adjust the distance from the top
+        top: 60, 
         left: 20,
         right: 20,
         child: Material(
@@ -83,11 +76,7 @@ class LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-
-    // Insert the overlay
     overlay.insert(overlayEntry);
-
-    // Remove after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       overlayEntry.remove();
     });
@@ -204,7 +193,7 @@ class LoginPageState extends State<LoginPage> {
                           controller: _passwordController,
                           isObscure: true,
                           hintText: 'Enter your password',
-                          validator: validatePassword,
+                          validator: (value) => value!.isEmpty ? 'Password is required' : null,
                           isValid: isPasswordValid,
                           onChanged: _updatePasswordValidation,
                         ),

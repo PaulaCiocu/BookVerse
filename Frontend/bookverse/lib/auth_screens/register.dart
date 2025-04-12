@@ -13,20 +13,41 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+    final List<String> avatars = [
+    'assets/avatars/avatar_woman.png',
+    'assets/avatars/avatar2.png',
+    'assets/avatars/avatar3.png',
+    'assets/avatars/avatar4.png',
+    'assets/avatars/avatar5.png',
+    'assets/avatars/avatar6.png',
+    'assets/avatars/avatar7.png',
+    'assets/avatars/avatar8.png',
+    'assets/avatars/avatar9.png',
+    'assets/avatars/avatar10.png',
+    'assets/avatars/avatar11.png',
+    'assets/avatars/avatar12.png',
+  ];
+
+  String? selectedAvatar;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  // Validation state variables for each field
   bool isFullNameValid = false;
   bool isEmailValid = false;
   bool isUsernameValid = false;
   bool isPasswordValid = false;
   bool isConfirmPasswordValid = false;
+
+  void _selectAvatar(String avatarPath) async {
+    setState(() {
+      selectedAvatar = avatarPath;
+    });
+  }
+
  
-  // Update the validation state when text changes
   void _updateFullNameValidation(String value) {
     setState(() {
       isFullNameValid = validateFullName(value) == null;
@@ -34,20 +55,22 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   void _updateEmailValidation(String value) {
     setState(() {
-      isEmailValid = validateEmail('Email') == null;
+      isEmailValid = validateEmail(value) == null;
       _formKey.currentState!.validate(); 
     });
   }
 
   void _updateUsernameValidation(String value) {
     setState(() {
-      isUsernameValid = validateUsername(value) == null;
+      isUsernameValid = validateField(value, 'Username') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
   void _updatePasswordValidation(String value) {
     setState(() {
       isPasswordValid = validatePassword(value) == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
@@ -55,43 +78,6 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() {
       isConfirmPasswordValid = validateConfirmPassword(value) == null;
     });
-  }
-
-  String? validateFullName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Full name is required';
-    }
-    if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
-      return 'Enter a valid name (letters and spaces only)';
-    }
-    if (value.trim().length < 2 || value.trim().length > 50) {
-      return 'Name must be between 2 and 50 characters';
-    }
-    return null;
-  }
-
-
-
-  String? validateUsername(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Username is required';
-    }
-    if (value.trim().length < 2 || value.trim().length > 50) {
-      return 'Username must be between 2 and 50 characters';
-    }
-    return null;
-  }
-
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    String passwordRegex =
-        r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$";
-    if (!RegExp(passwordRegex).hasMatch(value)) {
-      return 'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character';
-    }
-    return null;
   }
 
   String? validateConfirmPassword(String? value) {
@@ -158,7 +144,8 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -183,12 +170,66 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 40),
                 Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          'Choose your avatar:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF080a0b),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 200,
+                          child: GridView.builder(
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4, 
+                              crossAxisSpacing: 10, 
+                              mainAxisSpacing: 10, 
+                            ),
+                            itemCount: avatars.length,  
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () => _selectAvatar(avatars[index]),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: selectedAvatar == avatars[index] 
+                                        ? const Color(0xFFFFDCAA) : Colors.transparent,
+                                      width: 3,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.shade100,
+                                        blurRadius: 3,
+                                      ),
+                                    ],
+                                    color: selectedAvatar == avatars[index] 
+                                        ? const Color(0xFFFFDCAA)
+                                        : Colors.transparent,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.asset(
+                                      avatars[index],
+                                      fit: BoxFit.cover,  
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 20,),      
                         const Text(
                           'Enter your full name',
                           style: TextStyle(
@@ -225,25 +266,6 @@ class _RegisterPageState extends State<RegisterPage> {
                           validator: (value) => value!.isEmpty ? 'Email is required' : null,
                           isValid: isEmailValid,
                           onChanged: _updateEmailValidation,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Choose a username',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        buildTextField(
-                          controller: _usernameController,
-                          isObscure: false,
-                          hintText: 'username123',
-                          validator: validateUsername,
-                          isValid: isUsernameValid,
-                          onChanged: _updateUsernameValidation,
                         ),
                         const SizedBox(height: 12),
                         const Text(
@@ -291,7 +313,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-
+            
                        String? errorMessage = await AuthenticationController.registerUser(
                         fullName: _fullNameController.text,
                         email: _emailController.text,
@@ -299,17 +321,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         password: _passwordController.text,
                         confirmPassword: _confirmPasswordController.text,
                       );
-
+            
                         if (errorMessage == null) {
-                          // Success, navigate to another page
                            Navigator.push(
                             context, 
                             MaterialPageRoute(builder: (context) => const RegistrationSuccessPage())
                           );
                         } else {
-                          // Show error message in a SnackBar
                           showCustomSnackbar(context, errorMessage);
-
                         }
                      
                      }
@@ -346,7 +365,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         letterSpacing: 1.2, 
                       ),
                     ),
-
+            
                     const SizedBox(width: 10,),
                     GestureDetector(
                       onTap: (){
@@ -365,7 +384,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     )
-
                   ],
                 ),
               ],

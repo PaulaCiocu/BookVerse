@@ -1,6 +1,6 @@
+import 'package:bookverse/controller/trailController.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class ExploreTrails extends StatefulWidget {
   final String userId;
@@ -18,57 +18,10 @@ class _ExploreTrailsState extends State<ExploreTrails> {
   String selectedFilter = "All"; 
   TextEditingController searchController = TextEditingController(); 
 
-  @override
-  void initState() {
-    super.initState();
-    fetchTrails(); // Fetch trails when the widget is initialized
-  }
-
-  Future<void> fetchTrails({String? genre, String? author, String? bookTitle, String? trailName }) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    final Map<String, String> queryParams = {};
-
-    if (genre != null && genre.isNotEmpty) {
-      queryParams['genre'] = genre;
-    } else if (author != null && author.isNotEmpty) {
-      queryParams['author'] = author;
-    } else if (bookTitle != null && bookTitle.isNotEmpty) {
-      queryParams['bookTitle'] = bookTitle;
-    } else if (trailName != null && trailName.isNotEmpty) {
-      queryParams['trailName'] = trailName;
-    }
-
-    Uri uri = Uri.parse('http://10.0.2.2:8080/trails/except/person/${widget.userId}')
-        .replace(queryParameters: queryParams);
-
-    try {
-      final response = await http.get(uri);
-      print(response.body);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-        setState(() {
-          trails = jsonData;
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load trails. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching trails: $e');
-    }
-  }
-
   void filterTrails(String filter) {
     setState(() {
       selectedFilter = filter;
-      searchController.clear(); // Clear previous input when a new filter is selected
+      searchController.clear();
     });
   }
 
@@ -77,7 +30,6 @@ class _ExploreTrailsState extends State<ExploreTrails> {
     if (selectedFilter == "All" || searchText.isEmpty) {
       fetchTrails();
     } else {
-      // Call fetchTrails based on the selected filter
       if (selectedFilter == "Genre") {
         fetchTrails(genre: searchText);
       } else if (selectedFilter == "Title") {
@@ -88,6 +40,20 @@ class _ExploreTrailsState extends State<ExploreTrails> {
         fetchTrails(trailName: searchText);
       }
     }
+  }
+
+  Future<void> fetchTrails({String? genre, String? author, String? bookTitle, String? trailName }) async {
+    final trailList = await TrailController.fetchTrailsExcept(genre: genre, author: author,bookTitle: bookTitle,trailName: trailName, userId: widget.userId);
+    setState(() {
+      trails = List.of(trailList);
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTrails();
   }
 
   @override
@@ -127,7 +93,7 @@ class _ExploreTrailsState extends State<ExploreTrails> {
                       controller: searchController,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                        hintText: 'Search trails by',
+                        hintText: 'Search trails by $selectedFilter',
                         border: InputBorder.none,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.search),
@@ -142,7 +108,7 @@ class _ExploreTrailsState extends State<ExploreTrails> {
                   onSelected: filterTrails,
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners for the menu
+                        borderRadius: BorderRadius.circular(12), 
                   ),
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: "All", child: Text("All")),
@@ -157,12 +123,13 @@ class _ExploreTrailsState extends State<ExploreTrails> {
             ),
           ),
           const SizedBox(height: 20),
-          // RefreshIndicator only wraps the ListView
           Expanded(
             child: RefreshIndicator(
               onRefresh: fetchTrails,
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())        
+                : trails.isEmpty
+                ? const Center(child: Text('No trails available', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)))
                   : ListView.builder(
                       itemCount: trails.length,
                       itemBuilder: (context, index) {

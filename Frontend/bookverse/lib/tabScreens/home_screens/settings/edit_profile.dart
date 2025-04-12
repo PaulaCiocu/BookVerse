@@ -1,14 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:bookverse/controller/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
 import 'package:bookverse/validation/validation.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 class EditProfileScreen extends StatefulWidget {
   final String userId;
@@ -37,7 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   'assets/avatars/avatar11.png',
   'assets/avatars/avatar12.png',
 ];
-  
+
   bool isNameValid = false;
   bool isBioValid = false;
   String? selectedAvatar;
@@ -56,40 +50,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
-  Future<Uint8List?> loadAssetImage(String assetPath) async {
-    try {
-      final ByteData data = await rootBundle.load(assetPath);
-      return data.buffer.asUint8List();
-    } catch (e) {
-      print("Error loading asset image: $e");
-      return null;
-    }
-  }
- Future<String> uploadAvatar(String avatarPath) async {
-    try {
-      // Load the image as bytes
-      Uint8List? imageBytes = await loadAssetImage(avatarPath);
-      if (imageBytes == null) {
-        return 'Error loading image';
-      }
-
-      // Create a reference to Firebase Storage
-      final storageRef = FirebaseStorage.instance.ref().child('avatars/${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-      // Upload the file
-      await storageRef.putData(imageBytes);
-
-      // Get the image URL
-      String imageUrl = await storageRef.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return 'Error uploading image';
-    }
-  }
-
   Future<void> _fetchUserData() async {
-    final data = await UserProfilecontroller.fetchUserProfileById(widget.userId);
+    final data = await UserProfileController.fetchUserProfileById(widget.userId);
     setState(() {
       _nameController.text = data['fullName'] ?? '';
       _bioController.text = data['bio'] ?? '';
@@ -97,44 +59,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       
   }
 
-   @override
+  @override
   void initState() {
     super.initState();
     _fetchUserData(); 
   }
-
- Future<bool> updateProfile(String fullName, String bio) async {
-  final url = Uri.parse('http://10.0.2.2:8080/person/edit/${widget.email}');
-  final headers = {
-    'Content-Type': 'application/json',
-  };
-
-  String? profilePictureUrl = ''; // Default to empty string if no avatar selected
-  if (selectedAvatar!=null && selectedAvatar!.isNotEmpty) {
-    // If an avatar is selected, upload it and get the URL
-    profilePictureUrl = await uploadAvatar(selectedAvatar!);
-    print('Uploaded Image URL: $profilePictureUrl');
-  }
-  
-  // Prepare the request body
-  final body = json.encode({
-    'fullName': fullName,
-    'bio': bio,
-    'profilePictureUrl': profilePictureUrl, // Send empty string if no avatar selected
-  });
-
-  // Send the PUT request to update the profile
-  final response = await http.put(url, headers: headers, body: body);
-
-  // Check the response status to confirm the update
-  if (response.statusCode == 200) {
-    return true; // Profile update successful
-  } else {
-    print('Failed to update profile: ${response.body}');
-    return false; // Profile update failed
-  }
-}
-
 
   void _selectAvatar(String avatarPath) async {
     setState(() {
@@ -151,12 +80,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         "Edit profile",
         style: TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 20, // Slightly larger text for readability
-          color: Colors.black87, // Text color
+          fontSize: 20, 
+          color: Colors.black87, 
         ),
       ),
-      backgroundColor: const Color(0xFFFFDCAA), // Set AppBar background color
-      elevation: 0, // Remove shadow for a clean look
+      backgroundColor: const Color(0xFFFFDCAA), 
+      elevation: 0, 
     ),
       body: Padding(
         padding: const EdgeInsets.all(36.0),
@@ -249,10 +178,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         String name = _nameController.text;
                         String bio = _bioController.text;
 
-                        bool success = await updateProfile(name, bio);
+                        bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.email, name, bio);
                         if (success) {
                           AppEvents.notifyProfileUpdated();
-                          
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
                          
                         } else {

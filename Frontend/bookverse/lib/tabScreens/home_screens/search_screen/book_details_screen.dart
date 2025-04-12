@@ -1,5 +1,7 @@
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/reviewController.dart';
+import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
 
 class BookDetailScreen extends StatefulWidget {
@@ -28,64 +30,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   bool _isExpanded = false;
   bool isContentValid = false;
 
-  // Update TextField widget
-  Widget buildTextField({
-    required TextEditingController controller,
-    required bool isObscure,
-    required String hintText,
-    required String? Function(String?) validator,
-    required bool isValid,
-    required void Function(String) onChanged,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: isObscure,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF171719), height: 1.36),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xD9FFFFFF),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: isValid ? Colors.green : const Color(0xFFD7D7DC)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      validator: validator,
-      onChanged: onChanged,
-      maxLines: 6, // Allow up to 5 lines for the user to write
-      keyboardType: TextInputType.multiline, // Allow multi-line input
-    );
-  }
-
-  // Update the validation state when text changes
   void _updateContentValidation(String value) {
     setState(() {
-      isContentValid = validateContent(value) == null;
+      isContentValid = validateField(value, 'Content') == null;
     });
-  }
-
-  String? validateContent(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Content can not be empty';
-    }
-    return null;
   }
 
   Future<void> _addToReadingList() async {
@@ -272,25 +220,25 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     ),
                                   )
                                 : SizedBox(
-                              height: 200, // Give it fixed height
+                              height: 200, 
                               child: ListView.builder(
-                                padding: const EdgeInsets.all(12.0), // Add padding to the list
+                                padding: const EdgeInsets.all(12.0), 
                                 itemCount: reviews.length,
                                 itemBuilder: (context, index) {
                                   final review = reviews[index];
-                                  return Card(  // Wrap with Card for better presentation
+                                  return Card(
                                     color: Colors.white,
-                                    elevation: 3, // Add shadow for depth
+                                    elevation: 3, 
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                                      borderRadius: BorderRadius.circular(12.0), 
                                     ),
                                     child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0), // Padding inside the ListTile
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                                       title: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            review['person']['fullName'] ?? 'Anonymous', // Display name of the reviewer
+                                            review['person']['fullName'] ?? 'Anonymous', 
                                             style: const TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
@@ -344,57 +292,59 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                               children: [
                                                 const Text('Add Review', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
                                                 const SizedBox(height: 10),
-                                                
-                                                 buildTextField(
-                                                    controller: _contentController,
-                                                    isObscure: false,
-                                                    hintText: '',
-                                                    validator: validateContent,
-                                                    isValid: isContentValid,
-                                                    onChanged: _updateContentValidation,
-                                                  ),
+                                                buildTextField(
+                                                  controller: _contentController,
+                                                  isObscure: false,
+                                                  hintText: '',
+                                                  validator: (value) => value!.isEmpty ? 'Email is required' : null,
+                                                  isValid: isContentValid,
+                                                  onChanged: _updateContentValidation,
+                                                ),
                                                 const SizedBox(height: 20),
-                                                
                                                 Row(
                                                   children: [
-                                                    Text('Rating', style: TextStyle(fontSize: 16),),
-                                                    SizedBox(width: 10,),
-                                                    Container(
-                                                      width: 60,
-                                                      height: 40,
-                                                      child: DropdownButtonFormField<int>(
-                                                        value: rating,
-                                                        onChanged: (value) {
-                                                          setState(() {
-                                                            rating = value!;
-                                                          });
-                                                        },
-                                                        items: List.generate(5, (index) {
-                                                          return DropdownMenuItem<int>(
-                                                            value: index + 1,
-                                                            child: Text('${index + 1}'),
-                                                          );
-                                                        }),
-                                                         decoration: InputDecoration(
-                                                          
-                                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0), // Padding inside the field
-                                                          filled: true, // Ensure the background color is filled
-                                                          fillColor: Colors.white, // Background color of the field
-                                                          border: OutlineInputBorder(
-                                                            borderSide: BorderSide(color: Colors.white), // Border color
-                                                            borderRadius: BorderRadius.circular(12), // Rounded corners
-                                                          ),
-                                                          enabledBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(color: Colors.white),
-                                                            borderRadius: BorderRadius.circular(12), // Rounded corners
-                                                          ),
-                                                          focusedBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(color: Colors.blue), // Border color when focused
-                                                            borderRadius: BorderRadius.circular(12), // Rounded corners
-                                                          ),
-                                                        ),
+                                                    Text('Rating $rating', style: TextStyle(fontSize: 16)),
+                                                    SizedBox(width: 10),
+                                                    PopupMenuButton<String>(
+                                                      onSelected: (value) {
+                                                        setState(() {
+                                                          rating = int.parse(value); 
+                                                        });
+                                                      },
+                                                      color: Colors.white,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(12),
                                                       ),
+                                                      itemBuilder: (context) => [
+                                                        const PopupMenuItem(value: "1", child: Text("1")),
+                                                        const PopupMenuItem(value: "2", child: Text("2")),
+                                                        const PopupMenuItem(value: "3", child: Text("3")),
+                                                        const PopupMenuItem(value: "4", child: Text("4")),
+                                                        const PopupMenuItem(value: "5", child: Text("5")),
+                                                      ],
+                                                      icon: const Icon(Icons.star),
+                                                      
                                                     ),
+                                                 
+                                                    // Container(
+                                                    //   width: 60,
+                                                    //   height: 40,
+                                                    //   child: DropdownButtonFormField<int>(
+                                                    //     value: rating,
+                                                    //     onChanged: (value) {
+                                                    //       setState(() {
+                                                    //         rating = value!;
+                                                    //       });
+                                                    //     },
+                                                    //     items: List.generate(5, (index) {
+                                                    //       return DropdownMenuItem<int>(
+                                                    //         value: index + 1,
+                                                    //         child: Text('${index + 1}'),
+                                                    //       );
+                                                    //     }),
+                                                      
+                                                    //   ),
+                                                    // ),
                                                   ],
                                                 ),
                                               

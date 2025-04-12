@@ -1,13 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:bookverse/controller/booksController.dart';
+import 'package:bookverse/controller/imageController.dart';
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/update_success.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 class UpdatetrailScreen extends StatefulWidget {
@@ -27,7 +25,6 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   final TextEditingController _searchController = TextEditingController();
   final String _selectedFilter = 'Title';
 
-
   bool isTitleValid = false;
   bool isDescriptionValid = false;
   List<dynamic> _addedBooks = [];
@@ -38,59 +35,27 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
 
   void _updateNameValidation(String value) {
     setState(() {
-      isTitleValid = validateTitle(value) == null;
+      isTitleValid = validateField(value, 'Title') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
   void _updateBioValidation(String value) {
     setState(() {
-      isDescriptionValid = validateDescription(value) == null;
+      isDescriptionValid = validateField(value, 'Description') == null;
+      _formKey.currentState!.validate(); 
     });
   }
 
-    String? validateTitle(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Title is required';
-    }
-    return null;
-  }
-
-  String? validateDescription(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Description is required';
-    }
-    return null;
-  }
-
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController.text = widget.trail['trail']['title'] ?? '';
-    _descriptionController.text =widget.trail['trail']['description'] ?? '';
-    _addedBooks = List.from(widget.trail['trail']['trailBooks'] ?? []);
-    defaulImage = widget.trail['trail']['imageUrl'] ?? '';
-  }
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
     }
   }
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref().child('trail_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await storageRef.putFile(imageFile);
-      String imageUrl = await storageRef.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return '';
-    }
-  }
+
   Future<void> _searchBooks() async {
     final query = _searchController.text.trim();
     final bookList = await BooksController.searchBooks(_selectedFilter, query);
@@ -100,7 +65,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   }
 
   Future<void> updateTrail( String title, String description, List bookIds) async {
-    String? imageUrl = _selectedImage != null ? await uploadImage(_selectedImage!) : null;
+    String? imageUrl = _selectedImage != null ? await ImageController.uploadImage(_selectedImage!) : null;
     final update = await TrailController.updateTrail(widget.userId, widget.trail['trail']['id'], title, description, bookIds, imageUrl!);
     if (update) {
       Navigator.pushReplacement(
@@ -108,7 +73,15 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
         MaterialPageRoute(builder: (context) => const UpdateSuccessScreen()),
       );
     }
-   
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.trail['trail']['title'] ?? '';
+    _descriptionController.text =widget.trail['trail']['description'] ?? '';
+    _addedBooks = List.from(widget.trail['trail']['trailBooks'] ?? []);
+    defaulImage = widget.trail['trail']['imageUrl'] ?? '';
   }
 
 
@@ -120,12 +93,12 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
         "Update trail",
         style: TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 20, // Slightly larger text for readability
-          color: Colors.black87, // Text color
+          fontSize: 20, 
+          color: Colors.black87, 
         ),
       ),
-      backgroundColor: const Color(0xFFFFDCAA), // Set AppBar background color
-      elevation: 0, // Remove shadow for a clean look
+      backgroundColor: const Color(0xFFFFDCAA), 
+      elevation: 0, 
     ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -134,8 +107,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image picker button
+              children: [   
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -221,7 +193,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
             
                 // Use SizedBox instead of Expanded
                 SizedBox(
-                  height: 250, // Adjust height as needed
+                  height: 250,
                   child: Card(
                     color: Colors.white,
                     shape: RoundedRectangleBorder(

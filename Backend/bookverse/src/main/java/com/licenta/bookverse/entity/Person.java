@@ -30,11 +30,6 @@ public class Person implements UserDetails {
     private String email;
 
     @NotBlank
-    @Size(min = 3, max = 20)
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @NotBlank
     @Size(min = 8)
     @Column(nullable = false)
     private String password;
@@ -52,16 +47,17 @@ public class Person implements UserDetails {
     private String profilePictureUrl; // URL for the profile picture
     private Integer nrOfConnections = 0; // Number of connections
 
-//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Review> reviews = new ArrayList<>();
-
-
     @ElementCollection
     private List<UUID> connectedUserIds; // List of connected user IDs
     // Getters, Setters, Constructors
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
@@ -84,10 +80,7 @@ public class Person implements UserDetails {
         return UserDetails.super.isEnabled();
     }
 
-    @Override
-    public String getUsername() {
-        return email;  // Providing access to the email
-    }
+
 
 
 }

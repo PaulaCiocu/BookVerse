@@ -10,6 +10,7 @@ import com.licenta.bookverse.repository.BookRepository;
 import com.licenta.bookverse.repository.PersonRepository;
 import com.licenta.bookverse.repository.TrailBookRepository;
 import com.licenta.bookverse.repository.TrailRepository;
+import com.licenta.bookverse.service.books.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class TrailsService {
     private final ReadingTrailService readingTrailService;
     private final TrailBookRepository trailBookRepository;
     private final TrailBookService trailBookService;
+    private final BookService bookService;
 
     public TrailDTOGetRequest getTrailById(Integer trailId) {
         Trail trail = trailRepository.findById(trailId)
@@ -119,9 +121,11 @@ public class TrailsService {
             int nextOrderIndex = 1;
             Set<String> genres = new HashSet<>();
             for (TrailDTO.BookOrderDTO bookOrder : trailDTO.getBooks()) {
-                Book book = bookRepository.findById(bookOrder.getBookKey())
-                        .orElseThrow(() -> new RuntimeException("Book not found"));
-//
+                Optional<Book> bookCheck = bookRepository.findById(bookOrder.getBookKey());
+                Book book = null;
+                if(bookCheck.isEmpty()){
+                    book = bookService.getBookDetails(bookOrder.getBookKey());
+                }
                 TrailBook trailBook = TrailBook.builder()
                         .trail(trail) // Set the trail reference
                         .book(book) // Set the book reference
@@ -167,9 +171,11 @@ public class TrailsService {
                 throw new RuntimeException("Book key cannot be empty");
             }
 
-            // Retrieve the Book based on the bookKey
-            Book book = bookRepository.findById(bookKey)
-                    .orElseThrow(() -> new RuntimeException("Book not found"));
+            Optional<Book> bookCheck = bookRepository.findById(bookKey);
+            Book book = null;
+            if(bookCheck.isEmpty()){
+                book = bookService.getBookDetails(bookKey);
+            }
 
             // Create and add new TrailBook entities
             TrailBook trailBook = new TrailBook();
@@ -193,66 +199,5 @@ public class TrailsService {
         // Return the trailId or appropriate response
         return trail.getId();
     }
-
-
-    public Long updateTrail(Integer trailId, TrailDTO updatedTrailDTO) {
-        // Find the existing Trail
-        Trail trail = trailRepository.findById(trailId)
-                .orElseThrow(() -> new RuntimeException("Trail not found"));
-
-        // Update title if it's not null
-        if (updatedTrailDTO.getTitle() != null && !updatedTrailDTO.getTitle().isEmpty()) {
-            trail.setTitle(updatedTrailDTO.getTitle());
-        }
-
-        // Update description if it's not null
-        if (updatedTrailDTO.getDescription() != null && !updatedTrailDTO.getDescription().isEmpty()) {
-            trail.setDescription(updatedTrailDTO.getDescription());
-        }
-
-        // Update image URL if it's not null
-        if (updatedTrailDTO.getImageUrl() != null && !updatedTrailDTO.getImageUrl().isEmpty()) {
-            trail.setImageUrl(updatedTrailDTO.getImageUrl());
-        }
-
-        trail.getTrailBooks().clear();
-        // Add new TrailBooks
-        List<TrailBook> newTrailBooks = new ArrayList<>();
-        Set<String> genres = new HashSet<>();
-        int nextOrderIndex = 1;
-
-        // Ensure that bookOrderDTOList is passed correctly
-        for (TrailDTO.BookOrderDTO bookOrder : updatedTrailDTO.getBooks()) {
-            if (bookOrder.getBookKey() == null || bookOrder.getBookKey().isEmpty()) {
-                throw new RuntimeException("Book key cannot be empty");
-            }
-
-            Book book = bookRepository.findById(bookOrder.getBookKey())
-                    .orElseThrow(() -> new RuntimeException("Book not found"));
-
-            // Create and add new TrailBook entities
-            TrailBook trailBook = new TrailBook();
-            trailBook.setTrail(trail);
-            trailBook.setBook(book);
-            trailBook.setOrderIndex(nextOrderIndex++);
-            newTrailBooks.add(trailBook);
-
-            // Add book subjects to genres set
-            genres.addAll(book.getSubjects());
-            trail.getTrailBooks().add(trailBook);
-        }
-
-      //   Set the new list to the trail and update genres
-        System.out.println(trail.getTrailBooks());
-
-        trail.setGenres(new ArrayList<>(genres));
-
-        // Save the updated trail (only save once)
-        trailRepository.save(trail);
-
-        // Return the trailId or appropriate response
-        return trail.getId();
-    }
-
 
 }

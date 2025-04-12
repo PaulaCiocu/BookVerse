@@ -34,7 +34,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(  // Wrap everything in a SingleChildScrollView
+        child: SingleChildScrollView(
           child: Column(
             children: [
               SizedBox(

@@ -54,14 +54,7 @@ public class TrailController {
         Long updatedTrail = trailService.updateTrailBooks( trailId, bookList);
         return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
     }
-    @PutMapping("/{trailId}")
-    public ResponseEntity<Long> updateTrail(
-            @PathVariable Integer trailId,
-            @RequestBody TrailDTO updatedTrailDTO
-    ) {
-        Long updatedTrail = trailService.updateTrail(trailId, updatedTrailDTO);
-        return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
-    }
+
 
     @DeleteMapping("/delete/{trailId}/{userId}/{keepBooks}")
     public ResponseEntity<String> deleteTrail(@PathVariable Long trailId, @PathVariable UUID userId, @PathVariable Boolean keepBooks) {
