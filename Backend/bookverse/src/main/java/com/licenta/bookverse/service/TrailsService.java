@@ -2,14 +2,9 @@ package com.licenta.bookverse.service;
 
 import com.licenta.bookverse.dto.books.TrailDTO;
 import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
-import com.licenta.bookverse.entity.Book;
-import com.licenta.bookverse.entity.Person;
-import com.licenta.bookverse.entity.Trail;
-import com.licenta.bookverse.entity.TrailBook;
-import com.licenta.bookverse.repository.BookRepository;
-import com.licenta.bookverse.repository.PersonRepository;
-import com.licenta.bookverse.repository.TrailBookRepository;
-import com.licenta.bookverse.repository.TrailRepository;
+import com.licenta.bookverse.dto.books.enums.CreatedType;
+import com.licenta.bookverse.entity.*;
+import com.licenta.bookverse.repository.*;
 import com.licenta.bookverse.service.books.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,9 +22,10 @@ public class TrailsService {
     private final PersonRepository personRepository;
     private final ReadingListService readingListService;
     private final ReadingTrailService readingTrailService;
-    private final TrailBookRepository trailBookRepository;
+    private final ReadingTrailListRepository readingTrailListRepository;
     private final TrailBookService trailBookService;
     private final BookService bookService;
+    private final NotificationService notificationService;
 
     public TrailDTOGetRequest getTrailById(Integer trailId) {
         Trail trail = trailRepository.findById(trailId)
@@ -155,28 +151,88 @@ public class TrailsService {
         trailRepository.save(trail);
     }
 
-    public Long updateTrailBooks(Integer trailId, List<String> bookKeys) {
-        // Find the existing Trail
+//    public Long updateTrailBooks(Integer trailId, List<String> bookKeys) {
+//        // Find the existing Trail
+//        Trail trail = trailRepository.findById(trailId)
+//                .orElseThrow(() -> new RuntimeException("Trail not found"));
+//
+//        // Add new TrailBooks
+//        List<TrailBook> newTrailBooks = new ArrayList<>();
+//        Set<String> genres = new HashSet<>();
+//        int nextOrderIndex = 1;
+//
+//        // Ensure that bookKeys are passed correctly
+//        for (String bookKey : bookKeys) {
+//            if (bookKey == null || bookKey.isEmpty()) {
+//                throw new RuntimeException("Book key cannot be empty");
+//            }
+//
+//            Optional<Book> bookCheck = bookRepository.findById(bookKey);
+//            Book book = null;
+//            if(bookCheck.isEmpty()){
+//                book = bookService.getBookDetails(bookKey);
+//            }
+//
+//            // Create and add new TrailBook entities
+//            TrailBook trailBook = new TrailBook();
+//            trailBook.setTrail(trail);
+//            trailBook.setBook(book);
+//            trailBook.setOrderIndex(nextOrderIndex++);
+//            newTrailBooks.add(trailBook);
+//
+//            // Add book subjects to genres set
+//            genres.addAll(book.getSubjects());
+//            trail.getTrailBooks().add(trailBook);
+//        }
+//
+//        // Set the new list of TrailBooks to the trail and update genres
+//
+//        trail.setGenres(new ArrayList<>(genres));
+//
+//        // Save the updated trail (only save once)
+//        trailRepository.save(trail);
+//
+//        List<ReadingTrailList> readingTrails = readingTrailListRepository.findByTrailAndCreatedType(trail, CreatedType.FOLLOWED);
+//        // 🔔 Notify followers
+//        for (ReadingTrailList followedTrail : readingTrails) {
+//            Person follower = followedTrail.getPerson();
+//            if(!follower.getId().equals(trail.getCreator().getId())){
+//                String msg = "Trail '" + trail.getTitle() + "' has been updated.";
+//                notificationService.sendNotification(follower, msg);
+//            }
+//        }
+//        // Return the trailId or appropriate response
+//        return trail.getId();
+//    }
+
+    public Long updateTrail(Integer trailId, TrailDTO trailDTO) {
         Trail trail = trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
 
+        if(trailDTO.getTitle() != null && !trailDTO.getTitle().isEmpty()){
+            trail.setTitle(trailDTO.getTitle());
+        }
+        if(trailDTO.getDescription() != null && !trailDTO.getDescription().isEmpty()){
+            trail.setDescription(trailDTO.getDescription());
+        }
+        if(trailDTO.getImageUrl() != null && !trailDTO.getImageUrl().isEmpty()){
+            trail.setImageUrl(trailDTO.getImageUrl());
+        }
         // Add new TrailBooks
+        trail.getTrailBooks().clear();
         List<TrailBook> newTrailBooks = new ArrayList<>();
         Set<String> genres = new HashSet<>();
         int nextOrderIndex = 1;
 
         // Ensure that bookKeys are passed correctly
-        for (String bookKey : bookKeys) {
-            if (bookKey == null || bookKey.isEmpty()) {
-                throw new RuntimeException("Book key cannot be empty");
-            }
-
-            Optional<Book> bookCheck = bookRepository.findById(bookKey);
+        for (TrailDTO.BookOrderDTO bookOrder : trailDTO.getBooks()) {
+            Optional<Book> bookCheck = bookRepository.findById(bookOrder.getBookKey());
             Book book = null;
             if(bookCheck.isEmpty()){
-                book = bookService.getBookDetails(bookKey);
+                book = bookService.getBookDetails(bookOrder.getBookKey());
+            } else{
+                book = bookCheck.get();
             }
-
             // Create and add new TrailBook entities
             TrailBook trailBook = new TrailBook();
             trailBook.setTrail(trail);
@@ -189,15 +245,22 @@ public class TrailsService {
             trail.getTrailBooks().add(trailBook);
         }
 
-        // Set the new list of TrailBooks to the trail and update genres
-
         trail.setGenres(new ArrayList<>(genres));
 
         // Save the updated trail (only save once)
         trailRepository.save(trail);
 
+        List<ReadingTrailList> readingTrails = readingTrailListRepository.findByTrailAndCreatedType(trail, CreatedType.FOLLOWED);
+        // 🔔 Notify followers
+        for (ReadingTrailList followedTrail : readingTrails) {
+            Person follower = followedTrail.getPerson();
+            if(!follower.getId().equals(trail.getCreator().getId())){
+                String msg = "Trail '" + trail.getTitle() + "' has been updated.";
+                notificationService.sendNotification(follower, msg);
+            }
+        }
         // Return the trailId or appropriate response
         return trail.getId();
-    }
 
+    }
 }

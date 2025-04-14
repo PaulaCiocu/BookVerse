@@ -28,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
     'assets/avatars/avatar12.png',
   ];
 
-  String? selectedAvatar;
+  String _selectedAvatar='';
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -43,11 +43,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _selectAvatar(String avatarPath) async {
     setState(() {
-      selectedAvatar = avatarPath;
+      _selectedAvatar = avatarPath;
     });
   }
 
- 
   void _updateFullNameValidation(String value) {
     setState(() {
       isFullNameValid = validateFullName(value) == null;
@@ -59,14 +58,6 @@ class _RegisterPageState extends State<RegisterPage> {
       _formKey.currentState!.validate(); 
     });
   }
-
-  void _updateUsernameValidation(String value) {
-    setState(() {
-      isUsernameValid = validateField(value, 'Username') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
-
   void _updatePasswordValidation(String value) {
     setState(() {
       isPasswordValid = validatePassword(value) == null;
@@ -202,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: selectedAvatar == avatars[index] 
+                                      color: _selectedAvatar == avatars[index] 
                                         ? const Color(0xFFFFDCAA) : Colors.transparent,
                                       width: 3,
                                     ),
@@ -213,7 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         blurRadius: 3,
                                       ),
                                     ],
-                                    color: selectedAvatar == avatars[index] 
+                                    color: _selectedAvatar == avatars[index] 
                                         ? const Color(0xFFFFDCAA)
                                         : Colors.transparent,
                                   ),
@@ -312,14 +303,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-            
+                    if ( _selectedAvatar.isNotEmpty && (_formKey.currentState?.validate() ?? false)) {
                        String? errorMessage = await AuthenticationController.registerUser(
                         fullName: _fullNameController.text,
                         email: _emailController.text,
                         username: _usernameController.text,
                         password: _passwordController.text,
                         confirmPassword: _confirmPasswordController.text,
+                        selectedAvatar: _selectedAvatar
                       );
             
                         if (errorMessage == null) {

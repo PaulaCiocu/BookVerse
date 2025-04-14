@@ -15,10 +15,6 @@ public class RegistrationDTO {
     @NotBlank(message = "Full name cannot be blank")
     private String fullName;
 
-    @NotBlank(message = "Username cannot be blank")
-    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
-    private String username;
-
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
     private String email;
@@ -29,4 +25,6 @@ public class RegistrationDTO {
 
     @NotBlank(message = "Confirm password cannot be blank")
     private String confirmPassword;
+
+    private String profilePictureUrl;
 }

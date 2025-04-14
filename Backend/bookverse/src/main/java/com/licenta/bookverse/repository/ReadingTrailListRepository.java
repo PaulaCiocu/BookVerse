@@ -20,16 +20,6 @@ import java.util.UUID;
 public interface ReadingTrailListRepository extends JpaRepository<ReadingTrailList, Integer> {
 
     List<ReadingTrailList> findByPerson(Person person);
-//
-//    @Query("SELECT new com.licenta.bookverse.dto.books.ReadingTrailListDTO(" +
-//            "rt.id, rt.person.id, " +
-//            "new (" +
-//            "t.id, t.title, t.description, t.numberOfReadings, t.genres, null) " +
-//            ") " +
-//            "FROM ReadingTrailList rt " +
-//            "JOIN rt.trail t " +
-//            "WHERE rt.person.id = :personId")
-//    List<ReadingTrailListDTO> findReadingTrailsByPersonId(@Param("personId") UUID personId);
 
     boolean existsByPersonAndTrail(Person person, Trail trail);
 
@@ -42,4 +32,6 @@ public interface ReadingTrailListRepository extends JpaRepository<ReadingTrailLi
 
 
     List<ReadingTrailList> findByPerson_Id(UUID personId);
+
+    List<ReadingTrailList> findByTrailAndCreatedType(Trail trail, CreatedType createdType);
 }

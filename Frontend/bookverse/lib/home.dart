@@ -8,6 +8,7 @@ import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profi
 import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
   final String token;
@@ -21,6 +22,24 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  int _unreadCount = 0;
+
+
+  Future<void> fetchUnreadNotifications() async {
+    final url = Uri.parse('http://10.0.2.2:8080/notifications/unseen-count/${widget.userId}');
+    final response = await http.get(url, headers: {'Content-Type': 'application/json'});
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _unreadCount = int.parse(response.body);
+      });
+    } else {
+      print("Failed to fetch notifications");
+    }
+  }
+
+
   int screenIndex = 0;
   String? selectedBookKey; // Store the selected book key
   String? selectedTrailKey;
@@ -61,7 +80,7 @@ class _HomeState extends State<Home> {
                     trailsUserId = id; // Store the selected book key
                   });
                }, userId: widget.userId,),
-              SettingsScreen(userEmail: widget.userEmail, userId: widget.userId,),
+              SettingsScreen(userEmail: widget.userEmail, userId: widget.userId, onNotificationsUpdated: fetchUnreadNotifications),
             ],
           ),
 
@@ -153,11 +172,34 @@ class _HomeState extends State<Home> {
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         currentIndex: screenIndex,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home, size: 30), label: "Explore"),
-          BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 30), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.person, size: 30), label: "Profile"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings, size: 30), label: "Settings"),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home, size: 30), label: "Explore"),
+          const BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 30), label: "Search"),
+          const BottomNavigationBarItem(icon: Icon(Icons.person, size: 30), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: [
+                const Icon(Icons.settings),
+                if (_unreadCount > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$_unreadCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: 'Settings',
+          ),
         ],
       ),
     );

@@ -68,7 +68,7 @@ public class AuthenticationService {
         String encodedPassword = passwordEncoder.encode(registrationDTO.getPassword());
         Person person = new Person();
         person.setFullName(registrationDTO.getFullName());
-      //  person.setUsername(registrationDTO.getUsername());
+        person.setProfilePictureUrl(registrationDTO.getProfilePictureUrl());
         person.setPassword(encodedPassword);
         person.setEmail(registrationDTO.getEmail());
         personRepository.save(person);

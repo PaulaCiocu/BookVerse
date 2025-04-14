@@ -31,7 +31,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   List<dynamic> _books = [];
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
-  String defaulImage= '';
+  String _defaultImage= '';
 
   void _updateNameValidation(String value) {
     setState(() {
@@ -65,8 +65,8 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   }
 
   Future<void> updateTrail( String title, String description, List bookIds) async {
-    String? imageUrl = _selectedImage != null ? await ImageController.uploadImage(_selectedImage!) : null;
-    final update = await TrailController.updateTrail(widget.userId, widget.trail['trail']['id'], title, description, bookIds, imageUrl!);
+    String imageUrl = _selectedImage != null ? await ImageController.uploadImage(_selectedImage!) : _defaultImage;
+    final update = await TrailController.updateTrail(widget.userId, widget.trail['trail']['id'].toString(), title, description, bookIds, imageUrl);
     if (update) {
       Navigator.pushReplacement(
         context,
@@ -81,7 +81,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
     _titleController.text = widget.trail['trail']['title'] ?? '';
     _descriptionController.text =widget.trail['trail']['description'] ?? '';
     _addedBooks = List.from(widget.trail['trail']['trailBooks'] ?? []);
-    defaulImage = widget.trail['trail']['imageUrl'] ?? '';
+    _defaultImage = widget.trail['trail']['imageUrl'] ?? '';
   }
 
 

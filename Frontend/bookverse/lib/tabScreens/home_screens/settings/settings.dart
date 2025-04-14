@@ -2,21 +2,27 @@ import 'package:bookverse/auth_screens/login.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/created_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/edit_profile.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/followed_trails.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/notifications.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/reading_list.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String userEmail;
   final String userId;
+  final VoidCallback onNotificationsUpdated;
 
-  const SettingsScreen({super.key, required this.userEmail, required this.userId});
+
+  const SettingsScreen({super.key, required this.userEmail, required this.userId, required this.onNotificationsUpdated, });
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
+  int _unreadCount =0;
 
   Future<String?> getStoredJwtToken() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -32,6 +38,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     (Route<dynamic> route) => false,
   );
 }
+  Future<int> getUnseenCount() async {
+    final url = Uri.parse('http://10.0.2.2:8080/notifications/unseen-count/${widget.userId}');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+        setState(() {
+        _unreadCount = int.parse(response.body);;
+      });
+      return int.parse(response.body); 
+    } else {
+      throw Exception('Failed to fetch unseen notification count');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUnseenCount();
+  }
 
 
   @override
@@ -82,11 +113,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     
                     ListTile(
                       leading: const Icon(Icons.notifications),
-                      title: const Text('Notifications'),
+                      title: Row(
+                        children: [
+                          const Text('Notifications'),
+                          const SizedBox(width: 8),
+                          if (_unreadCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$_unreadCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                       onTap: () {
-                        // Add your notifications settings logic here
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => Notifications(userId: widget.userId,),
+                        )).then((_) {
+                          // Refresh the unread notification count when coming back
+                          getUnseenCount();
+                          widget.onNotificationsUpdated();
+                        });
+
                       },
                     ),
+
                     // Log out section
                     ListTile(
                       leading: const Icon(Icons.exit_to_app),

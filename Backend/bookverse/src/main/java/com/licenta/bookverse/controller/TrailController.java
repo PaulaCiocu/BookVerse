@@ -46,12 +46,21 @@ public class TrailController {
         return ResponseEntity.status(HttpStatus.CREATED).body(trailId); // Return the trail ID
     }
 
-    @PutMapping("/updatebooks/{trailId}")
-    public ResponseEntity<Long> updateTrail(
+//    @PutMapping("/updatebooks/{trailId}")
+//    public ResponseEntity<Long> updateTrail(
+//            @PathVariable Integer trailId,
+//            @RequestBody List<String> bookList
+//    ) {
+//        Long updatedTrail = trailService.updateTrailBooks( trailId, bookList);
+//        return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
+//    }
+
+    @PutMapping("/{trailId}")
+    public ResponseEntity<Long> updateTrailComplete(
             @PathVariable Integer trailId,
-            @RequestBody List<String> bookList
+            @RequestBody TrailDTO trailDTO
     ) {
-        Long updatedTrail = trailService.updateTrailBooks( trailId, bookList);
+        Long updatedTrail = trailService.updateTrail( trailId, trailDTO);
         return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
     }
 

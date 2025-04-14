@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:bookverse/controller/imageController.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AuthenticationController {
-  static final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  static  FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   static Future registerUser({
     required String fullName,
@@ -11,8 +12,14 @@ class AuthenticationController {
     required String username,
     required String password,
     required String confirmPassword,
+    required String selectedAvatar
   }) async {
     final url = Uri.parse('http://10.0.2.2:8080/auth/register'); // Replace with your backend URL
+    String? profilePictureUrl = '';
+    
+    profilePictureUrl = await ImageController.uploadAvatar(selectedAvatar);
+    print('Uploaded Image URL: $profilePictureUrl');
+    
     try {
       final response = await http.post(
         url,
@@ -23,6 +30,7 @@ class AuthenticationController {
           'username': username,
           'password': password,
           'confirmPassword': confirmPassword,
+          'profilePictureUrl': profilePictureUrl
         }),
       );
 
