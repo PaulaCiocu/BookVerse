@@ -7,7 +7,14 @@
     }
     return null;
   }
+  
 
+  String? validateFieldNotEmpty(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Can not be empty';
+    } 
+    return null;
+  }
   String? validateEmail(String? value) {
       if (value == null || value.trim().isEmpty) {
         return 'Email is required';

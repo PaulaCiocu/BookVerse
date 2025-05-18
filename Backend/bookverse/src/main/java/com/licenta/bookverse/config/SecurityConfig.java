@@ -1,5 +1,6 @@
 package com.licenta.bookverse.config;
-import com.licenta.bookverse.service.auth.JwtAuthenticationFilter;
+import com.licenta.bookverse.service.PersonService;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -18,17 +19,16 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.authenticationProvider = authenticationProvider;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    private final PersonService personService;
+
+    public SecurityConfig(  PersonService personService) {
+        this.personService = personService;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()) // Disable CSRF protection
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/notifications/**",
@@ -41,19 +41,17 @@ public class SecurityConfig {
                                 "/person/**",
                                 "/books/**",
                                 "/register",
-                                "/auth/**",          // Public API endpoints
-                                "/swagger-ui/**",    // Swagger UI
-                                "/v3/api-docs/**",   // OpenAPI documentation
-                                "/swagger-resources/**", // Additional Swagger resources
-                                "/webjars/**"       // Swagger assets
-                        ).permitAll() // Permit all requests under these paths
-                        .anyRequest().authenticated() // Require authentication for other requests
+                                "/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Use stateless sessions
-                )
-                .authenticationProvider(authenticationProvider) // Custom authentication provider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+                );
 
         return http.build();
     }
@@ -71,5 +69,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
 
 }

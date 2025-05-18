@@ -57,54 +57,70 @@ class _HomeState extends State<Home> {
           IndexedStack(
             index: screenIndex,
             children: [
-              ExploreTrails(onTrailsSelected: (String trailKey) { 
-                setState(() {
-                  selectedTrailKey = trailKey; // Store the selected book key
-                });
-               }, userId: widget.userId,),
-              SearchBooks(onBookSelected: (bookKey) {
-                setState(() {
-                  selectedBookKey = bookKey; // Store the selected book key
-                });
-              }),
-              UserProfile( onReadSelected: (id) { 
+              ExploreTrails(
+                onTrailsSelected: (String trailKey) { 
                   setState(() {
-                    readUserId = id; // Store the selected book key
+                    selectedTrailKey = trailKey;
                   });
-                }, onAchievementsSelected: (id) { 
+                },
+                userId: widget.userId,
+              ),
+              SearchBooks(
+                onBookSelected: (bookKey) {
                   setState(() {
-                    achievementsUserId = id; // Store the selected book key
+                    selectedBookKey = bookKey;
                   });
-              }, onTrailsSelected: (String id) { 
+                },
+              ),
+              UserProfile(
+                onReadSelected: (id) { 
                   setState(() {
-                    trailsUserId = id; // Store the selected book key
+                    readUserId = id;
                   });
-               }, userId: widget.userId,),
-              SettingsScreen(userEmail: widget.userEmail, userId: widget.userId, onNotificationsUpdated: fetchUnreadNotifications),
+                },
+                onAchievementsSelected: (id) { 
+                  setState(() {
+                    achievementsUserId = id;
+                  });
+                },
+                onTrailsSelected: (String id) { 
+                  setState(() {
+                    trailsUserId = id;
+                  });
+                },
+                userId: widget.userId,
+              ),
+              // SettingsScreen(
+              //   userEmail: widget.userEmail,
+              //   userId: widget.userId,
+              //   onNotificationsUpdated: fetchUnreadNotifications,
+              // ),
             ],
           ),
 
+          // Show the overlay screens only when the respective id is not null
           if (selectedTrailKey != null)
             Positioned.fill(
               child: TrailDetails(
                 trailId: selectedTrailKey!,
                 onClose: () {
                   setState(() {
-                    selectedTrailKey = null; 
+                    selectedTrailKey = null;
                   });
-                }, userId: widget.userId, 
+                },
+                userId: widget.userId,
               ),
             ),
-          // Show BookDetailScreen on top if selectedBookKey is set
           if (selectedBookKey != null)
             Positioned.fill(
               child: BookDetailScreen(
                 bookKey: selectedBookKey!,
                 onClose: () {
                   setState(() {
-                    selectedBookKey = null; // Close book details
+                    selectedBookKey = null;
                   });
-                }, userId: widget.userId,
+                },
+                userId: widget.userId,
               ),
             ),
           if (readUserId != null)
@@ -113,31 +129,30 @@ class _HomeState extends State<Home> {
                 userId: readUserId!,
                 onClose: () {
                   setState(() {
-                    readUserId = null; // Close book details
+                    readUserId = null;
                   });
                 },
               ),
             ),
-
-            if (achievementsUserId != null)
+          if (achievementsUserId != null)
             Positioned.fill(
               child: AchievmentsScreen(
+                key: ValueKey(achievementsUserId), 
                 userId: achievementsUserId!,
                 onClose: () {
                   setState(() {
-                    achievementsUserId = null; // Close book details
+                    achievementsUserId = null;
                   });
                 },
               ),
             ),
-
-            if (trailsUserId != null)
+          if (trailsUserId != null)
             Positioned.fill(
               child: TrailsScreen(
                 userId: trailsUserId!,
                 onClose: () {
                   setState(() {
-                    trailsUserId = null; // Close book details
+                    trailsUserId = null;
                   });
                 },
               ),
@@ -148,22 +163,21 @@ class _HomeState extends State<Home> {
         onTap: (index) {
           setState(() {
             if (selectedTrailKey != null) {
-              selectedTrailKey = null; // Close book details if it's open
+              selectedTrailKey = null; // Close trail details
             }
             if (selectedBookKey != null) {
-              selectedBookKey = null; // Close book details if it's open
+              selectedBookKey = null; // Close book details
             }
             if (readUserId != null) {
-              readUserId = null; 
-            } 
+              readUserId = null; // Close reading screen
+            }
             if (achievementsUserId != null) {
-              achievementsUserId = null; 
-            } 
+              achievementsUserId = null; // Close achievements screen
+            }
             if (trailsUserId != null) {
               trailsUserId = null; 
-            } 
-            else {
-              screenIndex = index; // Switch screens
+            } else {
+              screenIndex = index; 
             }
           });
         },
@@ -171,37 +185,39 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
+        showSelectedLabels: false, 
+        showUnselectedLabels: false, 
         currentIndex: screenIndex,
-        items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home, size: 30), label: "Explore"),
-          const BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 30), label: "Search"),
-          const BottomNavigationBarItem(icon: Icon(Icons.person, size: 30), label: "Profile"),
-          BottomNavigationBarItem(
-            icon: Stack(
-              children: [
-                const Icon(Icons.settings),
-                if (_unreadCount > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '$_unreadCount',
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            label: 'Settings',
-          ),
-        ],
-      ),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home, size: 35), label: "Explore"),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 35), label: "Search"),
+          BottomNavigationBarItem(icon: Icon(Icons.person, size: 35), label: "Profile"),
+      //     BottomNavigationBarItem(
+      //       icon: Stack(
+      //         children: [
+      //           const Icon(Icons.settings),
+      //           if (_unreadCount > 0)
+      //             Positioned(
+      //               right: 0,
+      //               top: 0,
+      //               child: Container(
+      //                 padding: const EdgeInsets.all(3),
+      //                 decoration: const BoxDecoration(
+      //                   color: Colors.red,
+      //                   shape: BoxShape.circle,
+      //                 ),
+      //                 child: Text(
+      //                   '$_unreadCount',
+      //                   style: const TextStyle(color: Colors.white, fontSize: 10),
+      //                 ),
+      //               ),
+      //             ),
+      //         ],
+      //       ),
+      //       label: 'Settings',
+      //     ),
+         ],
+       ),
     );
   }
 

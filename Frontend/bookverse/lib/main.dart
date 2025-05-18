@@ -62,39 +62,28 @@ class WelcomePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'BookVerse',
-                style: TextStyle(
-                  fontSize: 38,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF030303),
-                  letterSpacing: 1.2,
-                ),
+                style: Theme.of(context).textTheme.displayMedium
               ),
+              
               const SizedBox(height: 50),
               Image.asset(
                 'assets/welcome_image.jpeg',
-                height: 220,
-                width: 220,
+                height: 240,
+                width: 240,
                 fit: BoxFit.cover,
               ),
-              const SizedBox(height: 100),
-              const Text(
+              const SizedBox(height: 10),
+              Text(
                 'Discover new reading paths',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF030303),
-                  letterSpacing: 0.8,
-                ),
+                style: Theme.of(context).textTheme.titleSmall
               ),
               const SizedBox(height: 50),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                width: 158,
-                height: 36,
+                width: 160,
+                height: 40,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFDCAA),
                   borderRadius: BorderRadius.circular(8),
@@ -107,7 +96,7 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child:  Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
@@ -118,12 +107,7 @@ class WelcomePage extends StatelessWidget {
                     SizedBox(width: 7),
                     Text(
                       'Get Started',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Roboto',
-                        color: Color(0xFF000000),
-                        height: 24 / 14,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
                     ),
                   ],
                 ),

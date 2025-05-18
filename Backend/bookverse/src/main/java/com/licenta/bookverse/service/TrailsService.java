@@ -121,6 +121,8 @@ public class TrailsService {
                 Book book = null;
                 if(bookCheck.isEmpty()){
                     book = bookService.getBookDetails(bookOrder.getBookKey());
+                }else{
+                    book = bookCheck.get();
                 }
                 TrailBook trailBook = TrailBook.builder()
                         .trail(trail) // Set the trail reference
@@ -150,60 +152,6 @@ public class TrailsService {
         readingTrailService.deleteTrailFromReadingList(userId, trailId, keepBooks);
         trailRepository.save(trail);
     }
-
-//    public Long updateTrailBooks(Integer trailId, List<String> bookKeys) {
-//        // Find the existing Trail
-//        Trail trail = trailRepository.findById(trailId)
-//                .orElseThrow(() -> new RuntimeException("Trail not found"));
-//
-//        // Add new TrailBooks
-//        List<TrailBook> newTrailBooks = new ArrayList<>();
-//        Set<String> genres = new HashSet<>();
-//        int nextOrderIndex = 1;
-//
-//        // Ensure that bookKeys are passed correctly
-//        for (String bookKey : bookKeys) {
-//            if (bookKey == null || bookKey.isEmpty()) {
-//                throw new RuntimeException("Book key cannot be empty");
-//            }
-//
-//            Optional<Book> bookCheck = bookRepository.findById(bookKey);
-//            Book book = null;
-//            if(bookCheck.isEmpty()){
-//                book = bookService.getBookDetails(bookKey);
-//            }
-//
-//            // Create and add new TrailBook entities
-//            TrailBook trailBook = new TrailBook();
-//            trailBook.setTrail(trail);
-//            trailBook.setBook(book);
-//            trailBook.setOrderIndex(nextOrderIndex++);
-//            newTrailBooks.add(trailBook);
-//
-//            // Add book subjects to genres set
-//            genres.addAll(book.getSubjects());
-//            trail.getTrailBooks().add(trailBook);
-//        }
-//
-//        // Set the new list of TrailBooks to the trail and update genres
-//
-//        trail.setGenres(new ArrayList<>(genres));
-//
-//        // Save the updated trail (only save once)
-//        trailRepository.save(trail);
-//
-//        List<ReadingTrailList> readingTrails = readingTrailListRepository.findByTrailAndCreatedType(trail, CreatedType.FOLLOWED);
-//        // 🔔 Notify followers
-//        for (ReadingTrailList followedTrail : readingTrails) {
-//            Person follower = followedTrail.getPerson();
-//            if(!follower.getId().equals(trail.getCreator().getId())){
-//                String msg = "Trail '" + trail.getTitle() + "' has been updated.";
-//                notificationService.sendNotification(follower, msg);
-//            }
-//        }
-//        // Return the trailId or appropriate response
-//        return trail.getId();
-//    }
 
     public Long updateTrail(Integer trailId, TrailDTO trailDTO) {
         Trail trail = trailRepository.findById(trailId)

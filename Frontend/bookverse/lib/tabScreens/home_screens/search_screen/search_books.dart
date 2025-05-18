@@ -1,5 +1,6 @@
 
 import 'package:bookverse/controller/booksController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class SearchBooks extends StatefulWidget {
@@ -107,20 +108,14 @@ class _SearchBooksState extends State<SearchBooks> {
                           subtitle: Text(book['author'] ?? 'Unknown Author'),
                           leading: book['coverImageUrl'] != null
                             ? ClipOval(
-                                child: Image.network(
-                                  book['coverImageUrl'],
+                                child: CachedNetworkImage(
+                                  imageUrl: book['coverImageUrl']!,
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0), 
-                                child: const Icon(
-                                  Icons.book,
-                                  size: 50,
-                                ),
-                              ),
+                            : const Icon(Icons.book, size: 50),
                           onTap: () {
                             widget.onBookSelected(book['key']); 
                           },

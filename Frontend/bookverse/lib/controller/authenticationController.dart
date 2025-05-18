@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bookverse/controller/imageController.dart';
+import 'package:bookverse/services/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,6 +15,13 @@ class AuthenticationController {
     required String confirmPassword,
     required String selectedAvatar
   }) async {
+
+    try {
+      await AuthService().registerWithEmailAndPassword(email, password);
+    } catch (e) {
+      return 'Firebase registration error: \$e';
+    }
+
     final url = Uri.parse('http://10.0.2.2:8080/auth/register'); // Replace with your backend URL
     String? profilePictureUrl = '';
     
@@ -50,60 +58,45 @@ static Future loginUser({
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse('http://10.0.2.2:8080/auth/login'); // Replace with your backend URL
-    
+ 
+    String idToken;
+    try {
+      final result = await AuthService().signInWithEmailAndPassword(email, password);
+      if (result is String && result.contains("Please verify your email")) {
+        return result; // Return error string
+      }
+      idToken = result;
+    } catch (e) {
+      return 'Firebase login error';
+    }
+
+    // 🔐 Store Firebase token locally
+    await secureStorage.write(key: 'jwt_token', value: idToken);
+
+    // 🔐 Send token to backend instead of email/password
+    final url = Uri.parse('http://10.0.2.2:8080/auth/login');
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $idToken'
+        },
       );
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        final token = responseData['token'];
-        final personId = responseData['personId']; // Get the user ID from the response
+        final personId = responseData['personId'];
 
-        // Store the token and user ID securely
-        await secureStorage.write(key: 'jwt_token', value: token);
-        await secureStorage.write(key: 'person_id', value: personId.toString()); // Store user ID as a string
-
-        return null; // Success, no error message
+        await secureStorage.write(key: 'person_id', value: personId.toString());
+        return null;
       } else {
         final responseData = json.decode(response.body);
-        return responseData['description'] ?? "Login failed"; // Return error message
+        return responseData['description'] ?? "Login failed";
       }
     } catch (e) {
-      return "An error occurred. Please try again."; // Handle unexpected errors
-    }
-  }
-
-  static Future forgot_password({required String email}) async {
-    final url = Uri.parse('http://10.0.2.2:8080/auth/forgot-password'); // Replace with your backend URL
-    
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        
-        return null; // Success, no error message
-      } else {
-        final responseData = json.decode(response.body);
-        return responseData['description'] ?? "Email sending failed"; // Return error message
-      }
-    } catch (e) {
-      return "An error occurred. Please try again."; // Handle unexpected errors
-    }
-
+      return "An error occurred. Please try again.";
+    } 
   }
 
   static Future<String?> getToken() async {
@@ -115,6 +108,12 @@ static Future loginUser({
   }
 
   static Future<void> logout() async {
+    await AuthService().signOut();
     await secureStorage.delete(key: 'jwt_token');
   }
+
+  static Future<String?> forgot_password({required String email}) async {
+    return await AuthService().sendPasswordResetEmail(email);
+  }
+
 }

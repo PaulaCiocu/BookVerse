@@ -18,9 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Person implements UserDetails {
-
-
+public class Person{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -39,7 +37,7 @@ public class Person implements UserDetails {
     private String fullName;
 
     @Column(nullable = false)
-    private boolean confirmed = false;
+    private boolean confirmed = true;
 
 
     // Profile fields
@@ -50,38 +48,72 @@ public class Person implements UserDetails {
     @ElementCollection
     private List<UUID> connectedUserIds; // List of connected user IDs
     // Getters, Setters, Constructors
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
-    }
-
-
-
-
 }
+
+//public class Person implements UserDetails {
+//
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+//    private UUID id;
+//
+//    @NotBlank
+//    @Column(nullable = false, unique = true)
+//    private String email;
+////
+////    @NotBlank
+////    @Size(min = 8)
+////    @Column(nullable = false)
+////    private String password;
+//
+//    @NotBlank
+//    @Column(nullable = false)
+//    private String fullName;
+//
+//    @Column(nullable = false)
+//    private boolean confirmed = true;
+//
+//
+//    // Profile fields
+//    private String bio; // User bio
+//    private String profilePictureUrl; // URL for the profile picture
+//    private Integer nrOfConnections = 0; // Number of connections
+//
+//    @ElementCollection
+//    private List<UUID> connectedUserIds; // List of connected user IDs
+//    // Getters, Setters, Constructors
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return List.of();
+//    }
+//
+//    @Override
+//    public String getUsername() {
+//        return email;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonExpired() {
+//        return UserDetails.super.isAccountNonExpired();
+//    }
+//
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return UserDetails.super.isAccountNonLocked();
+//    }
+//
+//    @Override
+//    public boolean isCredentialsNonExpired() {
+//        return UserDetails.super.isCredentialsNonExpired();
+//    }
+//
+//    @Override
+//    public boolean isEnabled() {
+//        return UserDetails.super.isEnabled();
+//    }
+//
+//
+//
+//
+//}
 

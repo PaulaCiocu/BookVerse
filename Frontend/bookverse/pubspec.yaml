@@ -37,8 +37,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   image_picker: ^1.1.2
+  cached_network_image: ^3.3.0
   firebase_core: ^3.12.1
   firebase_storage: 
+  firebase_auth: ^5.5.3
   shared_preferences:
 
 dev_dependencies:
@@ -71,6 +73,7 @@ flutter:
   - assets/book_reading_background.png
   - assets/trails_background.png
   - assets/icons/book_icon.png
+  - assets/icons/settings.png
   - assets/icons/pink_book_icon.png
   - assets/icons/multiple_books_icon.png
   - assets/icons/page_icons.png

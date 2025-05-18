@@ -22,8 +22,8 @@ class UserProfileController {
     }
   }
 
-static Future<bool> updateProfile(String selectedAvatar,String email, String fullName, String bio) async {
-  final url = Uri.parse('http://10.0.2.2:8080/person/edit/$email');
+static Future<bool> updateProfile(String selectedAvatar,String id, String fullName, String bio) async {
+  final url = Uri.parse('http://10.0.2.2:8080/person/edit/id/$id');
   final headers = {
     'Content-Type': 'application/json',
   };

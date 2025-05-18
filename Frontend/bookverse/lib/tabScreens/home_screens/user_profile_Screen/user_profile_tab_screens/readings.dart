@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:bookverse/controller/booksController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReadingScreen extends StatefulWidget {
   final String userId;
@@ -16,11 +20,30 @@ class _ReadingScreenState extends State<ReadingScreen> {
   bool isLoading = true;
 
  Future<void> _loadTrails() async {
-    final booksList = await BooksController.fetchReadingListBooks(widget.userId);
-    setState(() {
-      _books = booksList;
-      isLoading = false;
-    });
+  try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedData = prefs.getString('reading_list_${widget.userId}');
+      
+      if (cachedData != null) {
+        setState(() {
+          _books = List<dynamic>.from(jsonDecode(cachedData));
+          isLoading = false; 
+        });
+      }
+      final readingList = await BooksController.fetchReadingListBooks(widget.userId);
+      setState(() {
+        _books = readingList;
+        isLoading = false;
+      });
+      
+      await prefs.setString('reading_list_${widget.userId}', jsonEncode(readingList));
+    } catch (e) {
+      print('Error in fetchReadingList: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+    
   }
 
   @override
@@ -40,11 +63,17 @@ class _ReadingScreenState extends State<ReadingScreen> {
               SizedBox(
                 width: double.infinity,
                 child: Image.asset(
-                  'assets/trail_background.png',
+                  'assets/brown background.png',
                   height: 120,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
                 ),
+                // child: Image.asset(
+                //   'assets/trail_background.png',
+                //   height: 120,
+                //   fit: BoxFit.cover,
+                //   alignment: Alignment.topCenter,
+                // ),
               ),
               const SizedBox(height: 40),
               const Text(
@@ -78,16 +107,19 @@ class _ReadingScreenState extends State<ReadingScreen> {
                                       // Book cover image or default icon
                                       Padding(
                                         padding: const EdgeInsets.all(8.0), // Padding around the image/icon
-                                        child: book['coverImageUrl'] != null
+                                        child: ClipOval(
+                                          child: book['coverImageUrl'] != null
                                             ? ClipOval(
-                                                child: Image.network(
-                                                  book['coverImageUrl'],
+                                                child: CachedNetworkImage(
+                                                  imageUrl: book['coverImageUrl']!,
                                                   width: 50,
                                                   height: 50,
                                                   fit: BoxFit.cover,
                                                 ),
                                               )
-                                            : const Icon(Icons.book, size: 50), // Default icon if no cover image
+                                            : const Icon(Icons.book, size: 50),
+
+                                        ),
                                       ),
                                       // Book details
                                       Expanded(

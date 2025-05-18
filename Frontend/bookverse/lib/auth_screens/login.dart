@@ -1,6 +1,6 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/auth_screens/forgot_password.dart';
-import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/home.dart';
 import 'package:bookverse/auth_screens/register.dart';
 import 'package:bookverse/validation/validation.dart';
@@ -19,23 +19,11 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final String _jwtToken = '';
+  bool _obscurePassword = true;
  
-  bool isEmailValid = false;
   bool isPasswordValid = false;
 
-  void _updateEmailValidation(String value) {
-    setState(() {
-      isEmailValid = validateEmail('Email') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
 
-  void _updatePasswordValidation(String value) {
-    setState(() {
-      isPasswordValid = validateField(value, 'Password') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
 
   void showCustomSnackbar(BuildContext context, String errorMessage) {
     final overlay = Overlay.of(context);
@@ -129,189 +117,138 @@ class LoginPageState extends State<LoginPage> {
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start, 
+                      crossAxisAlignment: CrossAxisAlignment.center, 
                       children: [
-                        const Text(
-                          'Email',
-                          style: TextStyle(
-                            fontSize: 14, 
-                            fontFamily: 'Poppins',
-                            color: Color(0xFF030303), 
-                            letterSpacing: 1.2, 
+                        CustomTextField(
+                            labelText: 'Email',
+                            hintText: 'Enter your email address',
+                            keyboardType: TextInputType.emailAddress,
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            validator: validateEmail,
+                            onSaved: (val) => _emailController.text = val?.trim() ?? '',
+                          ),
+
+                        CustomTextField(
+                            labelText: 'Password',
+                            hintText: 'Enter your password',
+                            obscureText: _obscurePassword,
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword 
+                                    ? Icons.visibility_outlined 
+                                    : Icons.visibility_off_outlined,
+                                color: Colors.grey[600],
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            validator: validatePassword,
+                            onSaved: (val) => _passwordController.text = val?.trim() ?? '',
+                          ),
+                      
+                        GestureDetector(
+                          onTap: (){
+                              Navigator.push(
+                                context, 
+                                MaterialPageRoute(builder: (context) =>  const ForgotPasswordPage()));
+                          },
+                          child:  Text(
+                            'Forgot your passsword?',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              decoration: TextDecoration.underline
+                            )
                           ),
                         ),
-                        const SizedBox(height: 8,),
-                        // Email Input Field
-                        buildTextField(
-                          controller: _emailController,
-                          isObscure: false,
-                          hintText: 'Enter your email',
-                          validator: (value) => value!.isEmpty ? 'Email is required' : null,
-                          isValid: isEmailValid,
-                          onChanged: _updateEmailValidation,
-                        ),
-                        const SizedBox(height: 20,),
-                              
-                        Row(
-                          children: [
-                            const Text(
-                              'Password',
-                              style: TextStyle(
-                                fontSize: 14, 
-                                fontFamily: 'Poppins',
-                                color: Color(0xFF000000), 
-                                letterSpacing: 1.2, 
-                              ),
-                            ),
-                    
-                            const SizedBox(width: 80,),
                             
-                            GestureDetector(
-                              onTap: (){
-                                  Navigator.push(
-                                    context, 
-                                    MaterialPageRoute(builder: (context) =>  ForgotPasswordPage()));
-                              },
-                              child: const Text(
-                                'Forgot your passsword?',
-                                style: TextStyle(
-                                  fontSize: 14, 
-                                  fontFamily: 'Poppins',
-                                  color: Color(0xFF000000), 
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 1.2, 
-                                  decoration: TextDecoration.underline
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                              
-                        const SizedBox(height: 8,),
-                        // Password Input Field
-                        buildTextField(
-                          controller: _passwordController,
-                          isObscure: true,
-                          hintText: 'Enter your password',
-                          validator: (value) => value!.isEmpty ? 'Password is required' : null,
-                          isValid: isPasswordValid,
-                          onChanged: _updatePasswordValidation,
-                        ),
                         
-                        const SizedBox(height: 30,),
-                        Row(
-                          children: [
-                            const Text(
-                              "Don't have an account ?",
-                              style: TextStyle(
-                                fontSize: 14, 
-                                fontFamily: 'Poppins',
-                                color: Color(0xFF000000), 
-                                letterSpacing: 1.2, 
-                              ),
-                            ),
-                              
-                            const SizedBox(width: 10,),
-                            GestureDetector(
-                              onTap: (){
-                                  Navigator.push(
-                                    context, 
-                                    MaterialPageRoute(builder: (context) =>  const RegisterPage()));
-                              },
-                              child: const Text(
-                                "Register",
-                                style: TextStyle(
-                                  fontSize: 14, 
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF000000), 
-                                  letterSpacing: 1.2, 
-                                  decoration: TextDecoration.underline
-                                ),
-                              ),
-                            )
-                              
-                            
-                          ],
-                        ),
-                              
-                       
                       ]
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 160.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Explore reading paths",
-                            style: TextStyle(
-                              fontSize: 12, 
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400, 
-                              color: Color(0xFF000000), 
-                              letterSpacing: 1.2, 
-                            ),
-                          ),
-                          const SizedBox(width: 10,),
-                          GestureDetector(
-                            onTap: () async {
-                              if (_formKey.currentState?.validate() ?? false) {
-
-                                String? errorMessage = await AuthenticationController.loginUser(
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                );
-                  
-                                if (errorMessage == null) {
-                                  // Success: Retrieve the JWT token and navigate to HomePage
-                                  final token = await AuthenticationController.getToken();
-                                  final userId = await AuthenticationController.getUserId();
-                                  
-                                  if (token != null && userId!= null) {
-                                    await storeJwtToken(token, userId, _emailController.text);
-                                    // Token successfully retrieved, navigate to the HomePage
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text, userId: userId)), // Passing token to HomePage
-                                    );
-                                  } else {
-                                    showCustomSnackbar(context, "Failed to retrieve token");
-                                  }
-                                } else {
-                                  // Show error message in a SnackBar
-                                  showCustomSnackbar(context, errorMessage);
-                                }
-
-                              }
-                                 
-                            },
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFDCAA), // #ffdcaa
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.arrow_forward, // Choose your desired icon here
-                                  color: Colors.black, // #000000
-                                  size: 18, // 18px width and height
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                  
-                   
-                    ],
+                const SizedBox(width: 10,),
+               
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:  const Color(0xFFFFDCAA),  
+                    foregroundColor: Colors.black87, 
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  onPressed: () async {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      _formKey.currentState?.save();
+                      
+                      String? errorMessage = await AuthenticationController.loginUser(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      );
+                            
+                      if (errorMessage == null) {
+                        // Success: Retrieve the JWT token and navigate to HomePage
+                        final token = await AuthenticationController.getToken();
+                        final userId = await AuthenticationController.getUserId();
+                        
+                        if (token != null && userId!= null) {
+                          await storeJwtToken(token, userId, _emailController.text);
+                          // Token successfully retrieved, navigate to the HomePage
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text, userId: userId)), // Passing token to HomePage
+                          );
+                        } else {
+                          showCustomSnackbar(context, "Failed to retrieve token");
+                        }
+                      } else {
+                        // Show error message in a SnackBar
+                        showCustomSnackbar(context, errorMessage);
+                      }
+                            
+                    }
+                       
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                
+                const SizedBox(height: 30,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                        "Don't have an account?",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+
+                    const SizedBox(width: 10,),
+                    GestureDetector(
+                      onTap: (){
+                          Navigator.push(
+                            context, 
+                            MaterialPageRoute(builder: (context) =>  const RegisterPage()));
+                      },
+                      child: Text(
+                        "Sign up",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )            
+                    
+                  ],
                 ),
           
               ],    

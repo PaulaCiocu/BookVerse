@@ -1,10 +1,13 @@
 import 'dart:async';
 
 class AppEvents {
-  // Create a static stream controller for profile updates
   static final StreamController<void> profileUpdated = StreamController<void>.broadcast();
-  
-  // Method to notify listeners that the profile was updated
+
+  static final StreamController<void> achievementsUpdated = StreamController<void>.broadcast();
+  static void notifyAchievementsUpdated() {
+    achievementsUpdated.add(null);
+  }
+
   static void notifyProfileUpdated() {
     profileUpdated.add(null);
   }

@@ -1,39 +1,57 @@
 import 'dart:io';
 import 'package:bookverse/controller/booksController.dart';
+import 'package:bookverse/controller/imageController.dart';
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/success_page.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/update_success.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:bookverse/widgets/book_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CreateTrailStepOne extends StatefulWidget {
+class UpdatetrailScreen extends StatefulWidget {
+  final Map<String, dynamic> trail;
   final String userId;
-  const CreateTrailStepOne({super.key, required this.userId});
+  const UpdatetrailScreen({super.key, required this.trail, required this.userId});
 
   @override
-  State<CreateTrailStepOne> createState() => _CreateTrailStepOneState();
+  State<UpdatetrailScreen> createState() => _UpdatetrailScreenState();
 }
 
-class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
+class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  List<dynamic> _books = [];
-  final List<dynamic> _addedBooks = [];
   final String _selectedFilter = 'Title';
+
   bool isTitleValid = false;
   bool isDescriptionValid = false;
-  File? _selectedImage; 
+  List<dynamic> _addedBooks = [];
+  List<dynamic> _books = [];
+  File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  String _defaultImage= '';
+
+  void _updateNameValidation(String value) {
+    setState(() {
+      isTitleValid = validateField(value, 'Title') == null;
+      _formKey.currentState!.validate(); 
+    });
+  }
+
+  void _updateBioValidation(String value) {
+    setState(() {
+      isDescriptionValid = validateField(value, 'Description') == null;
+      _formKey.currentState!.validate(); 
+    });
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -49,17 +67,26 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
     });
   }
 
-  Future<void> createReadingTrail(String title, String description, List books) async {
-    final success = await TrailController.createReadingTrail(widget.userId, _selectedImage!, title, description, books);
-    if(success){
+  Future<void> updateTrail( String title, String description, List bookIds) async {
+    String imageUrl = _selectedImage != null ? await ImageController.uploadImage(_selectedImage!) : _defaultImage;
+    final update = await TrailController.updateTrail(widget.userId, widget.trail['trail']['id'].toString(), title, description, bookIds, imageUrl);
+    if (update) {
       Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => SuccessPage()),);
-    } else{
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not create trail!')));
+        context,
+        MaterialPageRoute(builder: (context) => const UpdateSuccessScreen()),
+      );
     }
-    
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.trail['trail']['title'] ?? '';
+    _descriptionController.text =widget.trail['trail']['description'] ?? '';
+    _addedBooks = List.from(widget.trail['trail']['trailBooks'] ?? []);
+    _defaultImage = widget.trail['trail']['imageUrl'] ?? '';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,61 +110,59 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 160.0, right: 24, left: 24, bottom:16),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Create Trail", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 110,
-                          height: 110,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey),
+          padding: const EdgeInsets.only(top: 160.0, right: 24, left: 24, bottom:16),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [   
+                  Text("Update Trail", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: _selectedImage == null
+                        ? const Icon(Icons.add_a_photo, size: 40, color: Colors.grey)
+                        : ClipOval(
+                            child: Image.file(
+                              _selectedImage!,
+                              width: 110,
+                              height: 110,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          child: _selectedImage == null
-                            ? const Icon(Icons.add_a_photo, size: 40, color: Colors.grey)
-                            : ClipOval(
-                                child: Image.file(
-                                  _selectedImage!,
-                                  width: 110,
-                                  height: 110,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      CustomTextField(
-                        controller: _titleController,
-                        labelText: 'Trail Name',
-                        hintText: 'Enter trail name',
-                        keyboardType: TextInputType.name,
-                        prefixIcon: const Icon(Icons.menu_book_rounded),
-                        validator: validateFullName,
-                        onSaved: (val) => _titleController.text = val?.trim() ?? '',
-                      ),
-                      
-                      CustomTextField(
-                        controller: _descriptionController,
-                        labelText: 'Description',
-                        hintText: 'Enter a short description of the trail',
-                        keyboardType: TextInputType.name,
-                        prefixIcon: const Icon(Icons.edit),
-                        validator: validateFieldNotEmpty,
-                        onSaved: (val) => _descriptionController.text = val?.trim() ?? '',
-                        maxLines: 3,
-                      ),
-                      
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                    CustomTextField(
+                      controller: _titleController,
+                      labelText: 'Trail Name',
+                      hintText: 'Enter trail name',
+                      keyboardType: TextInputType.name,
+                      prefixIcon: const Icon(Icons.menu_book_rounded),
+                      validator: validateFullName,
+                      onSaved: (val) => _titleController.text = val?.trim() ?? '',
+                    ),
                     
-                  
+                    CustomTextField(
+                      controller: _descriptionController,
+                      labelText: 'Quote',
+                      hintText: 'Enter your favorite quote',
+                      keyboardType: TextInputType.name,
+                      prefixIcon: const Icon(Icons.edit),
+                      validator: validateFullName,
+                      onSaved: (val) => _descriptionController.text = val?.trim() ?? '',
+                      maxLines: 3,
+                    ),
+                   
                     //search
                     Container(
                       decoration: BoxDecoration(
@@ -162,26 +187,16 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                
-                    // Use SizedBox instead of Expanded
+         
                     SizedBox(
-                      height: 200, 
+                      height: 200,
                       child: Card(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: _books.isEmpty
-                          ? const Center(
-                            child: Text(
-                              'No books available',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          )
-                          : ListView.builder(
+                      
+                        child: ListView.builder(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           itemCount: _books.length,
                           itemBuilder: (context, index) {
@@ -220,8 +235,10 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-                
-                     Container(
+
+                    
+                  // Books Added Section
+                  Container(
                     width: double.infinity,
                     margin: const EdgeInsets.all(4),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -268,53 +285,48 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                   ),
               
                     const SizedBox(height: 30),
-                
-                    GestureDetector(
-                      onTap: ()  {
-                        if (_addedBooks.length >= 2 && (_formKey.currentState?.validate() ?? false ) 
-                              && _selectedImage!= null) {
-                            _formKey.currentState?.save();
-                            String title = _titleController.text;
-                            String description = _descriptionController.text;
-                            List bookIds = _addedBooks.map((entry) => entry['book']['key']).toList();
-                            print('Books ids:');
-                            print(bookIds);
-                             createReadingTrail(title, description, bookIds);
-                            
                     
-                        } else {
-                          // If any condition fails
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(_selectedImage == null 
-                                ? 'Please upload an image to create a trail.' 
-                                : 'Please fill in all fields and add at least 2 books.')),
-                            );
-                        }
-                      },
-                      child: Container(
-                        width: 110, 
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFDCAA), 
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.shade300,
-                              offset: const Offset(0, 4),
-                              blurRadius: 6,
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_addedBooks.length >= 2 && (_formKey.currentState?.validate() ?? false )) {
+                               _formKey.currentState?.save();
+                              String title = _titleController.text;
+                              String description = _descriptionController.text;
+                              List bookIds = _addedBooks.map((book) => book['book']['key']).toList();
+                              print(bookIds);
+                              updateTrail(title, description, bookIds);
+                              
+                          } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Please fill in all fields and add at least 2 books.')),
+                              );
+                          }
+                        },
+                        child: Container(
+                          width: 110, 
+                          height: 40, 
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFDCAA), // #ffdcaa
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade300,
+                                offset: const Offset(0, 4),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child:  Center(
+                            child: Text(
+                              "Update Trail",
+                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
                             ),
-                          ],
-                        ),
-                        child:  Center(
-                          child: Text(
-                            "Create Trail",
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ),
                       ),
                     ),
-                    
-                    const SizedBox(height: 30,)
+                    SizedBox(height: 50,)
                   ],
                 ),
               ),
@@ -324,5 +336,5 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
       ),
     );
   }
-
 }
+

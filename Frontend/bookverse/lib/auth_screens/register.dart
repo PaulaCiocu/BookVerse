@@ -1,7 +1,7 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/controller/registrationSuccessPage.dart';
 import 'package:bookverse/auth_screens/login.dart';
-import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
 
@@ -40,41 +40,18 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isUsernameValid = false;
   bool isPasswordValid = false;
   bool isConfirmPasswordValid = false;
-
+  bool _obscurePassword = true;
   void _selectAvatar(String avatarPath) async {
     setState(() {
       _selectedAvatar = avatarPath;
     });
   }
-
-  void _updateFullNameValidation(String value) {
-    setState(() {
-      isFullNameValid = validateFullName(value) == null;
-    });
-  }
-  void _updateEmailValidation(String value) {
-    setState(() {
-      isEmailValid = validateEmail(value) == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
-  void _updatePasswordValidation(String value) {
-    setState(() {
-      isPasswordValid = validatePassword(value) == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
-
-  void _updateConfirmPasswordValidation(String value) {
-    setState(() {
-      isConfirmPasswordValid = validateConfirmPassword(value) == null;
-    });
-  }
-
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please confirm your password';
     }
+    print('password');
+    print(_passwordController.text);
     if (value != _passwordController.text) {
       return 'Passwords do not match';
     }
@@ -141,22 +118,15 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-                const Text(
+                Text(
                   'Sign up',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF030303),
-                    letterSpacing: 1.2,
-                  ),
+                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                const Text(
-                  'Join the Bookeverse community',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF5d5d5b),
-                    letterSpacing: 1.2,
+                const SizedBox(height: 8),
+                Text(
+                  'Create your BookVerse account',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[700],
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -167,143 +137,147 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Choose your avatar:',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
-                          ),
+                  
+                        CustomTextField(
+                          controller: _fullNameController,
+                          labelText: 'Full Name',
+                          hintText: 'Enter your name',
+                          keyboardType: TextInputType.name,
+                          prefixIcon: const Icon(Icons.person_outline),
+                          validator: validateFullName,
+                          onSaved: (val) => _fullNameController.text = val?.trim() ?? '',
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          height: 200,
-                          child: GridView.builder(
-                            padding: const EdgeInsets.all(12),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4, 
-                              crossAxisSpacing: 10, 
-                              mainAxisSpacing: 10, 
+
+                        CustomTextField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Enter your email address',
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          validator: validateEmail,
+                          onSaved: (val) => _emailController.text = val?.trim() ?? '',
+                        ),
+
+                        CustomTextField(
+                          controller: _passwordController,
+                          labelText: 'Password',
+                          hintText: 'Choose a strong password',
+                          obscureText: _obscurePassword,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword 
+                                  ? Icons.visibility_outlined 
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.grey[600],
                             ),
-                            itemCount: avatars.length,  
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () => _selectAvatar(avatars[index]),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: _selectedAvatar == avatars[index] 
-                                        ? const Color(0xFFFFDCAA) : Colors.transparent,
-                                      width: 3,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.shade100,
-                                        blurRadius: 3,
-                                      ),
-                                    ],
-                                    color: _selectedAvatar == avatars[index] 
-                                        ? const Color(0xFFFFDCAA)
-                                        : Colors.transparent,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      avatars[index],
-                                      fit: BoxFit.cover,  
-                                    ),
-                                  ),
-                                ),
-                              );
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
                             },
                           ),
-                        ),
-                        SizedBox(height: 20,),      
-                        const Text(
-                          'Enter your full name',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        buildTextField(
-                          controller: _fullNameController,
-                          isObscure: false,
-                          hintText: 'Full Name',
-                          validator: validateFullName,
-                          isValid: isFullNameValid,
-                          onChanged: _updateFullNameValidation,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Enter your e-mail address',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        buildTextField(
-                          controller: _emailController,
-                          isObscure: false,
-                          hintText: 'email@email.com',
-                          validator: (value) => value!.isEmpty ? 'Email is required' : null,
-                          isValid: isEmailValid,
-                          onChanged: _updateEmailValidation,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Set up your password',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        buildTextField(
-                          controller: _passwordController,
-                          isObscure: true,
-                          hintText: '**********',
                           validator: validatePassword,
-                          isValid: isPasswordValid,
-                          onChanged: _updatePasswordValidation,
+                          onSaved: (val) => _passwordController.text = val?.trim() ?? '',
                         ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Repeat password',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF080a0b),
-                            letterSpacing: 1.2,
+                    
+                        CustomTextField(
+                          controller: _confirmPasswordController,
+                          labelText: 'Repeat Password',
+                          hintText: 'Passwords must match',
+                          obscureText: _obscurePassword,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword 
+                                  ? Icons.visibility_outlined 
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.grey[600],
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          validator: validateConfirmPassword,
+                          onSaved: (val) => _confirmPasswordController.text = val?.trim() ?? '',
+                        ),
+
+                        
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                            color: Colors.white,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Choose avatar',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 200,
+                                child: GridView.builder(
+                                  padding: const EdgeInsets.all(12),
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4, 
+                                    crossAxisSpacing: 10, 
+                                    mainAxisSpacing: 10, 
+                                  ),
+                                  itemCount: avatars.length,  
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () => _selectAvatar(avatars[index]),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: _selectedAvatar == avatars[index] 
+                                              ? const Color(0xFFFFDCAA) : Colors.transparent,
+                                            width: 3,
+                                          ),
+                                          borderRadius: BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.shade100,
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                          color: _selectedAvatar == avatars[index] 
+                                              ? const Color(0xFFFFDCAA)
+                                              : Colors.transparent,
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: Image.asset(
+                                            avatars[index],
+                                            fit: BoxFit.cover,  
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        buildTextField(
-                          controller: _confirmPasswordController,
-                          isObscure: true,
-                          hintText: '**********',
-                          validator: validateConfirmPassword,
-                          isValid: isConfirmPasswordValid,
-                          onChanged: _updateConfirmPasswordValidation,
-                        ),
-                        const SizedBox(height: 10),
+                    
                       ],
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () async {
-                    if ( _selectedAvatar.isNotEmpty && (_formKey.currentState?.validate() ?? false)) {
+                    if ( (_formKey.currentState?.validate() ?? false) && _selectedAvatar.isNotEmpty) {
+                      _formKey.currentState?.save();
                        String? errorMessage = await AuthenticationController.registerUser(
                         fullName: _fullNameController.text,
                         email: _emailController.text,
@@ -348,15 +322,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Already have an account ?",
-                      style: TextStyle(
-                        fontSize: 14, 
-                        color: Color(0xFF000000), 
-                        letterSpacing: 1.2, 
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-            
                     const SizedBox(width: 10,),
                     GestureDetector(
                       onTap: (){
@@ -364,14 +333,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             context, 
                             MaterialPageRoute(builder: (context) => const LoginPage()));
                       },
-                      child: const Text(
+                      child:  Text(
                         "Login",
-                        style: TextStyle(
-                          fontSize: 14, 
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF000000), 
-                          letterSpacing: 1.2, 
-                          decoration: TextDecoration.underline
                         ),
                       ),
                     )

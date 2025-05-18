@@ -1,6 +1,7 @@
 package com.licenta.bookverse.service;
 
 
+import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
 import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
@@ -8,12 +9,10 @@ import com.licenta.bookverse.repository.PersonRepository;
 import com.licenta.bookverse.repository.ReadingListRepository;
 import com.licenta.bookverse.repository.ReadingTrailListRepository;
 import com.licenta.bookverse.repository.TrailRepository;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ReadingTrailService {
@@ -90,13 +89,20 @@ public class ReadingTrailService {
         return readingTrails;
     }
 
-    public List<ReadingTrailList> getReadingTrailsFollowedForPersonId(UUID personId) {
+    public List<ReadingListFollowedDTO> getReadingTrailsFollowedForPersonId(UUID personId) {
         Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new RuntimeException("Person not found"));
 
         List<ReadingTrailList> readingTrails = readingTrailListRepository.findByPersonAndCreatedType(person, CreatedType.FOLLOWED);
 
-        return readingTrails;
+        return readingTrails.stream()
+                .map(trail -> ReadingListFollowedDTO.builder()
+                        .title(trail.getTrail().getTitle())
+                        .description(trail.getTrail().getDescription())
+                        .imageUrl(trail.getTrail().getImageUrl())
+                        .deleted(trail.getTrail().isDeleted())
+                        .build())
+                .toList();
     }
 
     public List<ReadingTrailList> getReadingTrailsCreatedForPersonId(UUID personId) {
@@ -136,28 +142,34 @@ public class ReadingTrailService {
             if (deleteBooks) {
                 // Deleting books from the reading list
                 List<TrailBook> booksInTrail = readingTrail.getTrail().getTrailBooks();
+                List<ReadingTrailList> otherUserTrails = readingTrailListRepository.findByPerson(person)
+                        .stream()
+                        .filter(otherTrail -> !otherTrail.getTrail().getId().equals(trailId))
+                        .toList();
 
                 for (TrailBook trailBook : booksInTrail) {
                     String bookKey = trailBook.getBook().getKey();
+                    boolean isBookInOtherUserTrails = otherUserTrails.stream()
+                            .flatMap(otherTrail -> otherTrail.getTrail().getTrailBooks().stream())
+                            .anyMatch(tb -> tb.getBook().getKey().equals(bookKey));
 
-                    // Find the reading list entry for the person and the book
-                    Optional<Object> readingListOptional = readingListRepository.findByPerson_IdAndBook_Key(personId, bookKey);
+                    if (!isBookInOtherUserTrails){
+                        Optional<Object> readingListOptional = readingListRepository.findByPerson_IdAndBook_Key(personId, bookKey);
 
-                    if (readingListOptional.isPresent()) {
-                        ReadingList readingList = (ReadingList) readingListOptional.get();
+                        if (readingListOptional.isPresent()) {
+                            ReadingList readingList = (ReadingList) readingListOptional.get();
 
-                        // Delete the book from the reading list
-                        readingListRepository.delete(readingList);
-                        System.out.println("Deleted book from reading list: " + trailBook.getBook().getTitle());
+                            // Delete the book from the reading list
+                            readingListRepository.delete(readingList);
+                            System.out.println("Deleted book from reading list: " + trailBook.getBook().getTitle());
+                        }
                     }
                 }
             }
-
             readingTrailListRepository.delete(readingTrail);
             return true;
         } else {
             return false;  // Trail not found
         }
-
     }
 }

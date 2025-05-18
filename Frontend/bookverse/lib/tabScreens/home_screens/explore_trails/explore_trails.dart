@@ -1,4 +1,5 @@
 import 'package:bookverse/controller/trailController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 
@@ -61,7 +62,7 @@ class _ExploreTrailsState extends State<ExploreTrails> {
     return Scaffold(
       body: Column(
         children: [
-          const SizedBox(height: 100),
+          const SizedBox(height: 60),
           const Text(
             "Explore Trails",
             style: TextStyle(
@@ -69,7 +70,7 @@ class _ExploreTrailsState extends State<ExploreTrails> {
               fontWeight: FontWeight.w700
             ),
           ),
-          const SizedBox(height: 100),
+          const SizedBox(height: 40),
           // Search bar at the top of the body
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
@@ -122,117 +123,97 @@ class _ExploreTrailsState extends State<ExploreTrails> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          //const SizedBox(height: 10),
           Expanded(
             child: RefreshIndicator(
               onRefresh: fetchTrails,
               child: isLoading
-                ? const Center(child: CircularProgressIndicator())        
-                : trails.isEmpty
-                ? const Center(child: Text('No trails available', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)))
-                  : ListView.builder(
-                      itemCount: trails.length,
-                      itemBuilder: (context, index) {
-                        final trail = trails[index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade200,
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                              ),
-                            ],
+                  ? const Center(child: CircularProgressIndicator())
+                  : trails.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No trails available',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                           ),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      trail['personName'] ?? 'Unknown',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        fontStyle: FontStyle.italic
-                                      ),
+                        )
+                      : ListView.builder(
+                          itemCount: trails.length,
+                          itemBuilder: (context, index) {
+                            final trail = trails[index];
+                            return GestureDetector(
+                              onTap: () {
+                                widget.onTrailsSelected(trail['trailId'].toString());
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.shade200,
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
                                     ),
-                                    Text(
-                                      trail['title'] ?? 'No Title',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      title: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            trail['personName'] ?? 'Unknown',
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          Text(
+                                            trail['title'] ?? 'No Title',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      subtitle: Text(
+                                        trail['description'] ?? 'No Description',
+                                        maxLines: 4,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      leading: ClipOval(
+                                        child: trail['imageUrl'] != null
+                                            ? CachedNetworkImage(
+                                                imageUrl: trail['imageUrl']!,
+                                                width: 50,
+                                                height: 50,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.asset(
+                                                'assets/user_profile_backgrounds_screen.png',
+                                                width: 50,
+                                                height: 50,
+                                                fit: BoxFit.cover,
+                                              ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                subtitle: Text(
-                                  trail['description'] ?? 'No Description',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                leading: ClipOval(
-                                  child: trail['imageUrl'] != null
-                                      ? Image.network(
-                                          trail['imageUrl']!,
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Image.asset(
-                                          'assets/user_profile_backgrounds_screen.png',
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        ),
-                                ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  widget.onTrailsSelected(trail['trailId'].toString());
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0, top: 6),
-                                  child: Container(
-                                    width: 100,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFDCAA),
-                                      borderRadius: BorderRadius.circular(6),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.shade300,
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Explore',
-                                          style: TextStyle(fontSize: 14, color: Colors.black87),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                            );
+                          },
+                        ),
             ),
           ),
+
         ],
       ),
     );

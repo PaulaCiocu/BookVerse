@@ -1,13 +1,17 @@
-import 'package:bookverse/controller/AppEvents.dart';
+import 'package:bookverse/auth_screens/login.dart';
+import 'package:bookverse/custom_ui/custom_text_field.dart';
+import 'package:bookverse/events/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
 import 'package:bookverse/validation/validation.dart';
+import 'package:bookverse/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String userId;
   final String email;
-  const EditProfileScreen({super.key, required this.userId, re, required this.email});
+  const EditProfileScreen({super.key, required this.userId,  required this.email});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -35,6 +39,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool isNameValid = false;
   bool isBioValid = false;
   String? selectedAvatar;
+
+    Future<String?> getStoredJwtToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('jwt_token');
+}
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');  
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+  
 
   void _updateNameValidation(String value) {
     setState(() {
@@ -75,160 +95,205 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar:true,
+     
       appBar: AppBar(
-      title: const Text(
-        "Edit profile",
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 20, 
-          color: Colors.black87, 
-        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+       
+        actions: [
+          TextButton.icon(
+            onPressed: () async {
+              bool? logoutConfirmed = await showLogoutConfirmationDialog(context);
+              if (logoutConfirmed == true) {
+                await logout();
+              }
+            },
+            icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+            label: const Text(
+              'Log Out',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+        ],
       ),
-      backgroundColor: const Color(0xFFFFDCAA), 
-      elevation: 0, 
-    ),
-      body: Padding(
-        padding: const EdgeInsets.all(36.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Name",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-               buildTextField(
-                controller: _nameController,
-                isObscure: false,
-                hintText: 'Name',
-                validator: (value) => value!.isEmpty ? 'Name is required' : null,
-                isValid: isNameValid,
-                onChanged: _updateNameValidation
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Bio",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-               buildTextField(
-                controller: _bioController,
-                isObscure: false,
-                hintText: 'Quote',
-                validator: (value) => value!.isEmpty ? 'Quote is required' : null,
-                isValid: isBioValid,
-                onChanged: _updateBioValidation
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Choose avatar",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-             const SizedBox(height: 20),
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,  // Number of columns
-                    crossAxisSpacing: 10,  // Horizontal space between items
-                    mainAxisSpacing: 10,  // Vertical space between items
+      body: Stack(
+        children: 
+        [
+          SizedBox(
+            width: double.infinity,
+            child: Image.asset(
+              'assets/achievements.png',
+              height: 140,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+          
+          Padding(
+          padding: const EdgeInsets.only(left: 36.0, right: 36.0, bottom: 36.0, top: 180),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Profile settings",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)
+                ),
+                const SizedBox(height: 30),
+                 CustomTextField(
+                    controller: _nameController,
+                    labelText: 'Full Name',
+                    hintText: 'Enter your name',
+                    prefixIcon: const Icon(Icons.person_outline),
+                    validator: validateFullName,
+                    onSaved: (val) => _nameController.text = val?.trim() ?? '',
                   ),
-                  itemCount: avatars.length,  // Number of items in the grid
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _selectAvatar(avatars[index]),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selectedAvatar == avatars[index] 
-                              ? const Color(0xFFFFDCAA) : Colors.transparent,
-                            width: 3,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.shade200,
-                              blurRadius: 3,
-                              //offset: Offset(0, 4),
+               
+                CustomTextField(
+                    controller: _bioController,
+                    labelText: 'Description',
+                    hintText: 'Favourite quote',
+                    prefixIcon:  Icon(Icons.edit),
+                    validator: validateFullName,
+                    onSaved: (val) => _bioController.text = val?.trim() ?? '',
+                  ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Choose avatar",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 20),
+                   
+                      SizedBox(
+                        height: 200,
+                        child: GridView.builder(
+                        padding: const EdgeInsets.all(12),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, 
+                          crossAxisSpacing: 10, 
+                          mainAxisSpacing: 10, 
+                        ),
+                        itemCount: avatars.length, 
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () => _selectAvatar(avatars[index]),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: selectedAvatar == avatars[index] 
+                                    ? const Color(0xFFFFDCAA) : Colors.transparent,
+                                  width: 3,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.shade200,
+                                    blurRadius: 3,
+                                    //offset: Offset(0, 4),
+                                  ),
+                                ],
+                                color: selectedAvatar == avatars[index] 
+                                    ? const Color(0xFFFFDCAA)
+                                    : Colors.transparent,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  avatars[index],
+                                  fit: BoxFit.cover,  
+                                ),
+                              ),
                             ),
-                          ],
-                          color: selectedAvatar == avatars[index] 
-                              ? const Color(0xFFFFDCAA)
-                              : Colors.transparent,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            avatars[index],
-                            fit: BoxFit.cover,  
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-
-    
-              Center(
-                child: GestureDetector(
-                  onTap: () async {
-                     if ((_formKey.currentState?.validate() ?? false )) {
-                        String name = _nameController.text;
-                        String bio = _bioController.text;
-
-                        bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.email, name, bio);
-                        if (success) {
-                          AppEvents.notifyProfileUpdated();
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
-                         
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile.')));
-                        }
-
-                    } else {
-                      //If any condition fails
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill in all fields.')),
-                      );
-                
-                    }
-                  },
-
-                  child: Container(
-                    width: 120, 
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFDCAA),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade300,
-                          offset: const Offset(0, 4),
-                          blurRadius: 6,
-                        ),
-                      ],
                     ),
-                    child: const Center(
-                      child: Text(
-                        "Save",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16, 
-                          color: Colors.black87, 
+                    ],
+                  ),
+                ),
+                SizedBox(height: 40,),
+                Center(
+                  child: GestureDetector(
+                    onTap: () async {
+                       if ((_formKey.currentState?.validate() ?? false )) {
+                         _formKey.currentState?.save();
+                          String name = _nameController.text;
+                          String bio = _bioController.text;
+        
+                          bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.userId, name, bio);
+                          if (success) {
+                            AppEvents.notifyProfileUpdated();
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
+                           
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile.')));
+                          }
+        
+                      } else {
+                        //If any condition fails
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please fill in all fields.')),
+                        );
+                  
+                      }
+                    },
+        
+                    child: Container(
+                      width: 120, 
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFDCAA),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.shade300,
+                            offset: const Offset(0, 4),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Save",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16, 
+                            color: Colors.black87, 
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              
-
-              const SizedBox(height: 30),
-            ],
+                
+        
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
+        ]
       ),
     );
   }

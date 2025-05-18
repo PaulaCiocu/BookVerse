@@ -1,8 +1,11 @@
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/reviewController.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/add_review_dialog.dart';
 import 'package:bookverse/validation/validation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 
 class BookDetailScreen extends StatefulWidget {
   final String bookKey;
@@ -69,363 +72,434 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: _bookDetailsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                final book = snapshot.data!;
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: book['coverImageUrl'] != null
-                            ? Image.network(
-                                book['coverImageUrl'],
-                                height: 180,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
-                              )
-                            : const Icon(Icons.book, size: 100),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                        child: Text(book['title'] ?? 'Unknown Title', 
-                          style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.w700,
-                          ),
-                          textAlign: TextAlign.center,
-                        )  
-                      ),
-                      const SizedBox(height: 10),
-                      Text('${book['author'] ?? 'Unknown'}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Description', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                              Text(
-                                _isExpanded
-                                    ? book['description'] ?? 'No description available'
-                                    : (book['description'] ?? 'No description available').split('\n').take(5).join('\n'),
-                                maxLines: _isExpanded ? null : 5,
-                                overflow: _isExpanded ? null : TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 5),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isExpanded = !_isExpanded;
-                                  });
-                                },
-                                child: Text(
-                                  _isExpanded ? 'See less...' : 'See more...',
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Genre:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                  const SizedBox(width: 5),
-                                  Expanded(
-                                    child: Text(
-                                      book['subjects'] != null
-                                          ? book['subjects'].join(", ")
-                                          : 'No genre info available',
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  const Text('Pages:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                  const SizedBox(width: 5),
-                                  Text(book['pages']?.toString() ?? 'No page info available'),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  const Text('Language:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                  const SizedBox(width: 5),
-                                  Text(book['language'] ?? 'No language info available'),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  const Text('Published date:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                  const SizedBox(width: 5),
-                                  Text(book['publish_date'] ?? 'No publish date available'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: _isAddedToList ? null : _addToReadingList,
-                        icon: const Icon(Icons.menu_book_rounded, color: Colors.black87),
-                        label: Text(_isAddedToList ? "Added to Reading List" : "Add to Reading"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
-                          foregroundColor: Colors.black87,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            const Text("Reviews", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),),
-                            SizedBox(height: 20,),
-                            reviews.isEmpty
-                                ? const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text(
-                                        'No reviews yet',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : SizedBox(
-                              height: 200, 
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(12.0), 
-                                itemCount: reviews.length,
-                                itemBuilder: (context, index) {
-                                  final review = reviews[index];
-                                  return Card(
-                                    color: Colors.white,
-                                    elevation: 3, 
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.0), 
-                                    ),
-                                    child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-                                      title: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            review['person']['fullName'] ?? 'Anonymous', 
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4.0), // Spacing between name and review content
-                                          Text(
-                                            review['content'] ?? 'No content',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      subtitle: Row(
-                                        children: [
-                                          Text(
-                                            'Rating: ${review['rating']}/5',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const Icon(Icons.star, size: 20, color: Colors.amber,)
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 20), 
-                            ElevatedButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        backgroundColor: Colors.white,
-                                        content: Form(
-                                          key: _formKey,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Text('Add Review', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
-                                                const SizedBox(height: 10),
-                                                buildTextField(
-                                                  controller: _contentController,
-                                                  isObscure: false,
-                                                  hintText: '',
-                                                  validator: (value) => value!.isEmpty ? 'Email is required' : null,
-                                                  isValid: isContentValid,
-                                                  onChanged: _updateContentValidation,
-                                                ),
-                                                const SizedBox(height: 20),
-                                                Row(
-                                                  children: [
-                                                    Text('Rating $rating', style: TextStyle(fontSize: 16)),
-                                                    SizedBox(width: 10),
-                                                    PopupMenuButton<String>(
-                                                      onSelected: (value) {
-                                                        setState(() {
-                                                          rating = int.parse(value); 
-                                                        });
-                                                      },
-                                                      color: Colors.white,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(12),
-                                                      ),
-                                                      itemBuilder: (context) => [
-                                                        const PopupMenuItem(value: "1", child: Text("1")),
-                                                        const PopupMenuItem(value: "2", child: Text("2")),
-                                                        const PopupMenuItem(value: "3", child: Text("3")),
-                                                        const PopupMenuItem(value: "4", child: Text("4")),
-                                                        const PopupMenuItem(value: "5", child: Text("5")),
-                                                      ],
-                                                      icon: const Icon(Icons.star),
-                                                      
-                                                    ),
-                                                 
-                                                    // Container(
-                                                    //   width: 60,
-                                                    //   height: 40,
-                                                    //   child: DropdownButtonFormField<int>(
-                                                    //     value: rating,
-                                                    //     onChanged: (value) {
-                                                    //       setState(() {
-                                                    //         rating = value!;
-                                                    //       });
-                                                    //     },
-                                                    //     items: List.generate(5, (index) {
-                                                    //       return DropdownMenuItem<int>(
-                                                    //         value: index + 1,
-                                                    //         child: Text('${index + 1}'),
-                                                    //       );
-                                                    //     }),
-                                                      
-                                                    //   ),
-                                                    // ),
-                                                  ],
-                                                ),
-                                              
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontSize: 14),),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              if (_formKey.currentState?.validate() ?? false) {
-                                                bool success = await ReviewController.createReview(
-                                                  userId: widget.userId,
-                                                  bookKey: widget.bookKey,
-                                                  rating: rating,
-                                                  content: _contentController.text,
-                                                );
-
-                                                if (success) {
-                                                  _fetchReviews(); 
-                                                  Navigator.pop(context);
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text("Review submitted successfully!"),
-                                                      backgroundColor: Colors.green,
-                                                      duration: Duration(seconds: 3),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text("Failed to submit the review. Please try again."),
-                                                      backgroundColor: Colors.red,
-                                                      duration: Duration(seconds: 3),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            },
-                                            child: const Text('Submit', style: TextStyle(fontSize: 16, color: Colors.black87)),
-                                          ),
-
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                  
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 4.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0), // Rounded corners for button
-                                ),
-                               backgroundColor: const Color(0xFFFFDCAA), 
-                              ),
-                              child: const Text(
-                                'Add Review',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                  
-                    ],
-                  ),
-                );
-              }
-            },
+      extendBodyBehindAppBar:true,
+       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        // This paints a fading black overlay behind the toolbar area
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.black87,  // very dark at the top
+                Colors.transparent // fade to fully clear
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
         ),
+      ),
+      body: Stack(
+        children:[
+          SizedBox(
+            width: double.infinity,
+            height: 160, // choose your image height
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: _bookDetailsFuture,
+              builder: (context, snapshot) {
+                // you can inline your loading / error logic here
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final book = snapshot.data!;
+                return CachedNetworkImage(
+                  imageUrl: book['coverImageUrl'] ?? '',
+                  fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) => Image.asset(
+                    'assets/user_profile_backgrounds_screen.png',
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            ),
+          ),
+    
+          Padding(
+            padding: const EdgeInsets.only(top: 160.0),
+            child: SafeArea(
+              top: false, 
+              child: SingleChildScrollView(
+               child: FutureBuilder<Map<String, dynamic>>(
+                 future: _bookDetailsFuture,
+                 builder: (context, snapshot) {
+                   if (snapshot.connectionState == ConnectionState.waiting) {
+                     return const Center(child: CircularProgressIndicator());
+                   } else if (snapshot.hasError) {
+                     return Center(child: Text('Error: ${snapshot.error}'));
+                   } else {
+                     final book = snapshot.data!;
+                     return Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                       child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                          //  SizedBox(
+                          //    width: double.infinity,
+                          //    height: 120,
+                          //    child: book['coverImageUrl'] != null
+                          //      ? CachedNetworkImage(
+                          //        imageUrl: book['coverImageUrl']!,
+                          //        fit: BoxFit.cover,
+                          //      )
+                          //      : const Icon(Icons.book, size: 50),
+                          //  ),
+                          const SizedBox(height: 20),
+                          Text(book['title'] ?? 'Unknown Title', 
+                             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 26),
+                             textAlign: TextAlign.center,
+                           ),
+                          const SizedBox(height: 10),
+                          Text('${book['author'] ?? 'Unknown'}', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontStyle: FontStyle.italic)),
+                          const SizedBox(height: 30),
+    
+                          DefaultTabController(
+                            length: 2,
+                            child: Column(
+                              children: [
+                                const TabBar(
+                                  indicatorColor: Colors.black87,
+                                  labelColor: Colors.black87,
+                                  unselectedLabelColor: Colors.grey,
+                                  tabs: [
+                                    Tab(text: 'Details'),
+                                    Tab(text: 'Reviews'),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.55,  // adjust height as you want
+                                  child: TabBarView(
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              child: Padding(
+                                                padding:  EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+                                                child: Container(
+                                                  padding:  EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    gradient: LinearGradient(
+                                                      colors: [Colors.white, Colors.grey.shade100],  // subtle paper gradient
+                                                      begin: Alignment.topLeft,
+                                                      end: Alignment.bottomRight,
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withOpacity(0.08),
+                                                        blurRadius: 20,
+                                                        offset: Offset(0, 10),
+                                                      ),
+                                                    ],
+                                                   
+                                                  ),
+                                                  
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        padding:  EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.circular(12),
+                                                          gradient: LinearGradient(
+                                                            colors: [Colors.white, Colors.grey.shade200],  // subtle paper gradient
+                                                            begin: Alignment.topLeft,
+                                                            end: Alignment.bottomRight,
+                                                          ),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Colors.black.withOpacity(0.08),
+                                                              blurRadius: 20,
+                                                              offset: Offset(0, 10),
+                                                            ),
+                                                          ],),
+                                                   
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            const SizedBox(height: 5),
+                                                            Text(
+                                                              _isExpanded
+                                                                  ? book['description'] ?? 'No description available'
+                                                                  : (book['description'] ?? 'No description available').split('\n').take(5).join('\n'),
+                                                              maxLines: _isExpanded ? null : 10,
+                                                              overflow: _isExpanded ? null : TextOverflow.ellipsis,
+                                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12),
+                                                            ),
+                                                            const SizedBox(height: 5),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  _isExpanded = !_isExpanded;
+                                                                });
+                                                              },
+                                                              child: Text(
+                                                                _isExpanded ? 'See less...' : 'See more...',
+                                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                                  fontSize: 12, 
+                                                                  color: Color.fromARGB(255, 225, 209, 179),
+                                                                  fontWeight: FontWeight.bold),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(height: 5),
+                                                            const SizedBox(height: 10),  // space after description
+                                                            LayoutBuilder(
+                                                              builder: (context, constraints) {
+                                                                return Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                  children: List.generate(
+                                                                    (constraints.maxWidth / 10).floor(),
+                                                                    (index) => Container(
+                                                                      width: 7,
+                                                                      height: 2,
+                                                                      color: Colors.grey[300],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                            const SizedBox(height: 15),  // space before genre
+                                                            Row(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Icon(Icons.theater_comedy_rounded, size: 14,  color: Color.fromARGB(255, 225, 209, 179),),
+                                                                const SizedBox(width: 4),
+                                                                Text('Genre:', style: Theme.of(context).textTheme.titleSmall),
+                                                                const SizedBox(width: 5),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    book['subjects'] != null
+                                                                        ? book['subjects'].join(", ")
+                                                                        : 'No genre info available',
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    maxLines: 2,
+                                                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12)
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                Icon(Icons.auto_stories_rounded, size: 14,  color: Color.fromARGB(255, 225, 209, 179),),
+                                                                const SizedBox(width: 5),
+                                                                Text('Pages:', style: Theme.of(context).textTheme.titleSmall),
+                                                                const SizedBox(width: 5),
+                                                                Text(book['pages']?.toString() ?? 'No page info available', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12)),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                Icon(Icons.language_rounded, size: 14,  color: Color.fromARGB(255, 225, 209, 179),),
+                                                                const SizedBox(width: 5),
+                                                                Text('Language:', style: Theme.of(context).textTheme.titleSmall),
+                                                                const SizedBox(width: 5),
+                                                                Text(book['language'] ?? 'No language info available', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12)),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                Icon(Icons.calendar_month_rounded, size: 14, color: Color.fromARGB(255, 225, 209, 179), ),
+                                                                const SizedBox(width: 5),
+                                                                Text('Published date:', style: Theme.of(context).textTheme.titleSmall),
+                                                                const SizedBox(width: 5),
+                                                                Text(book['publish_date'] ?? 'No publish date available', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12)),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          
+                                          ElevatedButton.icon(
+                                                  onPressed: _isAddedToList ? null : _addToReadingList,
+                                                  icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
+                                                  label: Text(_isAddedToList ? "Added to List" : "Add to List"),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
+                                                    foregroundColor: Colors.white,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                  ),
+                                                ),
+                                         SizedBox(height: 10,)
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(height: 20,),
+                                            reviews.isEmpty
+                                                ?  Center(
+                                                    child: Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Text(
+                                                        'No reviews yet',
+                                                        style: Theme.of(context).textTheme.titleSmall
+                                                      ),
+                                                    ),
+                                                  )
+                                                : SizedBox(
+                                              height: 300, 
+                                              child: ListView.builder(
+                                                padding: const EdgeInsets.all(12.0), 
+                                                itemCount: reviews.length,
+                                                itemBuilder: (context, index) {
+                                                  final review = reviews[index];
+                                                  return Card(
+                                                    color: Colors.white,
+                                                    elevation: 3, 
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12.0), 
+                                                    ),
+                                                    child: ListTile(
+                                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                                                      title: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            review['person']['fullName'] ?? 'Anonymous', 
+                                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)
+                                                          ),
+                                                          const SizedBox(height: 4.0), // Spacing between name and review content
+                                                          Row(
+                                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                                            children: [
+                                                              Text(
+                                                                review['content'] ?? 'No content',
+                                                                style: Theme.of(context).textTheme.bodyMedium
+                                                              ),
+                                                              // //SizedBox(width: 5,),
+                                                              // Row(
+                                                              //   children: List.generate(
+                                                              //     review['rating'], // number of stars based on rating
+                                                              //     (index) => const Icon(Icons.star, size: 20, color: Colors.amber),
+                                                              //   ),
+                                                              // ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      subtitle: Row(
+                                                        children: List.generate(
+                                                          review['rating'], // number of stars based on rating
+                                                          (index) => const Icon(Icons.star, size: 20, color: Colors.amber),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(height: 40), 
+                                            ElevatedButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    rating = 0;   
+                                                    _contentController.clear();
+                                                    isContentValid = false;
+                                                  });
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return AddReviewDialog(
+                                                        formKey: _formKey,
+                                                        contentController: _contentController,
+                                                        isContentValid: isContentValid,
+                                                        rating: rating,
+                                                        updateContentValidation: _updateContentValidation,
+                                                        updateRating: (newRating) {
+                                                          setState(() {
+                                                            rating = newRating;
+                                                          });
+                                                        },
+                                                        onSubmit: () async {
+                                                          if (_formKey.currentState?.validate() ?? false) {
+                                                            bool success = await ReviewController.createReview(
+                                                              userId: widget.userId,
+                                                              bookKey: widget.bookKey,
+                                                              rating: rating,
+                                                              content: _contentController.text,
+                                                            );
+
+                                                            if (success) {
+                                                              _fetchReviews();
+                                                              Navigator.pop(context);
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                const SnackBar(
+                                                                  content: Text("Review submitted successfully!"),
+                                                                  backgroundColor: Colors.green,
+                                                                  duration: Duration(seconds: 3),
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                const SnackBar(
+                                                                  content: Text("Failed to submit the review. Please try again."),
+                                                                  backgroundColor: Colors.red,
+                                                                  duration: Duration(seconds: 3),
+                                                                ),
+                                                              );
+                                                            }
+                                                          }
+                                                        },
+                                                      );
+                                                    },
+                                                  );
+                                                  
+                                                },
+                                  
+                                              style: ElevatedButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 4.0),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0), // Rounded corners for button
+                                                ),
+                                                backgroundColor: const Color(0xFFFFDCAA), 
+                                              ),
+                                              child: const Text(
+                                                'Add Review',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+  
+                         ],
+                       ),
+                     );
+                   }
+                 },
+               ),
+             ),
+                     ),
+          ),
+        ]
       ),
     );
   }

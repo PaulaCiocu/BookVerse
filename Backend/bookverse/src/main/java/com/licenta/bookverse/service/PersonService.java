@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,8 +22,6 @@ public class PersonService {
 
     @Autowired
     private final PersonRepository personRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
 
     public Person findById(UUID id) {
         return personRepository.findById(id)
@@ -38,27 +37,8 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    // Check if a user exists by email (added for password reset)
     public boolean checkIfEmailExists(String email) {
         return personRepository.existsByEmail(email);
-    }
-
-    // Update the password for the user (added for password reset)
-    public void updatePassword(String email, String newPassword) {
-        Person user = personRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        String encodedPassword = passwordEncoder.encode(newPassword); // Encode the new password
-        user.setPassword(encodedPassword);
-        personRepository.save(user);
-    }
-
-    public void confirmUserByEmail(String email) {
-        Person person = personRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        // Mark the user as confirmed
-        person.setConfirmed(true);
-        personRepository.save(person);
     }
 
     public Person editProfile(String email, UserProfileDTO updatedPerson) {
@@ -74,10 +54,25 @@ public class PersonService {
         if(updatedPerson.getProfilePictureUrl()!= null && !updatedPerson.getProfilePictureUrl().isEmpty()) {
             person.setProfilePictureUrl(updatedPerson.getProfilePictureUrl());
         }
-        // Save updated person
         Person savedPerson = personRepository.save(person);
         return savedPerson;
     }
 
 
+    public Person editProfileById(UUID id, UserProfileDTO updatedPerson) {
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if(updatedPerson.getFullName()!= null) {
+            person.setFullName(updatedPerson.getFullName());
+        }
+        if(updatedPerson.getBio()!= null) {
+            person.setBio(updatedPerson.getBio());
+        }
+
+        if(updatedPerson.getProfilePictureUrl()!= null && !updatedPerson.getProfilePictureUrl().isEmpty()) {
+            person.setProfilePictureUrl(updatedPerson.getProfilePictureUrl());
+        }
+        Person savedPerson = personRepository.save(person);
+        return savedPerson;
+    }
 }

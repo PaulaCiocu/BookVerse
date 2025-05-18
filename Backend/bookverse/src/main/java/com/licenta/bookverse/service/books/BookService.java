@@ -82,15 +82,6 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    private boolean containsExcludedWords(String title) {
-        String[] excludedWords = {"set", "box", "collection", "series", "coloring"};
-        for (String word : excludedWords) {
-            if (title.toLowerCase().contains(word)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 
     public Book getBookDetails(String bookKey) {
@@ -164,6 +155,16 @@ public class BookService {
                 .replace("\u2013", "-")  // En dash → hyphen
                 .replace("\u2014", "-")  // Em dash → hyphen
                 .replaceAll("[^\\p{Print}]", ""); // Remove non-printable characters
+    }
+
+    private boolean containsExcludedWords(String title) {
+        String[] excludedWords = {"set", "box", "collection", "series", "coloring", "edition", "movie", "screenplay", "appendices", "instrumental"};
+        for (String word : excludedWords) {
+            if (title.toLowerCase().contains(word)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

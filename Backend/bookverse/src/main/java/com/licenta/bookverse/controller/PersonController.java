@@ -51,4 +51,10 @@ public class PersonController {
     public ResponseEntity<Person> updateProfile(@PathVariable String email, @RequestBody UserProfileDTO updatedPerson) {
         return ResponseEntity.ok(personService.editProfile(email, updatedPerson));
     }
+
+    @PutMapping("/edit/id/{id}")
+    public ResponseEntity<Person> updateProfileById(@PathVariable UUID id, @RequestBody UserProfileDTO updatedPerson) {
+        return ResponseEntity.ok(personService.editProfileById(id, updatedPerson));
+    }
+
 }

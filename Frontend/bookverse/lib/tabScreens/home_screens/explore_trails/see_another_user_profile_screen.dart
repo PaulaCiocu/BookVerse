@@ -1,5 +1,7 @@
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/controller/userProfileController.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class SeeAnotherUserProfileScreen extends StatefulWidget {
@@ -39,12 +41,13 @@ class _SeeAnotherUserProfileScreenState extends State<SeeAnotherUserProfileScree
      return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+       // elevation: 0,
         title: const Text(
-          "Edit profile",
+          "View profile",
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            fontSize: 20, // Slightly larger text for readability
-            color: Colors.black87, // Text color
+            fontSize: 20, 
+            color: Colors.black87,
           ),
         ),
       ),
@@ -83,20 +86,20 @@ class _SeeAnotherUserProfileScreenState extends State<SeeAnotherUserProfileScree
                               left: MediaQuery.of(context).size.width / 2 - 50, // Center the avatar horizontally
                               child: CircleAvatar(
                                 radius: 50, // Set the size of the avatar
-                                backgroundImage: user['profilePictureUrl'] != null 
-                                    ? NetworkImage(user['profilePictureUrl']) // Use the user's image if available
-                                    : const AssetImage('assets/avatars/avatar_woman.png') as ImageProvider, // Default image if null
+                                backgroundImage: user['profilePictureUrl'] != null
+                                  ? CachedNetworkImageProvider(user['profilePictureUrl']!)
+                                  : const AssetImage('assets/avatars/avatar_woman.png') as ImageProvider,
                               ),
                             ),
                           ],
                         ),
           
-                        const SizedBox(height: 120), // Space between avatar and name
+                      const SizedBox(height: 60), // Space between avatar and name
               
-                        Text(user['fullName'] ?? 'Unknown User', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87)),
-                        const SizedBox(height: 30),
+                      Text(user['fullName'] ?? 'Unknown User', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87)),
+                      const SizedBox(height: 10),
                        Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 36.0, vertical:20.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 36.0, vertical:10.0),
                         child: Center( 
                           child: Text(
                             user['bio'] != null && user['bio']!.isNotEmpty 
@@ -113,69 +116,82 @@ class _SeeAnotherUserProfileScreenState extends State<SeeAnotherUserProfileScree
                       ),
                       ],
                     ),
-          
-                    const SizedBox(height: 50,),
+                    const SizedBox(height: 40,),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Other trails', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color.fromARGB(255, 225, 209, 179), )),
+                        ],
+                      ),
+                    ),
+
                     ListView.builder(
                         shrinkWrap: true,
                         itemCount: trails.length,
                         itemBuilder: (context, index) {
                           final trail = trails[index];
                     
-                          return Card(
-                            color: Colors.white,
-                            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-                            elevation: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ListTile(
-                                        title: Text(
-                                          trail['trail']['title'] ?? 'No Title',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              trail['trail']['description'] ?? 'No description available',
-                                              style: const TextStyle(
-                                                color: Colors.black45,
-                                                fontSize: 12,
-                                              ),
-                                              maxLines: 5,
-                                              overflow: TextOverflow.ellipsis,
+                          return InkWell(
+                            onTap: (){
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => TrailDetails( userId: widget.userId, trailId:  trail['trail']['id'].toString(), onClose: () {},),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              color: Colors.white,
+                              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                              elevation: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                            
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ListTile(
+                                          title: Text(
+                                            trail['trail']['title'] ?? 'No Title',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black87,
                                             ),
-                                            const SizedBox(height: 6),
-                                              ],
-                                        ),
-                                        leading: ClipOval(
-                                          child: trail['trail']['imageUrl'] != null
-                                              ? Image.network(
-                                                  trail['trail']['imageUrl'],
-                                                  width: 40,
-                                                  height: 40,
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : Image.asset(
-                                                  'assets/user_profile_backgrounds_screen.png',
-                                                  width: 40,
-                                                  height: 40,
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                trail['trail']['description'] ?? 'No description available',
+                                                style: const TextStyle(
+                                                  color: Colors.black45,
+                                                  fontSize: 12,
+                                                ),
+                                                maxLines: 5,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 6),
+                                                ],
+                                          ),
+                                          leading: trail['trail']['imageUrl'] != null
+                                            ? ClipOval(
+                                                child: CachedNetworkImage(
+                                                  imageUrl: trail['trail']['imageUrl'],
+                                                  width: 50,
+                                                  height: 50,
                                                   fit: BoxFit.cover,
                                                 ),
+                                              )
+                                            : const Icon(Icons.book, size: 50),
                                         ),
                                       ),
-                                    ),
-                                  
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },

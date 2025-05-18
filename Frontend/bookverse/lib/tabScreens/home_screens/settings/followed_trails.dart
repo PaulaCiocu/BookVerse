@@ -1,4 +1,6 @@
 import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/widgets/dialogs.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class FollowedTrailsscreen extends StatefulWidget {
@@ -66,7 +68,7 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                               itemCount: trails.length,
                               itemBuilder: (context, index) {
                                 final trail = trails[index];
-                                if (trail['trail']['deleted'] == true) {
+                                if (trail['deleted'] == true) {
                                   return Card(
                                     color: Colors.grey.shade300,
                                     margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
@@ -76,7 +78,7 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                       children: [
                                          ListTile(
                                             title: Text(
-                                              trail['trail']['title'] ?? 'No Title',
+                                              trail['title'] ?? 'No Title',
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
@@ -87,7 +89,7 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  trail['trail']['description'] ?? 'No description available',
+                                                  trail['description'] ?? 'No description available',
                                                   style: const TextStyle(
                                                     color: Colors.black45,
                                                     fontSize: 12,
@@ -227,9 +229,9 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                                ],
                                             ),
                                             leading: ClipOval(
-                                              child: trail['trail']['imageUrl'] != null
+                                              child: trail['imageUrl'] != null
                                                   ? Image.network(
-                                                      trail['trail']['imageUrl'],
+                                                      trail['imageUrl'],
                                                       width: 40,
                                                       height: 40,
                                                       fit: BoxFit.cover,
@@ -263,7 +265,7 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                           Expanded(
                                             child: ListTile(
                                               title: Text(
-                                                trail['trail']['title'] ?? 'No Title',
+                                                trail['title'] ?? 'No Title',
                                                 style: const TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w500,
@@ -275,7 +277,7 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                                 children: [
                                                   
                                                   Text(
-                                                    trail['trail']['description'] ?? 'No description available',
+                                                    trail['description'] ?? 'No description available',
                                                     style: const TextStyle(
                                                       color: Colors.black45,
                                                       fontSize: 12,
@@ -287,99 +289,13 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                                   //unfollow button
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      bool? unfollowConfirmed = await showDialog<bool>(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            backgroundColor: Colors.white,
-                                                            contentPadding: EdgeInsets.zero,
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(16), 
-                                                            ),
-                                                            title: const Column(
-                                                              children: [
-                                                                Text(
-                                                                  'Unfollow Trail', 
-                                                                  style: TextStyle(
-                                                                    color: Colors.black87,
-                                                                    fontWeight: FontWeight.w500,
-                                                                    fontSize: 18
-                                                                  ),
-                                                                ),
-                                                                SizedBox(height: 20,),
-                                                                Text(
-                                                                  'Are you sure you want to unfollow this trail?', 
-                                                                  style: TextStyle(
-                                                                    color: Colors.black54,
-                                                                    fontSize: 16
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            actions: <Widget>[
-                                                              Row(
-                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                children: [
-                                                                  TextButton(
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop(false);
-                                                                    },
-                                                                    child: const Text('CANCEL', style: TextStyle(color: Colors.grey, fontSize: 12),),
-                                                                  ),
-                                                                  const SizedBox(width: 20,),
-                                                                  TextButton(
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop(true);
-                                                                    },
-                                                                    child: const Text('YES', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                  
+                                                      bool? unfollowConfirmed = await showRemoveTrailDialog(context);
+                                                      
                                                       if (unfollowConfirmed == true) {
                                                         
-                                                        bool? keepBooksConfirmed = await showDialog<bool>(
-                                                          context: context,
-                                                          builder: (BuildContext context) {
-                                                            return AlertDialog(
-                                                              backgroundColor: Colors.white,
-                                                              title: const Text(
-                                                                'Keep Books in List?',
-                                                                style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 18),
-                                                              ),
-                                                              content: const Text(
-                                                                'Do you want to keep the books from this trail in your reading list?',
-                                                                style: TextStyle(color: Colors.black54, fontSize: 16),
-                                                              ),
-                                                              actions: <Widget>[
-                                                                Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                  children: [
-                                                                    TextButton(
-                                                                      onPressed: () {
-                                                                        Navigator.of(context).pop(false); 
-                                                                      },
-                                                                      child: const Text('NO', style: TextStyle(color: Colors.grey, fontSize: 14)),
-                                                                    ),
-                                                                    const SizedBox(width: 20),
-                                                                    TextButton(
-                                                                      onPressed: () {
-                                                                        Navigator.of(context).pop(true);
-                                                                      },
-                                                                      child: const Text('YES', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                  
-                                                        await TrailController.unfollowTrailFromReadingList(widget.userId, trail['trail']['id'].toString(), keepBooksConfirmed!);
+                                                        bool? keepBooks = await showKeepBooksDialog(context);
+
+                                                        await TrailController.unfollowTrailFromReadingList(widget.userId, trail['trail']['id'].toString(), keepBooks!);
                   
                                                       }
                                                        _loadTrails();
@@ -415,21 +331,16 @@ class _FollowedTrailsscreenState extends State<FollowedTrailsscreen> {
                                                   ),
                                                 ],
                                               ),
-                                             leading: ClipOval(
-                                              child: trail['trail']['imageUrl'] != null
-                                                  ? Image.network(
-                                                      trail['trail']['imageUrl'],
-                                                      width: 40,
-                                                      height: 40,
-                                                      fit: BoxFit.cover,
-                                                    )
-                                                  : Image.asset(
-                                                      'assets/user_profile_backgrounds_screen.png',
-                                                      width: 40,
-                                                      height: 40,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                            ),
+                                             leading: trail['imageUrl'] != null
+                                              ? ClipOval(
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: trail['imageUrl'],
+                                                    width: 50,
+                                                    height: 50,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                )
+                                              : const Icon(Icons.book, size: 50),
                   
                                             ),
                                           ),

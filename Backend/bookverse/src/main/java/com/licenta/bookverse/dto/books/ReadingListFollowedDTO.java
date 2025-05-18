@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class ReadingListFollowedAndCretedDTO {
+public class ReadingListFollowedDTO {
     private Long id;
     private String title;
     private String description;
