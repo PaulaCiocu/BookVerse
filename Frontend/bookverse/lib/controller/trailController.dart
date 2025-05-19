@@ -5,6 +5,7 @@ import 'package:bookverse/controller/imageController.dart';
 import 'package:http/http.dart' as http;
 
 class TrailController {
+  static const String baseUrl = 'http://10.0.2.2:8080';
 
   static Future<bool> createReadingTrail(String userId, File selectedImage, String title, String description, List books) async {
     final url = Uri.parse('http://10.0.2.2:8080/trails/create');
@@ -49,7 +50,8 @@ class TrailController {
     } else if (trailName != null && trailName.isNotEmpty) {
       queryParams['trailName'] = trailName;
     }
-    Uri uri = Uri.parse('http://10.0.2.2:8080/trails/except/person/$userId')
+   
+    Uri uri = Uri.parse('$baseUrl/trails/except/person/$userId')
         .replace(queryParameters: queryParams);
     final response = await http.get(uri);
     print(response.body);
@@ -64,7 +66,7 @@ class TrailController {
 
 
   static Future<Map<String, dynamic>> fetchTrailDetails(String trailId) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/trails/$trailId'));
+    final response = await http.get(Uri.parse('$baseUrl/trails/$trailId'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

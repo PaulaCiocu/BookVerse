@@ -74,7 +74,9 @@ static Future loginUser({
     await secureStorage.write(key: 'jwt_token', value: idToken);
 
     // 🔐 Send token to backend instead of email/password
+    //final url = Uri.parse('http://10.0.2.2:8080/auth/login');
     final url = Uri.parse('http://10.0.2.2:8080/auth/login');
+
     try {
       final response = await http.post(
         url,

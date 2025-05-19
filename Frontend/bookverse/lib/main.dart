@@ -1,5 +1,6 @@
 import 'package:bookverse/auth_screens/login.dart';
 import 'package:bookverse/home.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Ensure Firebase initializes properly
+//   await FirebaseAppCheck.instance.activate(
+//   androidProvider: AndroidAppCheckProvider.debug,
+//   webProvider:    WebAppCheckProvider.debug,
+// );
 
   runApp(MyApp());
 }

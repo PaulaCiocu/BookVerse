@@ -1,4 +1,3 @@
-import 'package:bookverse/events/AppEvents.dart';
 import 'package:flutter/material.dart';
 
 Future<bool?> _showDeleteConfirmationDialog({
@@ -267,7 +266,6 @@ Future<bool?> showKeepBooksDialog(BuildContext context) {
     },
   );
 }
-
 
 Future<bool?> showLogoutConfirmationDialog(BuildContext context) {
   const Color iconColor = Colors.amber;

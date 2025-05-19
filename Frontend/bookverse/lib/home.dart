@@ -4,7 +4,7 @@ import 'package:bookverse/tabScreens/home_screens/search_screen/search_books.dar
 import 'package:bookverse/tabScreens/home_screens/settings/settings.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievments.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/readings.dart';
+import 'package:bookverse/tabScreens/home_screens/settings/readings.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
 import 'package:flutter/material.dart';
@@ -22,23 +22,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
-  int _unreadCount = 0;
-
-
-  Future<void> fetchUnreadNotifications() async {
-    final url = Uri.parse('http://10.0.2.2:8080/notifications/unseen-count/${widget.userId}');
-    final response = await http.get(url, headers: {'Content-Type': 'application/json'});
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _unreadCount = int.parse(response.body);
-      });
-    } else {
-      print("Failed to fetch notifications");
-    }
-  }
-
 
   int screenIndex = 0;
   String? selectedBookKey; // Store the selected book key
@@ -73,28 +56,24 @@ class _HomeState extends State<Home> {
                 },
               ),
               UserProfile(
-                onReadSelected: (id) { 
-                  setState(() {
-                    readUserId = id;
-                  });
-                },
-                onAchievementsSelected: (id) { 
-                  setState(() {
-                    achievementsUserId = id;
-                  });
-                },
-                onTrailsSelected: (String id) { 
-                  setState(() {
-                    trailsUserId = id;
-                  });
-                },
+                // onReadSelected: (id) { 
+                //   setState(() {
+                //     readUserId = id;
+                //   });
+                // },
+                // onAchievementsSelected: (id) { 
+                //   setState(() {
+                //     achievementsUserId = id;
+                //   });
+                // },
+                // onTrailsSelected: (String id) { 
+                //   setState(() {
+                //     trailsUserId = id;
+                //   });
+                // },
                 userId: widget.userId,
               ),
-              // SettingsScreen(
-              //   userEmail: widget.userEmail,
-              //   userId: widget.userId,
-              //   onNotificationsUpdated: fetchUnreadNotifications,
-              // ),
+           
             ],
           ),
 
@@ -123,29 +102,29 @@ class _HomeState extends State<Home> {
                 userId: widget.userId,
               ),
             ),
-          if (readUserId != null)
-            Positioned.fill(
-              child: ReadingScreen(
-                userId: readUserId!,
-                onClose: () {
-                  setState(() {
-                    readUserId = null;
-                  });
-                },
-              ),
-            ),
-          if (achievementsUserId != null)
-            Positioned.fill(
-              child: AchievmentsScreen(
-                key: ValueKey(achievementsUserId), 
-                userId: achievementsUserId!,
-                onClose: () {
-                  setState(() {
-                    achievementsUserId = null;
-                  });
-                },
-              ),
-            ),
+          // if (readUserId != null)
+          //   Positioned.fill(
+          //     child: ReadingScreen(
+          //       userId: readUserId!,
+          //       onClose: () {
+          //         setState(() {
+          //           readUserId = null;
+          //         });
+          //       },
+          //     ),
+          //   ),
+          // if (achievementsUserId != null)
+          //   Positioned.fill(
+          //     child: AchievmentsScreen(
+          //       key: ValueKey(achievementsUserId), 
+          //       userId: achievementsUserId!,
+          //       onClose: () {
+          //         setState(() {
+          //           achievementsUserId = null;
+          //         });
+          //       },
+          //     ),
+          //   ),
           if (trailsUserId != null)
             Positioned.fill(
               child: TrailsScreen(
@@ -168,12 +147,12 @@ class _HomeState extends State<Home> {
             if (selectedBookKey != null) {
               selectedBookKey = null; // Close book details
             }
-            if (readUserId != null) {
-              readUserId = null; // Close reading screen
-            }
-            if (achievementsUserId != null) {
-              achievementsUserId = null; // Close achievements screen
-            }
+            // if (readUserId != null) {
+            //   readUserId = null; // Close reading screen
+            // }
+            // if (achievementsUserId != null) {
+            //   achievementsUserId = null; // Close achievements screen
+            // }
             if (trailsUserId != null) {
               trailsUserId = null; 
             } else {
@@ -192,30 +171,7 @@ class _HomeState extends State<Home> {
           BottomNavigationBarItem(icon: Icon(Icons.home, size: 35), label: "Explore"),
           BottomNavigationBarItem(icon: Icon(Icons.search_outlined, size: 35), label: "Search"),
           BottomNavigationBarItem(icon: Icon(Icons.person, size: 35), label: "Profile"),
-      //     BottomNavigationBarItem(
-      //       icon: Stack(
-      //         children: [
-      //           const Icon(Icons.settings),
-      //           if (_unreadCount > 0)
-      //             Positioned(
-      //               right: 0,
-      //               top: 0,
-      //               child: Container(
-      //                 padding: const EdgeInsets.all(3),
-      //                 decoration: const BoxDecoration(
-      //                   color: Colors.red,
-      //                   shape: BoxShape.circle,
-      //                 ),
-      //                 child: Text(
-      //                   '$_unreadCount',
-      //                   style: const TextStyle(color: Colors.white, fontSize: 10),
-      //                 ),
-      //               ),
-      //             ),
-      //         ],
-      //       ),
-      //       label: 'Settings',
-      //     ),
+     
          ],
        ),
     );

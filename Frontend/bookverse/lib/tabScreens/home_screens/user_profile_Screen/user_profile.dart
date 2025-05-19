@@ -4,8 +4,7 @@ import 'package:bookverse/events/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/edit_profile.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/notifications.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/reading_list.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/settings.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/reading_list.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievments.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,11 +13,11 @@ import 'package:http/http.dart' as http;
 
 class UserProfile extends StatefulWidget {
   final String userId;
-  final Function(String userId) onReadSelected;
-  final Function(String userId) onAchievementsSelected;
-  final Function(String userId) onTrailsSelected;
+ // final Function(String userId) onReadSelected;
+ // final Function(String userId) onAchievementsSelected;
+ // final Function(String userId) onTrailsSelected;
 
-  const UserProfile({super.key,  required this.onReadSelected, required this.onAchievementsSelected, required this.onTrailsSelected, required this.userId});
+  const UserProfile({super.key, required this.userId});
 
   @override
   _UserProfileState createState() => _UserProfileState();

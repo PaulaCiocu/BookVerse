@@ -3,6 +3,7 @@ import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/events/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
 import 'package:bookverse/custom_ui/custom_textfield.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:bookverse/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
@@ -110,13 +111,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 await logout();
               }
             },
-            icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+            icon: const Icon(Icons.logout, color: Colors.black, size: 20, weight: 6),
             label: const Text(
               'Log Out',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w900,
               ),
             ),
             style: TextButton.styleFrom(
@@ -132,7 +133,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SizedBox(
             width: double.infinity,
             child: Image.asset(
-              'assets/achievements.png',
+              'assets/trail_background.png',
               height: 140,
               fit: BoxFit.cover,
               alignment: Alignment.center,
@@ -237,6 +238,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: GestureDetector(
                     onTap: () async {
                        if ((_formKey.currentState?.validate() ?? false )) {
+                        if (selectedAvatar == null) {
+                            showTopSnackBar(context, 'Please choose an avatar!', backgroundColor: Colors.grey.shade400,  icon: Icons.error_outline,);
+                            return;
+                          }
                          _formKey.currentState?.save();
                           String name = _nameController.text;
                           String bio = _bioController.text;
@@ -244,10 +249,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.userId, name, bio);
                           if (success) {
                             AppEvents.notifyProfileUpdated();
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
-                           
+                              showTopSnackBar(context, 'Profile updated successfully!', backgroundColor: Colors.green,  icon: Icons.check_circle_outline,);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile.')));
+                            showTopSnackBar(context, 'Failed to update profile.', backgroundColor: Colors.red.shade400,  icon: Icons.error_outline,);
                           }
         
                       } else {

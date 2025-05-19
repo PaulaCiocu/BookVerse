@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/events/AppEvents.dart';
@@ -21,58 +20,96 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
   List<dynamic> books = [];
   bool isLoading = true;
 
-  Future<void> updateProgress(String bookId, int newPagesRead) async {
-    final update = await BooksController.updateProgress(widget.userId, bookId, newPagesRead);
-    if (update) {
-      setState(() {
-        final updatedBookIndex = books.indexWhere((book) => book['bookKey'] == bookId);
-        if (updatedBookIndex != -1) {
-          books[updatedBookIndex]['pagesRead'] = newPagesRead;
-        }
-      });
+  // Future<void> updateProgress(String bookId, int newPagesRead) async {
+  //   final update = await BooksController.updateProgress(widget.userId, bookId, newPagesRead);
+  //   if (update) {
+  //     setState(() {
+  //       final updatedBookIndex = books.indexWhere((book) => book['bookKey'] == bookId);
+  //       if (updatedBookIndex != -1) {
+  //         books[updatedBookIndex]['pagesRead'] = newPagesRead;
+  //       }
+  //     });
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
 
     
+  //   }
+  // }
+  Future<void> updateProgress(String bookId, int newPagesRead) async {
+    final idx = books.indexWhere((b) => b['bookKey'] == bookId);
+    final oldPages = idx != -1 ? books[idx]['pagesRead'] as int : 0;
+    if (idx != -1) {
+      setState(() => books[idx]['pagesRead'] = newPagesRead);
+      SharedPreferences.getInstance().then((p) {
+        p.setString('reading_list_${widget.userId}', jsonEncode(books));
+      });
+    }
+    final success = await BooksController.updateProgress(
+      widget.userId, bookId, newPagesRead);
+    if (!success) {
+      if (idx != -1) {
+        setState(() => books[idx]['pagesRead'] = oldPages);
+        SharedPreferences.getInstance().then((p) {
+          p.setString('reading_list_${widget.userId}', jsonEncode(books));
+        });
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update progress')),
+      );
+    } else {
+      AppEvents.notifyAchievementsUpdated();
     }
   }
-  Future<void> removeBookFromReadingList(String bookId) async {
-  final remove = await BooksController.removeBooksFromReadingList(widget.userId, bookId);
-  if (remove) {
-    setState(() {
-      books.removeWhere((book) => book['bookKey'] == bookId);
+
+    Future<void> removeBookFromReadingList(String bookId) async {
+    final removed = books.where((b) => b['bookKey'] == bookId).toList();
+    setState(() => books.removeWhere((b) => b['bookKey'] == bookId));
+    SharedPreferences.getInstance().then((p) {
+      p.setString('reading_list_${widget.userId}', jsonEncode(books));
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
+    final success = await BooksController.removeBooksFromReadingList(
+      widget.userId, bookId);
+    if (!success) {
+      setState(() => books.insertAll(0, removed));
+      SharedPreferences.getInstance().then((p) {
+        p.setString('reading_list_${widget.userId}', jsonEncode(books));
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to remove book')),
+      );
+    }
   }
-}
+  
+//   Future<void> removeBookFromReadingList(String bookId) async {
+//   final remove = await BooksController.removeBooksFromReadingList(widget.userId, bookId);
+//   if (remove) {
+//     setState(() {
+//       books.removeWhere((book) => book['bookKey'] == bookId);
+//     });
+
+//     final prefs = await SharedPreferences.getInstance();
+//     await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
+//   }
+// }
 
   Future<void> fetchReadingList() async {
     try {
-      // Try loading cached data first for immediate display
       final prefs = await SharedPreferences.getInstance();
       final cachedData = prefs.getString('reading_list_${widget.userId}');
       
       if (cachedData != null) {
-        // If we have cached data, show it immediately
         setState(() {
           books = List<dynamic>.from(jsonDecode(cachedData));
-          isLoading = false; // No longer loading since we have data to show
+          isLoading = false;
         });
       }
-      
-      // Then fetch fresh data from network (happens in background if we already showed cached data)
       final readingList = await BooksController.fetchReadingListBooks(widget.userId);
-      
-      // Update UI with fresh data
       setState(() {
         books = readingList;
         isLoading = false;
       });
-      
-      // Save updated data to cache for next time
       await prefs.setString('reading_list_${widget.userId}', jsonEncode(readingList));
     } catch (e) {
       print('Error in fetchReadingList: $e');
@@ -93,10 +130,13 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
     fetchReadingList();
   }
 
-  String? validatePagesRead(String? value) {
+  String? validatePagesRead(String? value, int totalBooksPages) {
     final parsedValue = int.tryParse(value ?? '');
     if (parsedValue == null || parsedValue < 0) {
       return 'Please enter a positive number';
+    }
+    if (parsedValue > totalBooksPages) {
+      return 'This exceeds the number of pages';
     }
     return null;
   }
@@ -104,98 +144,101 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
 
   
 
-  Future<void> showProgressDialog(BuildContext context, String bookId, int currentPagesRead) async {
-  TextEditingController controller = TextEditingController(text: currentPagesRead.toString());
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  Future<void> showProgressDialog(BuildContext context, String bookId, int currentPagesRead, int totalBooksPages) async {
+    TextEditingController controller = TextEditingController(text: currentPagesRead.toString());
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  await showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20), // softer corners
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-        content: Form(
-          key: formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.menu_book_rounded,
-                color: Colors.amber.shade200,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Update Pages Read',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              const SizedBox(height: 24),
-              CustomTextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                labelText: 'Pages',
-                hintText: 'Enter new pages read',
-                prefixIcon: const Icon(Icons.pages_outlined),
-                validator: (value) {
-                  final parsedValue = int.tryParse(value ?? '');
-                  if (parsedValue == null || parsedValue < 0) {
-                    return 'Please enter a positive number';
-                  }
-                  return null;
-                },
-                onSaved: (val) => controller.text = val?.trim() ?? '',
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState?.validate() ?? false) {
-                        final newPagesRead = int.tryParse(controller.text) ?? currentPagesRead;
-                        updateProgress(bookId, newPagesRead);
-                        AppEvents.notifyAchievementsUpdated();
-                        Navigator.of(context).pop();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Please enter a valid positive number")),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber.shade300,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: Text(
-                      'Update',
-                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // softer corners
           ),
-        ),
-      );
-    },
-  );
-}
+          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          content: Form(
+            key: formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.menu_book_rounded,
+                  color: Colors.amber.shade200,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Update Pages Read',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 24),
+                CustomTextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  labelText: 'Pages',
+                  hintText: 'Enter new pages read',
+                  prefixIcon: const Icon(Icons.pages_outlined),
+                  validator: (value) {
+                    final parsedValue = int.tryParse(value ?? '');
+                    if (parsedValue == null || parsedValue < 0) {
+                      return 'Please enter a positive number';
+                    }
+                    if (parsedValue > totalBooksPages) {
+                      return 'This exceeds the number of pages';
+                    }
+                    return null;
+                  },
+                  onSaved: (val) => controller.text = val?.trim() ?? '',
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Cancel',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (formKey.currentState?.validate() ?? false) {
+                          final newPagesRead = int.tryParse(controller.text) ?? currentPagesRead;
+                          updateProgress(bookId, newPagesRead);
+                          AppEvents.notifyAchievementsUpdated();
+                          Navigator.of(context).pop();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Please enter a valid positive number")),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade300,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      child: Text(
+                        'Update',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
 
   @override
@@ -213,12 +256,6 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
       [ 
         SizedBox(
           width: double.infinity,
-          // child: Image.asset(
-          //         'assets/brown background.png',
-          //         height: 140,
-          //         fit: BoxFit.cover,
-          //         alignment: Alignment.topCenter,
-          //       ),
           child: Image.asset(
             'assets/trail_background.png',
             height: 140,
@@ -295,7 +332,7 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
                                                   padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                                   child: GestureDetector(
                                                     onTap: () {
-                                                      showProgressDialog(context, book['bookKey'], pagesRead);
+                                                      showProgressDialog(context, book['bookKey'], pagesRead, totalPages);
                                                     },
                                                     child: Row(
                                                       children: [

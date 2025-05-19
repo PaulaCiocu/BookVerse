@@ -1,16 +1,23 @@
+import 'dart:convert';
+
 import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/create_trail.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/update_trail.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trail_progress.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/create_trail.dart';
 import 'package:bookverse/widgets/dialogs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TrailsScreen extends StatefulWidget {
   final String userId;
   final VoidCallback onClose;
 
-  const TrailsScreen({super.key, required this.userId, required this.onClose});
+  const TrailsScreen({
+    super.key,
+    required this.userId,
+    required this.onClose,
+  });
 
   @override
   _TrailsScreenState createState() => _TrailsScreenState();
@@ -21,19 +28,64 @@ class _TrailsScreenState extends State<TrailsScreen> {
   List<dynamic> _followedTrails = [];
   bool isLoading = true;
 
-  Future<void> _loadTrails() async {
-    final trailsList = await TrailController.fetchTrails(widget.userId);
-    setState(() {
-      _createdTrails = trailsList.where((t) => t['createdType'] == 'CREATED').toList();
-      _followedTrails = trailsList.where((t) => t['createdType'] == 'FOLLOWED').toList();
-      isLoading = false;
-    });
-  }
+  static const String _cacheKeyPrefix = 'trails_';
 
   @override
   void initState() {
     super.initState();
-    _loadTrails();
+    _loadCachedThenFetch();
+  }
+
+  /// 1) Load from cache (if any), then
+  /// 2) Fetch fresh from server and overwrite both state & cache.
+  Future<void> _loadCachedThenFetch() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('$_cacheKeyPrefix${widget.userId}');
+
+    if (raw != null) {
+      if (!mounted) return; 
+      // decode cached list
+      final List<dynamic> all = jsonDecode(raw);
+      setState(() {
+        _createdTrails =
+            all.where((t) => t['createdType'] == 'CREATED').toList();
+        _followedTrails =
+            all.where((t) => t['createdType'] == 'FOLLOWED').toList();
+        isLoading = false;
+      });
+    }
+
+    // now fetch fresh
+    try {
+      final allTrails = await TrailController.fetchTrails(widget.userId);
+      // separate
+      final created =
+          allTrails.where((t) => t['createdType'] == 'CREATED').toList();
+      final followed =
+          allTrails.where((t) => t['createdType'] == 'FOLLOWED').toList();
+      if (!mounted) return;
+      setState(() {
+        _createdTrails = created;
+        _followedTrails = followed;
+        isLoading = false;
+      });
+
+      // update cache
+      await prefs.setString(
+        '$_cacheKeyPrefix${widget.userId}',
+        jsonEncode(allTrails),
+      );
+    } catch (e) {
+      // if fetch fails, leave whatever we had (cache or empty)
+      setState(() => isLoading = false);
+      // optionally show a Snackbar or toast here
+    }
+  }
+
+  Future<void> _loadTrailsOnly() async {
+    // helper if you want pull-to-refresh
+    setState(() => isLoading = true);
+    await _loadCachedThenFetch();
   }
 
   Widget buildTrailCard(dynamic trail, {bool isFollowed = false}) {
@@ -80,22 +132,22 @@ class _TrailsScreenState extends State<TrailsScreen> {
                 ),
               )
             : const Icon(Icons.book, size: 45),
-
         title: Text(
           trail['trail']['title'] ?? 'No Title',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6.0),
           child: Text(
             trail['trail']['description'] ?? 'No description available',
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: Colors.grey[600]),
           ),
         ),
-
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -112,31 +164,29 @@ class _TrailsScreenState extends State<TrailsScreen> {
                     color: const Color.fromARGB(255, 251, 207, 146),
                     strokeWidth: 4,
                   ),
-                  Text('$progressPercentage%', style: const TextStyle(fontSize: 10)),
+                  Text('$progressPercentage%',
+                      style: const TextStyle(fontSize: 10)),
                 ],
               ),
             ),
             const SizedBox(width: 6),
 
             if (isFollowed)
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      bool? confirmed = await showRemoveTrailDialog(context);
-                      if (confirmed == true) {
-                        bool? keepBooks = await showKeepBooksDialog(context);
-                        await TrailController.unfollowTrailFromReadingList(
-                          widget.userId,
-                          trail['trail']['id'].toString(),
-                          keepBooks!,
-                        );
-                      }
-                      _loadTrails();
-                    },
-                    child: Icon(Icons.delete, size: 20, color: Colors.red.shade400),
-                  ),
-                ],
+              GestureDetector(
+                onTap: () async {
+                  bool? confirmed = await showRemoveTrailDialog(context);
+                  if (confirmed == true) {
+                    bool? keepBooks = await showKeepBooksDialog(context);
+                    await TrailController.unfollowTrailFromReadingList(
+                      widget.userId,
+                      trail['trail']['id'].toString(),
+                      keepBooks!,
+                    );
+                    await _loadTrailsOnly();
+                  }
+                },
+                child: Icon(Icons.delete,
+                    size: 20, color: Colors.red.shade400),
               )
             else
               Row(
@@ -152,14 +202,16 @@ class _TrailsScreenState extends State<TrailsScreen> {
                           ),
                         ),
                       );
-                      await _loadTrails();
+                      await _loadTrailsOnly();
                     },
-                    child: const Icon(Icons.edit, size: 20, color: Colors.black54),
+                    child: const Icon(Icons.edit,
+                        size: 20, color: Colors.black54),
                   ),
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () async {
-                      bool? confirmed = await showRemoveCreatedTrailDialog(context);
+                      bool? confirmed =
+                          await showRemoveCreatedTrailDialog(context);
                       if (confirmed == true) {
                         bool? keepBooks = await showKeepBooksDialog(context);
                         await TrailController.deleteCreatedTrail(
@@ -167,18 +219,18 @@ class _TrailsScreenState extends State<TrailsScreen> {
                           trail['trail']['id'].toString(),
                           keepBooks!,
                         );
+                        await _loadTrailsOnly();
                       }
-                     await _loadTrails();
                     },
-                    child: Icon(Icons.delete, size: 20, color: Colors.red.shade400),
+                    child: Icon(Icons.delete,
+                        size: 20, color: Colors.red.shade400),
                   ),
                 ],
               ),
           ],
-        )
+        ),
       ),
     );
-
   }
 
   @override
@@ -201,6 +253,7 @@ class _TrailsScreenState extends State<TrailsScreen> {
       ),
       body: Stack(
         children: [
+          // top background
           SizedBox(
             width: double.infinity,
             child: Image.asset(
@@ -210,13 +263,19 @@ class _TrailsScreenState extends State<TrailsScreen> {
               alignment: Alignment.topCenter,
             ),
           ),
+
+          // content
           Padding(
             padding: const EdgeInsets.only(top: 40.0),
             child: SafeArea(
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  Text("Trails List", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  Text("Trails List",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 40),
                   Expanded(
                     child: DefaultTabController(
@@ -233,90 +292,109 @@ class _TrailsScreenState extends State<TrailsScreen> {
                             ],
                           ),
                           Expanded(
-                            child: TabBarView(
-                              children: [
-                                Column(
-                                  children: [
-                                    isLoading
-                                        ? const Center(child: CircularProgressIndicator())
-                                        : Expanded(
-                                            child: ListView(
-                                              padding: const EdgeInsets.only(bottom: 40),
-                                              children: [
-                                                if (_createdTrails.isEmpty) ...[
-                                                  const SizedBox(height: 60),
-                                                  Center(
-                                                    child: Text(
-                                                      "You haven't created any trails yet.",
-                                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                            color: Colors.grey[500],
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 40),
-                                                ] else ...[
-                                                  ..._createdTrails.map((trail) => buildTrailCard(trail)).toList(),
-                                                  const SizedBox(height: 40),
-                                                ],
-                                                const SizedBox(height: 40),
-                                                Center(
-                                                  child: GestureDetector(
-                                                    onTap: () async {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) => CreateTrailStepOne(userId: widget.userId),
-                                                        ),
-                                                      );
-                                                      await _loadTrails();
-                                                    },
-                                                    child: Container(
-                                                      width: 140,
-                                                      height: 40,
-                                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(10),
-                                                        color: const Color(0xFFFFDCAA),
-                                                      ),
-                                                      child: Center(
-                                                        child: Text(
-                                                          'Create trail',
-                                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w900,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
+                            child: isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator())
+                                : TabBarView(
+                                    children: [
+                                      // CREATED
+                                      _createdTrails.isEmpty
+                                          ? const Center(
+                                              child: Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 60),
+                                                child: Text(
+                                                  "You haven't created any trails yet.",
                                                 ),
-                                                const SizedBox(height: 20),
-                                              ],
-                                            ),
-                                          ),
-                                  ],
-                                ),
-                                isLoading
-                                    ? const Center(child: CircularProgressIndicator())
-                                    : _followedTrails.isEmpty
-                                        ? Center(
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(top: 40),
-                                              child: Text(
-                                                "You haven't followed any trails yet.",
-                                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                      color: Colors.grey[500],
+                                              ),
+                                            )
+                                          : RefreshIndicator(
+                                              onRefresh: _loadTrailsOnly,
+                                              child: ListView(
+                                                padding: const EdgeInsets
+                                                        .only(bottom: 40) +
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 0),
+                                                children: [
+                                                  ..._createdTrails
+                                                      .map((t) =>
+                                                          buildTrailCard(t))
+                                                      .toList(),
+                                                  const SizedBox(height: 20),
+                                                  Center(
+                                                    child: GestureDetector(
+                                                      onTap: () async {
+                                                        await Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                CreateTrailStepOne(
+                                                                    userId: widget
+                                                                        .userId),
+                                                          ),
+                                                        );
+                                                        await _loadTrailsOnly();
+                                                      },
+                                                      child: Container(
+                                                        width: 140,
+                                                        height: 40,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          color: const Color(
+                                                              0xFFFFDCAA),
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            'Create trail',
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .bodyLarge
+                                                                ?.copyWith(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w900,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
                                                     ),
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                ],
                                               ),
                                             ),
-                                          )
-                                        : ListView.builder(
-                                            itemCount: _followedTrails.length,
-                                            itemBuilder: (context, index) => buildTrailCard(_followedTrails[index], isFollowed: true),
-                                          ),
-                              ],
-                            ),
-                          )
+
+                                      // FOLLOWED
+                                      _followedTrails.isEmpty
+                                          ? const Center(
+                                              child: Padding(
+                                              padding:
+                                                  EdgeInsets.only(top: 60),
+                                              child: Text(
+                                                "You haven't followed any trails yet.",
+                                              ),
+                                            ))
+                                          : RefreshIndicator(
+                                              onRefresh: _loadTrailsOnly,
+                                              child: ListView.builder(
+                                                itemCount:
+                                                    _followedTrails.length,
+                                                itemBuilder: (ctx, idx) =>
+                                                    buildTrailCard(
+                                                  _followedTrails[idx],
+                                                  isFollowed: true,
+                                                ),
+                                              ),
+                                            ),
+                                    ],
+                                  ),
+                          ),
                         ],
                       ),
                     ),

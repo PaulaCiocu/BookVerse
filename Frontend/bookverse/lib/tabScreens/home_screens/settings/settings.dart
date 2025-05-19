@@ -3,7 +3,7 @@ import 'package:bookverse/tabScreens/home_screens/settings/created_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/edit_profile.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/followed_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/settings/notifications.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/reading_list.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/reading_list.dart';
 import 'package:bookverse/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
