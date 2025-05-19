@@ -1,12 +1,10 @@
 import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_screen.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/explore_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/search_screen/search_books.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/settings.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievments.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/readings.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/achievments.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 

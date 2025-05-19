@@ -1,7 +1,6 @@
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/reviewController.dart';
-import 'package:bookverse/custom_ui/custom_textfield.dart';
-import 'package:bookverse/tabScreens/home_screens/search_screen/add_review_dialog.dart';
+import 'package:bookverse/widgets/add_review_dialog.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +24,13 @@ class BookDetailScreen extends StatefulWidget {
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
   bool _isAddedToList = false;
-  Future<Map<String, dynamic>>? _bookDetailsFuture;
   List<dynamic> reviews = [];
   final TextEditingController _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   int rating = 1; 
   bool _isExpanded = false;
   bool isContentValid = false;
-
+  late final Future<void> _initFuture;
   void _updateContentValidation(String value) {
     setState(() {
       isContentValid = validateField(value, 'Content') == null;
@@ -53,19 +51,29 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     });
   }
 
-  Future<void> _loadData() async {
-    _bookDetailsFuture =  BooksController.fetchBookDetails(widget.bookKey);
-    final isAddedToList = await BooksController.checkIfBookInReadingList(widget.userId, widget.bookKey);
-    setState(() {
-      _isAddedToList = isAddedToList;
-    });
+
+  Map<String, dynamic>? _bookDetails;
+
+  Future<void> _loadDetailsAndStatus() async {
+    // fire details + status in parallel
+    final detailsFuture = BooksController.fetchBookDetails(widget.bookKey);
+    final statusFuture  = BooksController.checkIfBookInReadingList(widget.userId, widget.bookKey);
+    final results = await Future.wait([detailsFuture, statusFuture]);
+    // unwrap:
+    _bookDetails   = results[0] as Map<String, dynamic>;
+    _isAddedToList = results[1] as bool;
   }
+
 
   @override
   void initState() {
     super.initState();
-    _fetchReviews();
-    _loadData();
+    _initFuture = Future.wait([
+      _fetchReviews(),                  
+      _loadDetailsAndStatus(),            
+    ]).then((results) {
+     
+    });
   }
 
 
@@ -78,15 +86,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _bookDetailsFuture,
+      body: FutureBuilder<void>(
+        future: _initFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Center(child: Text("Failed to load trail details"));
           } else {
-            final book = snapshot.data!;
+            final book = _bookDetails!;
             return Stack(
               children:[
                 SizedBox(
@@ -341,7 +349,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                               crossAxisAlignment: CrossAxisAlignment.start,
                                                               children: [
                                                                 Text(
-                                                                  review['person']['fullName'] ?? 'Anonymous', 
+                                                                  review['personName'] ?? 'Anonymous', 
                                                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)
                                                                 ),
                                                                 const SizedBox(height: 4.0), // Spacing between name and review content

@@ -2,11 +2,9 @@ import 'dart:io';
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
-import 'package:bookverse/custom_ui/custom_textfield.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/success_page.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/create_trail/success_page.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:bookverse/widgets/book_tile.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 

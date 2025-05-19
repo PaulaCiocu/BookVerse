@@ -1,8 +1,9 @@
 import 'package:bookverse/controller/authenticationController.dart';
-import 'package:bookverse/auth_screens/forgot_password.dart';
+import 'package:bookverse/tabScreens/auth_screens/forgot_password.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/home.dart';
-import 'package:bookverse/auth_screens/register.dart';
+import 'package:bookverse/tabScreens/auth_screens/register.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,52 +24,6 @@ class LoginPageState extends State<LoginPage> {
  
   bool isPasswordValid = false;
 
-
-
-  void showCustomSnackbar(BuildContext context, String errorMessage) {
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 60, 
-        left: 20,
-        right: 20,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: 335,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color:  Colors.white, // Match button color
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                errorMessage,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    overlay.insert(overlayEntry);
-    Future.delayed(const Duration(seconds: 3), () {
-      overlayEntry.remove();
-    });
-  }
 
  Future<void> storeJwtToken(String token, String userId, String email) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

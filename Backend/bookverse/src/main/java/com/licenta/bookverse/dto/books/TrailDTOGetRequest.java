@@ -17,8 +17,6 @@ public class TrailDTOGetRequest {
         private String description;
         private UUID creatorId;
         private String personName;
-        private List<String> genre;
-        private List<TrailBook> trailBookList;
         private Integer numberOfReadings;
         private String imageUrl;
 }

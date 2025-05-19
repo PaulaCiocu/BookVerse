@@ -1,6 +1,7 @@
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/see_another_user_profile_screen.dart';
 import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_screen.dart';
+import 'package:bookverse/widgets/book_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -16,20 +17,22 @@ class TrailDetails extends StatefulWidget {
 }
 
 class _TrailDetailsState extends State<TrailDetails> {
-  Future<Map<String, dynamic>>? _trailFuture;
   bool _isAddedToList = false;
+  late final Future<void> _initFuture;
+  Map<String, dynamic>? _trail;
 
   @override
   void initState() {
     super.initState();
-    _trailFuture = TrailController.fetchTrailDetails(widget.trailId);
-    _checkIfTrailInReadingList();
-  }
-
-  Future<void> _checkIfTrailInReadingList() async {
-    final isAdded = await TrailController.checkIfTrailInReadingList(widget.userId, widget.trailId);
-    setState(() {
-      _isAddedToList = isAdded;
+    _initFuture = Future.wait([
+      TrailController.fetchTrailDetails(widget.trailId),
+      TrailController.checkIfTrailInReadingList(widget.userId, widget.trailId),
+    ]).then((results) {
+      _trail = results[0] as Map<String, dynamic>;
+      _isAddedToList = results[1] as bool;
+      if (_trail!['imageUrl'] != null) {
+        precacheImage(NetworkImage(_trail!['imageUrl']), context);
+      }
     });
   }
 
@@ -58,15 +61,15 @@ class _TrailDetailsState extends State<TrailDetails> {
           ),
         ),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _trailFuture,
+      body: FutureBuilder<void>(
+        future: _initFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Center(child: Text("Failed to load trail details"));
           } else {
-            final trail = snapshot.data!;
+            final trail = _trail!;
             return Stack(
               children: [
                 // background image
@@ -181,46 +184,34 @@ class _TrailDetailsState extends State<TrailDetails> {
                               elevation: 3,
                               margin: const EdgeInsets.symmetric(vertical: 12),
                               color: Colors.white,
-                              child: Column(
-                                children: (trail['trailBookList'] as List<dynamic>? ?? []).map((bookEntry) {
-                                  var book = bookEntry['book'];
-                                  return ListTile(
-                                    leading: book['coverImageUrl'] != null
-                                        ? ClipOval(
-                                            child: CachedNetworkImage(
-                                              imageUrl: book['coverImageUrl']!,
-                                              width: 45,
-                                              height: 45,
-                                              fit: BoxFit.cover,
+                              child: SizedBox(
+                                height: 200, 
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: (trail['trailBookDTODetails'] as List).length,
+                                  itemBuilder: (ctx, i) {
+                                    final book = (trail['trailBookDTODetails'] as List)[i] as Map<String, dynamic>;
+                                    return BookTile(
+                                      book: book,
+                                      icon: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                      backgroundColor: const Color(0xFFFFDCAA),
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => BookDetailScreen(
+                                              bookKey: book['bookKey'] as String,
+                                              onClose: () {},
+                                              userId: widget.userId,
                                             ),
-                                          )
-                                        : const Icon(Icons.book, size: 50),
-                                    title: Text(
-                                      book['title'] ?? 'No Title',
-                                      style: Theme.of(context).textTheme.titleSmall,
-                                    ),
-                                    subtitle: Text(
-                                      book['author'] ?? 'Unknown',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            fontStyle: FontStyle.italic,
-                                            color: Colors.grey[600],
                                           ),
-                                    ),
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => BookDetailScreen(
-                                            bookKey: book['key'],
-                                            onClose: () {},
-                                            userId: widget.userId,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }).toList(),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
+
                             const SizedBox(height: 20),
                           ],
                         ),

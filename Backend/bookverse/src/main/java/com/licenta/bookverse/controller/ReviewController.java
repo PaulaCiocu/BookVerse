@@ -1,5 +1,6 @@
 package com.licenta.bookverse.controller;
 
+import com.licenta.bookverse.dto.books.ReviewsDTO;
 import com.licenta.bookverse.entity.Review;
 import com.licenta.bookverse.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class ReviewController {
     }
 
     @GetMapping("/book/{bookKey}")
-    public ResponseEntity<List<Review>> getReviewsByBook(@PathVariable String bookKey) {
+    public ResponseEntity<List<ReviewsDTO>> getReviewsByBook(@PathVariable String bookKey) {
         return ResponseEntity.ok(reviewService.getReviewsByBook(bookKey));
     }
 

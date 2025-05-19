@@ -15,6 +15,13 @@
     } 
     return null;
   }
+
+    String? validateDescription(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Can not be empty';
+    } 
+    return null;
+  }
   String? validateEmail(String? value) {
       if (value == null || value.trim().isEmpty) {
         return 'Email is required';
@@ -33,7 +40,7 @@
     String passwordRegex =
         r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$";
     if (!RegExp(passwordRegex).hasMatch(value)) {
-      return 'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character';
+      return 'Password must contain at least 8 characters, uppercase letter, lowercase, number and special character';
     }
     return null;
   }

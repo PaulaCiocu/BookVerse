@@ -2,6 +2,7 @@ package com.licenta.bookverse.controller;
 
 
 import com.licenta.bookverse.dto.books.TrailDTO;
+import com.licenta.bookverse.dto.books.TrailDTODetails;
 import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
 import com.licenta.bookverse.service.TrailsService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,13 @@ public class TrailController {
     private final TrailsService trailService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrailDTOGetRequest> getTrailById(@PathVariable Integer id) {
-        TrailDTOGetRequest trail = trailService.getTrailById(id);
+    public ResponseEntity<TrailDTODetails> getTrailById(@PathVariable Integer id) {
+        TrailDTODetails trail = trailService.getTrailById(id);
         return ResponseEntity.ok(trail);
     }
 
     @GetMapping("/person/{personId}")
-    public ResponseEntity<List<TrailDTOGetRequest>> getTrailsByPerson(@PathVariable UUID personId) {
+    public ResponseEntity<List<TrailDTODetails>> getTrailsByPerson(@PathVariable UUID personId) {
         return ResponseEntity.ok(trailService.getTrailsByPerson(personId));
     }
 

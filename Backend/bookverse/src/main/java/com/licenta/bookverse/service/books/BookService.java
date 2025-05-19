@@ -158,7 +158,7 @@ public class BookService {
     }
 
     private boolean containsExcludedWords(String title) {
-        String[] excludedWords = {"set", "box", "collection", "series", "coloring", "edition", "movie", "screenplay", "appendices", "instrumental"};
+        String[] excludedWords = {"set","box", "collection", "series", "coloring", "edition", "movie", "screenplay", "appendices", "instrumental"};
         for (String word : excludedWords) {
             if (title.toLowerCase().contains(word)) {
                 return true;

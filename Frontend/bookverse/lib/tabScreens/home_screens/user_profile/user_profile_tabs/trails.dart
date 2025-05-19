@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:bookverse/controller/trailController.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/create_trail.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/create_trail/update_trail.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trail_progress.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/create_trail/create_trail.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/create_trail/update_trail.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/trail_progress.dart';
 import 'package:bookverse/widgets/dialogs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -298,77 +298,58 @@ class _TrailsScreenState extends State<TrailsScreen> {
                                 : TabBarView(
                                     children: [
                                       // CREATED
-                                      _createdTrails.isEmpty
-                                          ? const Center(
-                                              child: Padding(
-                                                padding:
-                                                    EdgeInsets.only(top: 60),
-                                                child: Text(
-                                                  "You haven't created any trails yet.",
-                                                ),
-                                              ),
-                                            )
-                                          : RefreshIndicator(
-                                              onRefresh: _loadTrailsOnly,
-                                              child: ListView(
-                                                padding: const EdgeInsets
-                                                        .only(bottom: 40) +
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 0),
-                                                children: [
-                                                  ..._createdTrails
-                                                      .map((t) =>
-                                                          buildTrailCard(t))
-                                                      .toList(),
+                                      RefreshIndicator(
+                                            onRefresh: _loadTrailsOnly,
+                                            child: ListView(
+                                              padding: const EdgeInsets.only(bottom: 40),
+                                              children: [
+                                                if (_createdTrails.isEmpty) ...[
+                                                  const SizedBox(height: 60),
+                                                  const Center(
+                                                    child: Text("You haven't created any trails yet."),
+                                                  ),
                                                   const SizedBox(height: 20),
-                                                  Center(
-                                                    child: GestureDetector(
-                                                      onTap: () async {
-                                                        await Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                CreateTrailStepOne(
-                                                                    userId: widget
-                                                                        .userId),
-                                                          ),
-                                                        );
-                                                        await _loadTrailsOnly();
-                                                      },
-                                                      child: Container(
-                                                        width: 140,
-                                                        height: 40,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          color: const Color(
-                                                              0xFFFFDCAA),
+                                                ] else ...[
+                                                  ..._createdTrails.map((t) => buildTrailCard(t)),
+                                                  const SizedBox(height: 20),
+                                                ],
+
+                                                // Create trail button is always visible
+                                                Center(
+                                                  child: GestureDetector(
+                                                    onTap: () async {
+                                                      await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) => CreateTrailStepOne(userId: widget.userId),
                                                         ),
-                                                        child: Center(
-                                                          child: Text(
-                                                            'Create trail',
-                                                            style: Theme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .bodyLarge
-                                                                ?.copyWith(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w900,
-                                                                ),
-                                                          ),
+                                                      );
+                                                      await _loadTrailsOnly();
+                                                    },
+                                                    child: Container(
+                                                      width: 140,
+                                                      height: 40,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(10),
+                                                        color: const Color(0xFFFFDCAA),
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          'Create trail',
+                                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w900,
+                                                              ),
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 20),
-                                                ],
-                                              ),
+                                                ),
+                                                const SizedBox(height: 20),
+                                              ],
                                             ),
+                                          ),
+
 
                                       // FOLLOWED
                                       _followedTrails.isEmpty

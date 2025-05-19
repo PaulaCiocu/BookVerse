@@ -1,6 +1,8 @@
 package com.licenta.bookverse.service;
 
+import com.licenta.bookverse.dto.books.TrailBookDTODetails;
 import com.licenta.bookverse.dto.books.TrailDTO;
+import com.licenta.bookverse.dto.books.TrailDTODetails;
 import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
@@ -27,16 +29,26 @@ public class TrailsService {
     private final BookService bookService;
     private final NotificationService notificationService;
 
-    public TrailDTOGetRequest getTrailById(Integer trailId) {
+    public TrailDTODetails getTrailById(Integer trailId) {
         Trail trail = trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
-
-        return TrailDTOGetRequest.builder()
+        List<TrailBookDTODetails> bookDtos =
+                trail.getTrailBooks().stream()
+                        .map(tb -> TrailBookDTODetails.builder()
+                                .id(tb.getId())
+                                .bookKey(tb.getBook().getKey())
+                                .title(tb.getBook().getTitle())
+                                .author(tb.getBook().getAuthor())
+                                .coverImageUrl(tb.getBook().getCoverImageUrl())
+                                .build()
+                        )
+                        .collect(Collectors.toList());
+        return TrailDTODetails.builder()
                 .trailId(trail.getId())
                 .title(trail.getTitle())
                 .description(trail.getDescription())
                 .genre(trail.getGenres())
-                .trailBookList(trail.getTrailBooks())
+                .trailBookDTODetails(bookDtos)
                 .numberOfReadings(trail.getNumberOfReadings())
                 .creatorId(trail.getCreator().getId())
                 .personName(trail.getCreator().getFullName())
@@ -45,23 +57,36 @@ public class TrailsService {
     }
 
 
-    public List<TrailDTOGetRequest> getTrailsByPerson(UUID personId) {
-        List<Trail> trails = trailRepository.findByCreatorId(personId);
-
-        return trails.stream()
+    public List<TrailDTODetails> getTrailsByPerson(UUID personId) {
+        return trailRepository.findByCreatorId(personId).stream()
                 .filter(trail -> !trail.isDeleted())
-                .map(trail ->
-                        TrailDTOGetRequest.builder()
-                                .trailId(trail.getId())
-                                .title(trail.getTitle())
-                                .description(trail.getDescription())
-                                .genre(trail.getGenres())
-                                .trailBookList(trail.getTrailBooks())
-                                .numberOfReadings(trail.getNumberOfReadings())
-                                .creatorId(trail.getCreator().getId())
-                                .personName(trail.getCreator().getFullName())
-                                .build()
-                ).collect(Collectors.toList());
+                .map(trail -> {
+                    // map each TrailBook → TrailBookDTODetails
+                    List<TrailBookDTODetails> bookDtos =
+                            trail.getTrailBooks().stream()
+                                    .map(tb -> TrailBookDTODetails.builder()
+                                            .id(tb.getId())
+                                            .bookKey(tb.getBook().getKey())
+                                            .title(tb.getBook().getTitle())
+                                            .author(tb.getBook().getAuthor())
+                                            .coverImageUrl(tb.getBook().getCoverImageUrl())
+                                            .build()
+                                    )
+                                    .collect(Collectors.toList());
+
+                    // build the TrailDTODetails
+                    return TrailDTODetails.builder()
+                            .trailId(trail.getId())
+                            .title(trail.getTitle())
+                            .description(trail.getDescription())
+                            .genre(trail.getGenres())
+                            .trailBookDTODetails(bookDtos)
+                            .numberOfReadings(trail.getNumberOfReadings())
+                            .creatorId(trail.getCreator().getId())
+                            .personName(trail.getCreator().getFullName())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     public List<TrailDTOGetRequest> getTrailsExceptForPerson(UUID personId, String genre, String author, String bookTitle, String trailName) {
@@ -85,8 +110,8 @@ public class TrailsService {
                         .trailId(trail.getId())
                         .title(trail.getTitle())
                         .description(trail.getDescription())
-                        .genre(trail.getGenres())
-                        .trailBookList(trail.getTrailBooks())
+                       // .genre(trail.getGenres())
+                      //  .trailBookList(trail.getTrailBooks())
                         .numberOfReadings(trail.getNumberOfReadings())
                         .creatorId(trail.getCreator().getId())
                         .personName(trail.getCreator().getFullName())

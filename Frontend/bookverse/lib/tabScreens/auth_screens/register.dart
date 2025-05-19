@@ -1,6 +1,6 @@
 import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/controller/registrationSuccessPage.dart';
-import 'package:bookverse/auth_screens/login.dart';
+import 'package:bookverse/tabScreens/auth_screens/login.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';

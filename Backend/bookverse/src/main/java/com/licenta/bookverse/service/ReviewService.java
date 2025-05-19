@@ -1,5 +1,6 @@
 package com.licenta.bookverse.service;
 
+import com.licenta.bookverse.dto.books.ReviewsDTO;
 import com.licenta.bookverse.entity.Book;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.entity.Review;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +40,17 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    public List<Review> getReviewsByBook(String bookKey) {
-        return reviewRepository.findByBook_Key(bookKey);
+    public List<ReviewsDTO> getReviewsByBook(String bookKey) {
+        return reviewRepository.findByBook_Key(bookKey).stream().map(
+                review -> {
+                    ReviewsDTO reviewsDTO = new ReviewsDTO();
+                    reviewsDTO.setId(review.getId());
+                    reviewsDTO.setContent(review.getContent());
+                    reviewsDTO.setRating(review.getRating());
+                    reviewsDTO.setPersonName(review.getPerson().getFullName());
+                    return reviewsDTO;
+                })
+                .collect(Collectors.toList());
     }
 
     public List<Review> getReviewsByPerson(UUID personId) {

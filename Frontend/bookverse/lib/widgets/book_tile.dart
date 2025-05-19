@@ -24,7 +24,7 @@ class BookTile extends StatelessWidget {
       ),
       subtitle: Text(
         book['author'] ?? 'Unknown Author',
-        style: Theme.of(context).textTheme.bodySmall,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
       ),
       leading: book['coverImageUrl'] != null
           ? ClipOval(

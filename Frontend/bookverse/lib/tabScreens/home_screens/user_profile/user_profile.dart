@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:bookverse/events/AppEvents.dart';
 import 'package:bookverse/controller/userProfileController.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/edit_profile.dart';
-import 'package:bookverse/tabScreens/home_screens/settings/notifications.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/reading_list.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/achievments.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile_Screen/user_profile_tab_screens/trails/trails.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/edit_profile.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/notifications.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/reading_list.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/achievments.dart';
+import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -149,7 +149,7 @@ class _UserProfileState extends State<UserProfile> {
                             ),
                           ),
 
-                          // Profile picture (Avatar)
+                          
                           Positioned(
                             top: 70, // Adjust this value to position the avatar on top of the background
                             left: MediaQuery.of(context).size.width / 2 - 50, // Center the avatar horizontally

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-void showTopSnackBar(
+void showBottomSnackBar(
   BuildContext context,
   String message, {
   Color backgroundColor = Colors.black87,
@@ -40,3 +40,49 @@ void showTopSnackBar(
     ..hideCurrentSnackBar()
     ..showSnackBar(snackBar);
 }
+
+ void showCustomSnackbar(BuildContext context, String errorMessage) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 60, 
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 335,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color:  Colors.white, // Match button color
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(overlayEntry);
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
+

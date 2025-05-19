@@ -1,4 +1,4 @@
-import 'package:bookverse/auth_screens/login.dart';
+import 'package:bookverse/tabScreens/auth_screens/login.dart';
 import 'package:bookverse/home.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
