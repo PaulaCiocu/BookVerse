@@ -4,6 +4,7 @@ import 'package:bookverse/controller/imageController.dart';
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/update_success.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:bookverse/widgets/book_tile.dart';
 import 'package:flutter/material.dart';
@@ -33,20 +34,6 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
   String _defaultImage= '';
-
-  void _updateNameValidation(String value) {
-    setState(() {
-      isTitleValid = validateField(value, 'Title') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
-
-  void _updateBioValidation(String value) {
-    setState(() {
-      isDescriptionValid = validateField(value, 'Description') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -212,9 +199,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                                       'pagesRead': 0,
                                     });
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('This book is already added.')),
-                                    );
+                                    showCustomSnackbar(context, "This book is already added.");
                                   }
                                 });
                               },
@@ -232,7 +217,6 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-
                     
                   // Books Added Section
                   Container(
@@ -258,7 +242,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                                 style: TextStyle(color: Colors.black45),
                               )
                             : SizedBox(
-                                height: 200, // Adjust height as needed
+                                height: 200,
                                 child:
                                  ListView.builder(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -295,9 +279,7 @@ class _UpdatetrailScreenState extends State<UpdatetrailScreen> {
                               updateTrail(title, description, bookIds);
                               
                           } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Please fill in all fields and add at least 2 books.')),
-                              );
+                            showCustomSnackbar(context, "Please fill in all fields and add at least 2 books.");
                           }
                         },
                         child: Container(

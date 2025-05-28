@@ -7,16 +7,13 @@ import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/reading_list.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/achievments.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails.dart';
+import 'package:bookverse/widgets/user_option_card.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfile extends StatefulWidget {
   final String userId;
- // final Function(String userId) onReadSelected;
- // final Function(String userId) onAchievementsSelected;
- // final Function(String userId) onTrailsSelected;
-
   const UserProfile({super.key, required this.userId});
 
   @override
@@ -95,9 +92,8 @@ class _UserProfileState extends State<UserProfile> {
                   Column(
                     children: [
                      Stack(
-                        clipBehavior: Clip.none,  // Allow the avatar to overlap the background without clipping it
+                        clipBehavior: Clip.none, 
                         children: [
-                                                    // Background image
                           SizedBox(
                             width: double.infinity,
                             child: Image.asset(
@@ -149,12 +145,11 @@ class _UserProfileState extends State<UserProfile> {
                             ),
                           ),
 
-                          
                           Positioned(
-                            top: 70, // Adjust this value to position the avatar on top of the background
-                            left: MediaQuery.of(context).size.width / 2 - 50, // Center the avatar horizontally
+                            top: 70, 
+                            left: MediaQuery.of(context).size.width / 2 - 50, 
                             child: CircleAvatar(
-                              radius: 50, // Set the size of the avatar
+                              radius: 50,
                               backgroundImage: user['profilePictureUrl'] != null
                                 ? CachedNetworkImageProvider(user['profilePictureUrl']!)
                                 : const AssetImage('assets/avatars/avatar_woman.png') as ImageProvider,
@@ -163,9 +158,7 @@ class _UserProfileState extends State<UserProfile> {
                           ),
                         ],
                       ),
-
                     const SizedBox(height: 70), 
-    
                     Text(
                       user['fullName'] ?? 'Unknown User', 
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
@@ -184,9 +177,7 @@ class _UserProfileState extends State<UserProfile> {
                     ),
                     ],
                   ),
-
                   const SizedBox(height: 40,),
-
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
@@ -195,7 +186,7 @@ class _UserProfileState extends State<UserProfile> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildOptionCard(
+                            buildOptionCard(
                               context: context,
                               iconPath: 'assets/icons/page_icons.png',
                               label: 'Reading',
@@ -208,12 +199,11 @@ class _UserProfileState extends State<UserProfile> {
                                 );
                               },
                             ),
-                            _buildOptionCard(
+                            buildOptionCard(
                               context: context,
                               iconPath: 'assets/badges/medal_icon.png',
                               label: 'Achievements',
                               onTap: () {
-                                //widget.onAchievementsSelected(user['id']);
                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -228,12 +218,11 @@ class _UserProfileState extends State<UserProfile> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildOptionCard(
+                            buildOptionCard(
                               context: context,
                               iconPath: 'assets/icons/books_shelve_icon.png',
                               label: 'Trails',
                               onTap: () {
-                               // widget.onTrailsSelected(user['id']);
                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -242,7 +231,7 @@ class _UserProfileState extends State<UserProfile> {
                                 );
                               },
                             ),
-                            _buildOptionCard(
+                            buildOptionCard(
                               context: context,
                               iconPath: 'assets/icons/settings.png',
                               label: 'Profile Settings',
@@ -263,7 +252,6 @@ class _UserProfileState extends State<UserProfile> {
                       ],
                     ),
                   ),
-
                 ],
               );
             }
@@ -272,39 +260,4 @@ class _UserProfileState extends State<UserProfile> {
       ),
     );
   }
-}
-
-
-Widget _buildOptionCard({
-  required BuildContext context,
-  required String label,
-  required VoidCallback onTap,
-  required String iconPath,
-}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      color: const Color.fromARGB(255, 240, 225, 200),
-      shadowColor: Colors.black12, 
-      child: Container(
-        width: 120,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(iconPath, width: 45, height: 45),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }

@@ -23,41 +23,9 @@ public class PersonService {
     @Autowired
     private final PersonRepository personRepository;
 
-    public Person findById(UUID id) {
-        return personRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-
-    public Person findByEmail(String email) {
-        return personRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-
     public List<Person> getAllPersons() {
         return personRepository.findAll();
     }
-
-    public boolean checkIfEmailExists(String email) {
-        return personRepository.existsByEmail(email);
-    }
-
-    public Person editProfile(String email, UserProfileDTO updatedPerson) {
-        Person person = personRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        if(updatedPerson.getFullName()!= null) {
-            person.setFullName(updatedPerson.getFullName());
-        }
-        if(updatedPerson.getBio()!= null) {
-            person.setBio(updatedPerson.getBio());
-        }
-
-        if(updatedPerson.getProfilePictureUrl()!= null && !updatedPerson.getProfilePictureUrl().isEmpty()) {
-            person.setProfilePictureUrl(updatedPerson.getProfilePictureUrl());
-        }
-        Person savedPerson = personRepository.save(person);
-        return savedPerson;
-    }
-
 
     public Person editProfileById(UUID id, UserProfileDTO updatedPerson) {
         Person person = personRepository.findById(id)

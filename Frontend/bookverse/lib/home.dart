@@ -2,11 +2,9 @@ import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_scr
 import 'package:bookverse/tabScreens/home_screens/explore_trails/explore_trails.dart';
 import 'package:bookverse/tabScreens/home_screens/search_screen/search_books.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile.dart';
-import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/achievments.dart';
 import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
   final String token;
@@ -22,13 +20,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   int screenIndex = 0;
-  String? selectedBookKey; // Store the selected book key
+  String? selectedBookKey; 
   String? selectedTrailKey;
   String? selectedTabScreenProfile;
   String? readUserId;
   String? achievementsUserId;
   String? trailsUserId;
-
 
   @override
   Widget build(BuildContext context) {
@@ -54,21 +51,6 @@ class _HomeState extends State<Home> {
                 },
               ),
               UserProfile(
-                // onReadSelected: (id) { 
-                //   setState(() {
-                //     readUserId = id;
-                //   });
-                // },
-                // onAchievementsSelected: (id) { 
-                //   setState(() {
-                //     achievementsUserId = id;
-                //   });
-                // },
-                // onTrailsSelected: (String id) { 
-                //   setState(() {
-                //     trailsUserId = id;
-                //   });
-                // },
                 userId: widget.userId,
               ),
            
@@ -100,29 +82,7 @@ class _HomeState extends State<Home> {
                 userId: widget.userId,
               ),
             ),
-          // if (readUserId != null)
-          //   Positioned.fill(
-          //     child: ReadingScreen(
-          //       userId: readUserId!,
-          //       onClose: () {
-          //         setState(() {
-          //           readUserId = null;
-          //         });
-          //       },
-          //     ),
-          //   ),
-          // if (achievementsUserId != null)
-          //   Positioned.fill(
-          //     child: AchievmentsScreen(
-          //       key: ValueKey(achievementsUserId), 
-          //       userId: achievementsUserId!,
-          //       onClose: () {
-          //         setState(() {
-          //           achievementsUserId = null;
-          //         });
-          //       },
-          //     ),
-          //   ),
+      
           if (trailsUserId != null)
             Positioned.fill(
               child: TrailsScreen(
@@ -140,17 +100,11 @@ class _HomeState extends State<Home> {
         onTap: (index) {
           setState(() {
             if (selectedTrailKey != null) {
-              selectedTrailKey = null; // Close trail details
+              selectedTrailKey = null;
             }
             if (selectedBookKey != null) {
-              selectedBookKey = null; // Close book details
+              selectedBookKey = null; 
             }
-            // if (readUserId != null) {
-            //   readUserId = null; // Close reading screen
-            // }
-            // if (achievementsUserId != null) {
-            //   achievementsUserId = null; // Close achievements screen
-            // }
             if (trailsUserId != null) {
               trailsUserId = null; 
             } else {
@@ -175,6 +129,5 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Function to navigate to ReadingScreen
   
 }

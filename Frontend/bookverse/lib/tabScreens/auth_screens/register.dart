@@ -2,6 +2,7 @@ import 'package:bookverse/controller/authenticationController.dart';
 import 'package:bookverse/controller/registrationSuccessPage.dart';
 import 'package:bookverse/tabScreens/auth_screens/login.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:flutter/material.dart';
 
@@ -58,55 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return null;
   }
 
-  void showCustomSnackbar(BuildContext context, String errorMessage) {
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 60, // Adjust the distance from the top
-        left: 20,
-        right: 20,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: 335,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color:  Colors.white, // Match button color
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                errorMessage,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Insert the overlay
-    overlay.insert(overlayEntry);
-
-    // Remove after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      overlayEntry.remove();
-    });
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,7 +157,6 @@ class _RegisterPageState extends State<RegisterPage> {
                           onSaved: (val) => _confirmPasswordController.text = val?.trim() ?? '',
                         ),
 
-                        
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
@@ -295,7 +247,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         } else {
                           showCustomSnackbar(context, errorMessage);
                         }
-                     
                      }
                   },
                   child: Container(

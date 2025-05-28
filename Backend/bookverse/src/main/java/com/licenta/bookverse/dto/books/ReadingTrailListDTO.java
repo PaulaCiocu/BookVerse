@@ -13,8 +13,7 @@ import java.util.UUID;
 public class ReadingTrailListDTO {
     private Long id;
     private UUID personId;
-    private TrailDTO trail;
-    private String createdType;
-    private int totalBooks;
-    private int progress;
+    private String title;
+    private String description;
+    private String imageUrl;
 }

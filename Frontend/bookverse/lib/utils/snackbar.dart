@@ -41,7 +41,12 @@ void showBottomSnackBar(
     ..showSnackBar(snackBar);
 }
 
- void showCustomSnackbar(BuildContext context, String errorMessage) {
+ void showCustomSnackbar(BuildContext context, String errorMessage,{
+      Color backgroundColor = Colors.transparent,
+      Color textColor = Colors.white,
+      IconData? icon,
+      Duration duration = const Duration(seconds: 3),
+    }) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -49,7 +54,7 @@ void showBottomSnackBar(
         left: 20,
         right: 20,
         child: Material(
-          color: Colors.transparent,
+          color: backgroundColor,
           child: Container(
             width: 335,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

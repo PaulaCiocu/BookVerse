@@ -8,7 +8,6 @@
     return null;
   }
   
-
   String? validateFieldNotEmpty(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Can not be empty';
@@ -16,7 +15,7 @@
     return null;
   }
 
-    String? validateDescription(String? value) {
+  String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Can not be empty';
     } 

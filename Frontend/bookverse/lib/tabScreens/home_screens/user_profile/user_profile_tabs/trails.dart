@@ -35,16 +35,12 @@ class _TrailsScreenState extends State<TrailsScreen> {
     super.initState();
     _loadCachedThenFetch();
   }
-
-  /// 1) Load from cache (if any), then
-  /// 2) Fetch fresh from server and overwrite both state & cache.
   Future<void> _loadCachedThenFetch() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('$_cacheKeyPrefix${widget.userId}');
 
     if (raw != null) {
       if (!mounted) return; 
-      // decode cached list
       final List<dynamic> all = jsonDecode(raw);
       setState(() {
         _createdTrails =
@@ -55,10 +51,8 @@ class _TrailsScreenState extends State<TrailsScreen> {
       });
     }
 
-    // now fetch fresh
     try {
       final allTrails = await TrailController.fetchTrails(widget.userId);
-      // separate
       final created =
           allTrails.where((t) => t['createdType'] == 'CREATED').toList();
       final followed =
@@ -70,20 +64,16 @@ class _TrailsScreenState extends State<TrailsScreen> {
         isLoading = false;
       });
 
-      // update cache
       await prefs.setString(
         '$_cacheKeyPrefix${widget.userId}',
         jsonEncode(allTrails),
       );
     } catch (e) {
-      // if fetch fails, leave whatever we had (cache or empty)
       setState(() => isLoading = false);
-      // optionally show a Snackbar or toast here
     }
   }
 
   Future<void> _loadTrailsOnly() async {
-    // helper if you want pull-to-refresh
     setState(() => isLoading = true);
     await _loadCachedThenFetch();
   }

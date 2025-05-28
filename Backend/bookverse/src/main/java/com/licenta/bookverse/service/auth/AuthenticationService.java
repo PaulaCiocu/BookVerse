@@ -53,7 +53,7 @@ public class AuthenticationService {
 
         Person person = new Person();
         person.setFullName(registrationDTO.getFullName());
-        person.setPassword(registrationDTO.getPassword());
+        //person.setPassword(registrationDTO.getPassword());
         person.setEmail(registrationDTO.getEmail());
         person.setProfilePictureUrl(registrationDTO.getProfilePictureUrl());
 

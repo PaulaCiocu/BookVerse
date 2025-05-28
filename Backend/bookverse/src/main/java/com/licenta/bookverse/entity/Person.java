@@ -26,11 +26,11 @@ public class Person{
     @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
-
-    @NotBlank
-    @Size(min = 8)
-    @Column(nullable = false)
-    private String password;
+//
+//    @NotBlank
+//    @Size(min = 8)
+//    @Column(nullable = false)
+//    private String password;
 
     @NotBlank
     @Column(nullable = false)

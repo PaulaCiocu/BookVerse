@@ -3,6 +3,7 @@ import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/trailController.dart';
 import 'package:bookverse/custom_ui/custom_text_field.dart';
 import 'package:bookverse/tabScreens/home_screens/user_profile/user_profile_tabs/trails/create_trail/success_page.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:bookverse/widgets/book_tile.dart';
 import 'package:flutter/material.dart';
@@ -54,9 +55,8 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
       context,
       MaterialPageRoute(builder: (context) => SuccessPage()),);
     } else{
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not create trail!')));
+        showCustomSnackbar(context, "Could not create trail");    
     }
-    
   }
 
   @override
@@ -133,9 +133,7 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                         onSaved: (val) => _descriptionController.text = val?.trim() ?? '',
                         maxLines: 3,
                       ),
-                      
-                    
-                  
+      
                     //search
                     Container(
                       decoration: BoxDecoration(
@@ -160,8 +158,7 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                
-                    // Use SizedBox instead of Expanded
+         
                     SizedBox(
                       height: 200, 
                       child: Card(
@@ -242,7 +239,7 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                                 style: TextStyle(color: Colors.black45),
                               )
                             : SizedBox(
-                                height: 200, // Adjust height as needed
+                                height: 200, 
                                 child:
                                  ListView.builder(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -281,7 +278,6 @@ class _CreateTrailStepOneState extends State<CreateTrailStepOne> {
                             
                     
                         } else {
-                          // If any condition fails
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(_selectedImage == null 
                                 ? 'Please upload an image to create a trail.' 

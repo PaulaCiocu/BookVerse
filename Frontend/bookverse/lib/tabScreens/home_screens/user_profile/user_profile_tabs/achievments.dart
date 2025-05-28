@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bookverse/controller/achievments_controller.dart';
@@ -40,36 +41,27 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
   }
   
   Future<void> _loadAchievementsWithCache() async {
-    // First try to load from cache
     final cachedData = await _loadFromCache();
     
     if (cachedData != null && mounted) {
-      // Update UI with cached data first
       setState(() {
         _achievements = cachedData;
         _isLoading = false;
       });
     }
-    
-    // Then fetch fresh data in background
     try {
       final freshData = await AchievmentsController.fetchAchievements(widget.userId);
       
       if (mounted) {
-        // Update the UI with fresh data
         setState(() {
           _achievements = freshData;
           _isLoading = false;
         });
-        
-        // Cache the new data
         await _saveToCache(freshData);
       }
     } catch (e) {
       print('Failed to fetch achievements: $e');
-      
       if (mounted && cachedData == null) {
-        // Only update loading state if we don't have cached data
         setState(() {
           _isLoading = false;
         });
@@ -99,35 +91,6 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
     }
   }
   
-  Future<void> _refreshData() async {
-    setState(() {
-      _isLoading = true;
-    });
-    
-    try {
-      final freshData = await AchievmentsController.fetchAchievements(widget.userId);
-      
-      if (mounted) {
-        setState(() {
-          _achievements = freshData;
-          _isLoading = false;
-        });
-        
-        await _saveToCache(freshData);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to refresh achievements'))
-        );
-      }
-    }
-  }
-
   Widget buildAchievementBadge(String label, bool isUnlocked, String imagePath) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0), 
@@ -293,19 +256,6 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        // This paints a fading black overlay behind the toolbar area
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.black87,  // very dark at the top
-                Colors.transparent // fade to fully clear
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
       ),
       body: Stack(
         children:
@@ -332,8 +282,7 @@ class _AchievmentsScreenState extends State<AchievmentsScreen> {
                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)
                     ),
                     const SizedBox(height: 20),
-                    
-                    // Main content
+        
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: _isLoading && _achievements['totalBooksRead'] == 0

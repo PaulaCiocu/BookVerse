@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/achievements")
-@CrossOrigin(origins = "*")  // Allow Flutter to access
+@CrossOrigin(origins = "*")
 public class AchievementController {
     private final AchievementService achievementService;
 

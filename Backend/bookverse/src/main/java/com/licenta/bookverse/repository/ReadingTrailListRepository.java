@@ -1,7 +1,6 @@
 package com.licenta.bookverse.repository;
 
-import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
-import com.licenta.bookverse.dto.books.ReadingTrailListProjection;
+
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.entity.Person;

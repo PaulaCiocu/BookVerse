@@ -72,7 +72,6 @@ class _TrailDetailsState extends State<TrailDetails> {
             final trail = _trail!;
             return Stack(
               children: [
-                // background image
                 SizedBox(
                   width: double.infinity,
                   height: 160,
@@ -85,7 +84,7 @@ class _TrailDetailsState extends State<TrailDetails> {
                     ),
                   ),
                 ),
-                // main content
+
                 Padding(
                   padding: const EdgeInsets.only(top: 180.0),
                   child: SafeArea(

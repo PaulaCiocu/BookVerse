@@ -1,5 +1,6 @@
 import 'package:bookverse/controller/booksController.dart';
 import 'package:bookverse/controller/reviewController.dart';
+import 'package:bookverse/utils/snackbar.dart';
 import 'package:bookverse/widgets/add_review_dialog.dart';
 import 'package:bookverse/validation/validation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -51,19 +52,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     });
   }
 
-
   Map<String, dynamic>? _bookDetails;
-
   Future<void> _loadDetailsAndStatus() async {
-    // fire details + status in parallel
     final detailsFuture = BooksController.fetchBookDetails(widget.bookKey);
     final statusFuture  = BooksController.checkIfBookInReadingList(widget.userId, widget.bookKey);
     final results = await Future.wait([detailsFuture, statusFuture]);
-    // unwrap:
     _bookDetails   = results[0] as Map<String, dynamic>;
     _isAddedToList = results[1] as bool;
   }
-
 
   @override
   void initState() {
@@ -75,7 +71,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
      
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +140,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                         ],
                                       ),
                                       SizedBox(
-                                        height: MediaQuery.of(context).size.height * 0.55,  // adjust height as you want
+                                        height: MediaQuery.of(context).size.height * 0.55, 
                                         child: TabBarView(
                                           children: [
                                             Column(
@@ -160,7 +155,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                           color: Colors.white,
                                                           borderRadius: BorderRadius.circular(12),
                                                           gradient: LinearGradient(
-                                                            colors: [Colors.white, Colors.grey.shade100],  // subtle paper gradient
+                                                            colors: [Colors.white, Colors.grey.shade100], 
                                                             begin: Alignment.topLeft,
                                                             end: Alignment.bottomRight,
                                                           ),
@@ -183,7 +178,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                                 color: Colors.white,
                                                                 borderRadius: BorderRadius.circular(12),
                                                                 gradient: LinearGradient(
-                                                                  colors: [Colors.white, Colors.grey.shade200],  // subtle paper gradient
+                                                                  colors: [Colors.white, Colors.grey.shade200], 
                                                                   begin: Alignment.topLeft,
                                                                   end: Alignment.bottomRight,
                                                                 ),
@@ -223,7 +218,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                                     ),
                                                                   ),
                                                                   const SizedBox(height: 5),
-                                                                  const SizedBox(height: 10),  // space after description
+                                                                  const SizedBox(height: 10), 
                                                                   LayoutBuilder(
                                                                     builder: (context, constraints) {
                                                                       return Row(
@@ -239,7 +234,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                                       );
                                                                     },
                                                                   ),
-                                                                  const SizedBox(height: 15),  // space before genre
+                                                                  const SizedBox(height: 15), 
                                                                   Row(
                                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                                     children: [
@@ -300,18 +295,18 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                 ),
                                                 
                                                 ElevatedButton.icon(
-                                                        onPressed: _isAddedToList ? null : _addToReadingList,
-                                                        icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
-                                                        label: Text(_isAddedToList ? "Added to List" : "Add to List"),
-                                                        style: ElevatedButton.styleFrom(
-                                                          backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
-                                                          foregroundColor: Colors.white,
-                                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(8),
-                                                          ),
-                                                        ),
-                                                      ),
+                                                  onPressed: _isAddedToList ? null : _addToReadingList,
+                                                  icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
+                                                  label: Text(_isAddedToList ? "Added to List" : "Add to List"),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: _isAddedToList ? Colors.green : const Color(0xFFFFDCAA),
+                                                    foregroundColor: Colors.white,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                  ),
+                                                ),
                                               SizedBox(height: 10,)
                                               ],
                                             ),
@@ -405,25 +400,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                                     rating: rating,
                                                                     content: _contentController.text,
                                                                   );
-            
                                                                   if (success) {
                                                                     _fetchReviews();
                                                                     Navigator.pop(context);
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      const SnackBar(
-                                                                        content: Text("Review submitted successfully!"),
-                                                                        backgroundColor: Colors.green,
-                                                                        duration: Duration(seconds: 3),
-                                                                      ),
-                                                                    );
+                                                                    showCustomSnackbar(context, "Review submitted successfully!", backgroundColor: Colors.green);
                                                                   } else {
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      const SnackBar(
-                                                                        content: Text("Failed to submit the review. Please try again."),
-                                                                        backgroundColor: Colors.red,
-                                                                        duration: Duration(seconds: 3),
-                                                                      ),
-                                                                    );
+                                                                     showCustomSnackbar(context, "Failed to submit the review. Please try again.", backgroundColor: Colors.red);
                                                                   }
                                                                 }
                                                               },
@@ -436,7 +418,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                     style: ElevatedButton.styleFrom(
                                                       padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 4.0),
                                                       shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(8.0), // Rounded corners for button
+                                                        borderRadius: BorderRadius.circular(8.0), 
                                                       ),
                                                       backgroundColor: const Color(0xFFFFDCAA), 
                                                     ),

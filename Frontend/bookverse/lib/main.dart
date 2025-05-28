@@ -1,18 +1,12 @@
 import 'package:bookverse/tabScreens/auth_screens/login.dart';
 import 'package:bookverse/home.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Ensure Firebase initializes properly
-//   await FirebaseAppCheck.instance.activate(
-//   androidProvider: AndroidAppCheckProvider.debug,
-//   webProvider:    WebAppCheckProvider.debug,
-// );
-
+  await Firebase.initializeApp(); 
   runApp(MyApp());
 }
 
@@ -30,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
-      home: const WelcomePage(), // Show WelcomePage when app starts
+      home: const WelcomePage(), 
     );
   }
 }
@@ -44,7 +38,6 @@ class WelcomePage extends StatelessWidget {
       body: Center(
         child: GestureDetector(
           onTap: () async {
-            // Check if the user is already logged in
             final isLoggedIn = await _checkLoginStatus();
             if (isLoggedIn) {
                
@@ -52,13 +45,11 @@ class WelcomePage extends StatelessWidget {
               final token = prefs.getString('jwt_token') ?? '';
               final email = prefs.getString('user_email') ?? '';
               final userId = prefs.getString('user_id') ?? '';
-              
             
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => Home(token: token, userEmail: email, userId: userId,)));
             } else {
-              // If not logged in, navigate to LoginPage
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()));
@@ -104,7 +95,7 @@ class WelcomePage extends StatelessWidget {
                 child:  Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.my_library_books,
                       size: 21,
                       color: Color(0xFF000000),
@@ -124,11 +115,10 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-  // Function to check if the user is logged in
   Future<bool> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token'); // Get the token from SharedPreferences
-    return token != null; // If a token exists, the user is logged in
+    final token = prefs.getString('jwt_token'); 
+    return token != null;
   }
 }
 

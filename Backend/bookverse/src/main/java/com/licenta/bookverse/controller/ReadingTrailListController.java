@@ -2,6 +2,7 @@ package com.licenta.bookverse.controller;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
+import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.ReadingTrailList;
 import com.licenta.bookverse.service.ReadingTrailService;
@@ -42,6 +43,11 @@ public class ReadingTrailListController {
     @GetMapping("/person/{personId}")
     public List<ReadingTrailList> getPersonTrails(@PathVariable UUID personId) {
         return readingTrailService.getReadingTrailsForPerson(personId);
+    }
+
+    @GetMapping("/profile/person/{personId}")
+    public List<ReadingTrailListDTO> getPersonTrailShorter(@PathVariable UUID personId) {
+        return readingTrailService.getReadingTrailsForPersonProfile(personId);
     }
 
     @GetMapping("/followed/person/{personId}")

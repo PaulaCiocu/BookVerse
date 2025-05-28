@@ -25,13 +25,12 @@ class LoginPageState extends State<LoginPage> {
   bool isPasswordValid = false;
 
 
- Future<void> storeJwtToken(String token, String userId, String email) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('jwt_token', token);
-  await prefs.setString('user_id', userId);
-  await prefs.setString('user_email', email);
-
- }
+  Future<void> storeJwtToken(String token, String userId, String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('jwt_token', token);
+    await prefs.setString('user_id', userId);
+    await prefs.setString('user_email', email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +41,14 @@ class LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-              
                 const SizedBox(height: 40,),
-                
                 Image.asset(
                   'assets/login_image.jpeg', 
                   height: 220,
                   width: 220,
                   fit: BoxFit.cover,
                 ),
-          
                 const SizedBox(height: 20),
-          
                 const Text(
                   'BookVerse',
                   style: TextStyle(
@@ -107,9 +102,9 @@ class LoginPageState extends State<LoginPage> {
                       
                         GestureDetector(
                           onTap: (){
-                              Navigator.push(
-                                context, 
-                                MaterialPageRoute(builder: (context) =>  const ForgotPasswordPage()));
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(builder: (context) =>  const ForgotPasswordPage()));
                           },
                           child:  Text(
                             'Forgot your passsword?',
@@ -118,8 +113,6 @@ class LoginPageState extends State<LoginPage> {
                             )
                           ),
                         ),
-                            
-                        
                       ]
                     ),
                   ),
@@ -137,20 +130,16 @@ class LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
                       _formKey.currentState?.save();
-                      
                       String? errorMessage = await AuthenticationController.loginUser(
                         email: _emailController.text,
                         password: _passwordController.text,
                       );
-                            
                       if (errorMessage == null) {
-                        // Success: Retrieve the JWT token and navigate to HomePage
                         final token = await AuthenticationController.getToken();
                         final userId = await AuthenticationController.getUserId();
                         
                         if (token != null && userId!= null) {
                           await storeJwtToken(token, userId, _emailController.text);
-                          // Token successfully retrieved, navigate to the HomePage
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => Home(token: token, userEmail: _emailController.text, userId: userId)), // Passing token to HomePage
@@ -159,12 +148,9 @@ class LoginPageState extends State<LoginPage> {
                           showCustomSnackbar(context, "Failed to retrieve token");
                         }
                       } else {
-                        // Show error message in a SnackBar
                         showCustomSnackbar(context, errorMessage);
                       }
-                            
                     }
-                       
                   },
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16),
@@ -202,10 +188,8 @@ class LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     )            
-                    
                   ],
                 ),
-          
               ],    
             ),
           ),

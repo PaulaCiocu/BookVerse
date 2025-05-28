@@ -84,6 +84,17 @@ class TrailController {
     }
   }
 
+    static Future<List<dynamic>> fetchTrailsProfile(String userId) async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/reading-trails/profile/person/$userId'));
+    if (response.statusCode == 200) {
+        return json.decode(response.body);
+    } else {
+      
+      throw Exception('Failed to load trails');
+    }
+  }
+
+
   static Future<bool> checkIfTrailInReadingList(String userId, String trailId) async {
     final url = 'http://10.0.2.2:8080/reading-trails/exists/$userId/$trailId';
     final response = await http.get(Uri.parse(url));

@@ -2,6 +2,7 @@ package com.licenta.bookverse.service;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
+import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
@@ -77,16 +78,24 @@ public class ReadingTrailService {
 
         List<ReadingTrailList> readingTrails = readingTrailListRepository.findByPerson(person);
 
-        for (ReadingTrailList trailList : readingTrails) {
-            Trail trail = trailList.getTrail();
-
-            // Sort the TrailBooks in the desired order (this might be redundant if your list is already ordered)
-            trail.getTrailBooks().sort(Comparator.comparingInt(TrailBook::getOrderIndex)); // Assuming 'getIndex' returns the book index in the trail
-
-            // Optionally, you can store the ordered books in the trailList if you need them to be ordered
-        }
-
         return readingTrails;
+    }
+
+    public List<ReadingTrailListDTO> getReadingTrailsForPersonProfile(UUID personId) {
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new RuntimeException("Person not found"));
+
+        List<ReadingTrailList> readingTrails = readingTrailListRepository.findByPerson(person);
+
+        return readingTrails.stream().map(
+                        trail -> ReadingTrailListDTO.builder()
+                                .title(trail.getTrail().getTitle())
+                                .description(trail.getTrail().getDescription())
+                                .imageUrl(trail.getTrail().getImageUrl())
+                                .id(trail.getTrail().getId())
+                                .personId(personId)
+                                .build())
+                .toList();
     }
 
     public List<ReadingListFollowedDTO> getReadingTrailsFollowedForPersonId(UUID personId) {

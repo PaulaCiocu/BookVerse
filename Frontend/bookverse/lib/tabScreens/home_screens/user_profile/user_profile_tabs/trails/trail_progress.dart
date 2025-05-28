@@ -21,19 +21,6 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        // This paints a fading black overlay behind the toolbar area
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.black87,  // very dark at the top
-                Colors.transparent // fade to fully clear
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
       ),
       body: Stack(
         children: 
@@ -78,7 +65,6 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
                         ),
                         const SizedBox(height: 20),
                 
-                        // Display Books in the Trail
                         Text(
                           "Books",
                           style: Theme.of(context).textTheme.titleMedium
@@ -160,17 +146,13 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
                             ),
                           ),
                         ),
-                         
-                        
                       ],
                     ),
                   )
-                      
-                 
                 ],
               ),
             ),
-                    ),
+            ),
           ),
         ]
       ),

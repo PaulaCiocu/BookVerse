@@ -20,22 +20,6 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
   List<dynamic> books = [];
   bool isLoading = true;
 
-  // Future<void> updateProgress(String bookId, int newPagesRead) async {
-  //   final update = await BooksController.updateProgress(widget.userId, bookId, newPagesRead);
-  //   if (update) {
-  //     setState(() {
-  //       final updatedBookIndex = books.indexWhere((book) => book['bookKey'] == bookId);
-  //       if (updatedBookIndex != -1) {
-  //         books[updatedBookIndex]['pagesRead'] = newPagesRead;
-  //       }
-  //     });
-
-  //     final prefs = await SharedPreferences.getInstance();
-  //     await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
-
-    
-  //   }
-  // }
   Future<void> updateProgress(String bookId, int newPagesRead) async {
     final idx = books.indexWhere((b) => b['bookKey'] == bookId);
     final oldPages = idx != -1 ? books[idx]['pagesRead'] as int : 0;
@@ -82,18 +66,6 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
     }
   }
   
-//   Future<void> removeBookFromReadingList(String bookId) async {
-//   final remove = await BooksController.removeBooksFromReadingList(widget.userId, bookId);
-//   if (remove) {
-//     setState(() {
-//       books.removeWhere((book) => book['bookKey'] == bookId);
-//     });
-
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.setString('reading_list_${widget.userId}', jsonEncode(books));
-//   }
-// }
-
   Future<void> fetchReadingList() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -154,7 +126,7 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // softer corners
+            borderRadius: BorderRadius.circular(20), 
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
           content: Form(
@@ -281,7 +253,7 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
                           : Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: ListView.builder(
-                                shrinkWrap: true, // Ensures the ListView takes up only as much space as necessary
+                                shrinkWrap: true, 
                                 itemCount: books.length,
                                 itemBuilder: (context, index) {
                                   final book = books[index];
@@ -294,7 +266,6 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
                                       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                                       child: Row(
                                         children: [
-                                          // Book cover image or default icon
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: book['coverImageUrl'] != null
@@ -368,13 +339,10 @@ class _ReadingListsceenState extends State<ReadingListsceen> {
                                                             ),
                                                           ),
                                                         ),
-                                                
                                                       ],
                                                     ),
                                                   ),
                                                 ),
-                        
-                                            
                                               ],
                                             ),
                                           ),

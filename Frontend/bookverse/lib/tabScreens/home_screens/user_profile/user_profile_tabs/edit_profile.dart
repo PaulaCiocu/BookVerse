@@ -54,21 +54,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       (Route<dynamic> route) => false,
     );
   }
-  
-
-  void _updateNameValidation(String value) {
-    setState(() {
-      isNameValid = validateField(value, 'Name') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
-
-  void _updateBioValidation(String value) {
-    setState(() {
-      isBioValid = validateField(value, 'Quote') == null;
-      _formKey.currentState!.validate(); 
-    });
-  }
 
   Future<void> _fetchUserData() async {
     final data = await UserProfileController.fetchUserProfileById(widget.userId);
@@ -250,17 +235,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.userId, name, bio);
                             if (success) {
                               AppEvents.notifyProfileUpdated();
-                                showBottomSnackBar(context, 'Profile updated successfully!', backgroundColor: Colors.green,  icon: Icons.check_circle_outline,);
+                                showCustomSnackbar(context, 'Profile updated successfully!', backgroundColor: Colors.green,  icon: Icons.check_circle_outline,);
                             } else {
-                              showBottomSnackBar(context, 'Failed to update profile.', backgroundColor: Colors.red.shade400,  icon: Icons.error_outline,);
+                              showCustomSnackbar(context, 'Failed to update profile.', backgroundColor: Colors.red.shade400,  icon: Icons.error_outline,);
                             }
                     
                         } else {
-                          //If any condition fails
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please fill in all fields.')),
-                          );
-                    
+                          showCustomSnackbar(context, 'Please fill in all fields.');
                         }
                       },
                     
@@ -291,8 +272,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                   ),
-                  
-                    
                   const SizedBox(height: 30),
                 ],
               ),
