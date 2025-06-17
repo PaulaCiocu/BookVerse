@@ -79,12 +79,12 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: (trail['trailBooks'] as List<dynamic>? ?? []).map((bookEntry) {
-                                final book = bookEntry['book'];
-                                final pagesRead = bookEntry['pagesRead'] ?? 0;
-                                final index = bookEntry['orderIndex'].toString();
-                                  final totalPages = book['pages'] ?? 1;
-                                  final progress = (pagesRead / totalPages).clamp(0.0, 1.0);
-                                  final progressPercentage = (progress * 100).toStringAsFixed(0);
+                                 final book = bookEntry['book'];
+                                // final pagesRead = bookEntry['pagesRead'] ?? 0;
+                                 final index = bookEntry['orderIndex'].toString();
+                                //   final totalPages = book['pages'] ?? 1;
+                                //   final progress = (pagesRead / totalPages).clamp(0.0, 1.0);
+                                //   final progressPercentage = (progress * 100).toStringAsFixed(0);
                                           
                                 return Card(
                                   elevation: 3,
@@ -112,33 +112,33 @@ class _TrailprogreesscreenState extends State<Trailprogreesscreen> {
                                             children: [
                                               Text("${book['author'] ?? 'Unknown'}", 
                                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontStyle:FontStyle.italic,)),
-                                              Text("Pages: $pagesRead/ $totalPages", style: Theme.of(context).textTheme.bodySmall),
+                                              //Text("Pages: $pagesRead/ $totalPages", style: Theme.of(context).textTheme.bodySmall),
                                             ],
                                           ),
                                         ),
                                       ),
-                                      SizedBox(
-                                        width: 60,
-                                        height: 60,
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            CircularProgressIndicator(
-                                              value: progress,
-                                              backgroundColor: Colors.grey[300],
-                                              color: const Color.fromARGB(255, 251, 207, 146),
-                                              strokeWidth: 4,
-                                            ),
-                                            Text(
-                                              '$progressPercentage%',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      // SizedBox(
+                                      //   width: 60,
+                                      //   height: 60,
+                                      //   child: Stack(
+                                      //     alignment: Alignment.center,
+                                      //     children: [
+                                      //       CircularProgressIndicator(
+                                      //         value: progress,
+                                      //         backgroundColor: Colors.grey[300],
+                                      //         color: const Color.fromARGB(255, 251, 207, 146),
+                                      //         strokeWidth: 4,
+                                      //       ),
+                                      //       Text(
+                                      //         '$progressPercentage%',
+                                      //         style: const TextStyle(
+                                      //           fontWeight: FontWeight.w500,
+                                      //           fontSize: 12,
+                                      //         ),
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 );

@@ -1,4 +1,5 @@
 import 'package:bookverse/controller/trailController.dart';
+import 'package:bookverse/tabScreens/home_screens/explore_trails/trail_details.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -141,7 +142,13 @@ class _ExploreTrailsState extends State<ExploreTrails> {
                           final trail = trails[index];
                           return GestureDetector(
                             onTap: () {
-                              widget.onTrailsSelected(trail['trailId'].toString());
+                              //widget.onTrailsSelected(trail['trailId'].toString());
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TrailDetails(userId: widget.userId, trailId: trail['trailId'].toString(), onClose: () {  }, )
+                                  ),
+                                );
                             },
                             child: Container(
                               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),

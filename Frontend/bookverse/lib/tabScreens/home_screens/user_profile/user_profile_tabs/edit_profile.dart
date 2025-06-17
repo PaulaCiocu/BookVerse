@@ -235,9 +235,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             bool success = await UserProfileController.updateProfile(selectedAvatar!, widget.userId, name, bio);
                             if (success) {
                               AppEvents.notifyProfileUpdated();
-                                showCustomSnackbar(context, 'Profile updated successfully!', backgroundColor: Colors.green,  icon: Icons.check_circle_outline,);
+                                showCustomSnackbar(context, 'Profile updated successfully!',  icon: Icons.check_circle_outline,);
                             } else {
-                              showCustomSnackbar(context, 'Failed to update profile.', backgroundColor: Colors.red.shade400,  icon: Icons.error_outline,);
+                              showCustomSnackbar(context, 'Failed to update profile.',  icon: Icons.error_outline,);
                             }
                     
                         } else {

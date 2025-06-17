@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
                   setState(() {
                     selectedBookKey = bookKey;
                   });
-                },
+                }, userId: widget.userId,
               ),
               UserProfile(
                 userId: widget.userId,

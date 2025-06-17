@@ -403,9 +403,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                                   if (success) {
                                                                     _fetchReviews();
                                                                     Navigator.pop(context);
-                                                                    showCustomSnackbar(context, "Review submitted successfully!", backgroundColor: Colors.green);
+                                                                    showCustomSnackbar(context, "Review submitted successfully!");
                                                                   } else {
-                                                                     showCustomSnackbar(context, "Failed to submit the review. Please try again.", backgroundColor: Colors.red);
+                                                                     showCustomSnackbar(context, "Failed to submit the review. Please try again.");
                                                                   }
                                                                 }
                                                               },

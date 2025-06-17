@@ -51,12 +51,12 @@ void showBottomSnackBar(
     final overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         top: 60, 
-        left: 20,
-        right: 20,
+        left: 40,
+        right: 40,
         child: Material(
           color: backgroundColor,
           child: Container(
-            width: 335,
+            width: 300,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),

@@ -1,12 +1,14 @@
 
 import 'package:bookverse/controller/booksController.dart';
+import 'package:bookverse/tabScreens/home_screens/search_screen/book_details_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class SearchBooks extends StatefulWidget {
   final Function(String bookKey) onBookSelected;
+  final String userId;
   
-  const SearchBooks({super.key, required this.onBookSelected});
+  const SearchBooks({super.key, required this.onBookSelected, required this.userId});
 
   @override
   State<SearchBooks> createState() => _SearchBooksState();
@@ -117,7 +119,13 @@ class _SearchBooksState extends State<SearchBooks> {
                               )
                             : const Icon(Icons.book, size: 50),
                           onTap: () {
-                            widget.onBookSelected(book['key']); 
+                           // widget.onBookSelected(book['key']); 
+                           Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BookDetailScreen(onClose: () {  }, bookKey: book['key'], userId: widget.userId, )
+                                  ),
+                                );
                           },
                         );
                       },
