@@ -18,12 +18,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookService {
 
-    //@Autowired
     private final BookRepository bookRepository;
-   // @Autowired
     private final GenreFilterService genreFilterService;
-
-    //@Autowired
     private final RestTemplate restTemplate;
 
     private static final String OPEN_LIBRARY_SEARCH_API_URL = "https://openlibrary.org/search.json?q=";  // Search API URL

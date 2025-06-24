@@ -21,7 +21,7 @@ public class TrailController {
     private final TrailsService trailService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrailDTODetails> getTrailById(@PathVariable Integer id) {
+    public ResponseEntity<TrailDTODetails> getTrailById(@PathVariable Long id) {
         TrailDTODetails trail = trailService.getTrailById(id);
         return ResponseEntity.ok(trail);
     }
@@ -58,10 +58,10 @@ public class TrailController {
 
     @PutMapping("/{trailId}")
     public ResponseEntity<Long> updateTrailComplete(
-            @PathVariable Integer trailId,
+            @PathVariable Long trailId,
             @RequestBody TrailDTO trailDTO
     ) {
-        Long updatedTrail = trailService.updateTrail( trailId, trailDTO);
+        Long updatedTrail = trailService.updateTrail(trailId, trailDTO);
         return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
     }
 

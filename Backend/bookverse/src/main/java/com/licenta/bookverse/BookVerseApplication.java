@@ -9,8 +9,6 @@ public class BookVerseApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(BookVerseApplication.class, args);
-		//ToDo: Uncomment this if you want to run locally. Lines commented for EC2 Instance JAR
-
 		try {
 			String url = "http://localhost:8080/swagger-ui/index.html";
 			String os = System.getProperty("os.name").toLowerCase();
