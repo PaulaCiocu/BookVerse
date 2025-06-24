@@ -1,46 +1,46 @@
 package com.licenta.bookverse.service;
 
-import com.licenta.bookverse.dto.RegistrationDTO;
+import com.licenta.bookverse.dto.auth.UserProfileDTO;
 import com.licenta.bookverse.entity.Person;
-import com.licenta.bookverse.exception.EmailAlreadyExistsException;
-import com.licenta.bookverse.exception.PasswordMismatchException;
-import com.licenta.bookverse.exception.UsernameAlreadyExistsException;
 import com.licenta.bookverse.repository.PersonRepository;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class PersonService {
-    private final PersonRepository personRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public PersonService(PersonRepository personRepository, PasswordEncoder passwordEncoder) {
-        this.personRepository = personRepository;
-        this.passwordEncoder = passwordEncoder;
+    @Autowired
+    private final PersonRepository personRepository;
+
+    public List<Person> getAllPersons() {
+        return personRepository.findAll();
     }
 
-    public void registerPerson(RegistrationDTO registrationDTO) {
-        if(!registrationDTO.getPassword().equals(registrationDTO.getConfirmPassword())) {
-            throw new PasswordMismatchException();
+    public Person editProfileById(UUID id, UserProfileDTO updatedPerson) {
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if(updatedPerson.getFullName()!= null) {
+            person.setFullName(updatedPerson.getFullName());
+        }
+        if(updatedPerson.getBio()!= null) {
+            person.setBio(updatedPerson.getBio());
         }
 
-        if(personRepository.findByUsername(registrationDTO.getUsername()).isPresent()){
-            throw new UsernameAlreadyExistsException();
+        if(updatedPerson.getProfilePictureUrl()!= null && !updatedPerson.getProfilePictureUrl().isEmpty()) {
+            person.setProfilePictureUrl(updatedPerson.getProfilePictureUrl());
         }
-        if(personRepository.findByEmail(registrationDTO.getEmail()).isPresent()){
-            throw new EmailAlreadyExistsException();
-        }
-
-        String encodedPassword = passwordEncoder.encode(registrationDTO.getPassword());
-
-        Person person = new Person();
-        person.setFullName(registrationDTO.getFullName());
-        person.setUsername(registrationDTO.getUsername());
-        person.setPassword(encodedPassword);
-        person.setEmail(registrationDTO.getEmail());
-        personRepository.save(person);
-
-
+        Person savedPerson = personRepository.save(person);
+        return savedPerson;
     }
 }

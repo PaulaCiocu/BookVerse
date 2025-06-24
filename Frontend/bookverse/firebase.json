@@ -1,0 +1,28 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "bookverse-68d8f",
+          "appId": "1:676297522863:android:1e8e37342f284252351e5a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "bookverse-68d8f",
+          "configurations": {
+            "android": "1:676297522863:android:1e8e37342f284252351e5a",
+            "ios": "1:676297522863:ios:29cbfd9040e6e679351e5a",
+            "macos": "1:676297522863:ios:29cbfd9040e6e679351e5a",
+            "web": "1:676297522863:web:42c3982e4c97dfdc351e5a",
+            "windows": "1:676297522863:web:9293c7ff2fc3f03b351e5a"
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
