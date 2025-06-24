@@ -2,7 +2,7 @@ package com.licenta.bookverse.controller;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
-import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
+import com.licenta.bookverse.dto.trails.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.ReadingTrailList;
 import com.licenta.bookverse.service.ReadingTrailService;

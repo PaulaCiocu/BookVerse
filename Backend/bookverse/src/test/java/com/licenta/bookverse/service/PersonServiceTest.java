@@ -1,9 +1,8 @@
-package com.licenta.bookverse;
+package com.licenta.bookverse.service;
 
 import com.licenta.bookverse.dto.auth.UserProfileDTO;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.repository.PersonRepository;
-import com.licenta.bookverse.service.PersonService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

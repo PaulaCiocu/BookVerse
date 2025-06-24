@@ -1,11 +1,9 @@
-package com.licenta.bookverse.dto.books;
+package com.licenta.bookverse.dto.trails;
 
-import com.licenta.bookverse.entity.TrailBook;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.UUID;
 
 @Getter

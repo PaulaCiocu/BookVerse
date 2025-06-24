@@ -1,9 +1,9 @@
 package com.licenta.bookverse.controller;
 
 
-import com.licenta.bookverse.dto.books.TrailDTO;
-import com.licenta.bookverse.dto.books.TrailDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
+import com.licenta.bookverse.dto.trails.TrailDTO;
+import com.licenta.bookverse.dto.trails.TrailDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTOGetRequest;
 import com.licenta.bookverse.service.TrailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,16 +1,15 @@
 package com.licenta.bookverse.service;
 
-import com.licenta.bookverse.dto.books.TrailBookDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTO;
-import com.licenta.bookverse.dto.books.TrailDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
+import com.licenta.bookverse.dto.trailbooks.TrailBookDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTO;
+import com.licenta.bookverse.dto.trails.TrailDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTOGetRequest;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
 import com.licenta.bookverse.repository.*;
 import com.licenta.bookverse.service.books.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;

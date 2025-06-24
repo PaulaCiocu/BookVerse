@@ -1,17 +1,13 @@
 package com.licenta.bookverse.dto.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserProfileDTO {
-
     private String fullName;
-    private String bio; // User bio
-    private String profilePictureUrl; // URL for the profile picture
-
+    private String bio;
+    private String profilePictureUrl;
 }

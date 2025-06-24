@@ -1,6 +1,5 @@
-package com.licenta.bookverse;
+package com.licenta.bookverse.controller;
 
-import com.licenta.bookverse.controller.PersonController;
 import com.licenta.bookverse.dto.auth.UserProfileDTO;
 import com.licenta.bookverse.entity.Person;
 import com.licenta.bookverse.repository.PersonRepository;

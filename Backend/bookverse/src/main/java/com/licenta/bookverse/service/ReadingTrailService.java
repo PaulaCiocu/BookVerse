@@ -2,7 +2,7 @@ package com.licenta.bookverse.service;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
-import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
+import com.licenta.bookverse.dto.trails.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;

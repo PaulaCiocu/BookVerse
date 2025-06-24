@@ -62,12 +62,12 @@ static Future loginUser({
     String idToken;
     try {
       final result = await AuthService().signInWithEmailAndPassword(email, password);
-      if (result is String && result.contains("Please verify your email")) {
+      if (result is String && result.contains("Please verify your email!")) {
         return result; // Return error string
       }
       idToken = result;
     } catch (e) {
-      return 'Firebase login error';
+      return 'Please verify credentials!';
     }
 
     // 🔐 Store Firebase token locally

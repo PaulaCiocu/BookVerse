@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookService {
 
-    @Autowired
+    //@Autowired
     private final BookRepository bookRepository;
-    @Autowired
+   // @Autowired
     private final GenreFilterService genreFilterService;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    //@Autowired
+    private final RestTemplate restTemplate;
 
     private static final String OPEN_LIBRARY_SEARCH_API_URL = "https://openlibrary.org/search.json?q=";  // Search API URL
     private static final String OPEN_LIBRARY_WORKS_API_URL = "https://openlibrary.org/works/";  // Works API URL
@@ -42,16 +42,11 @@ public class BookService {
         return searchBooksFromApi(searchUrl);
     }
     public List<Book> searchBooksByGenre(String genre) {
-        String subjectUrl = OPEN_LIBRARY_URL_SUBJECT + genre;  // Construct the subject/genre URL
+        String subjectUrl = OPEN_LIBRARY_URL_SUBJECT + genre;
         return searchBooksFromApi(subjectUrl);
     }
     public List<Book> searchBooksByAuthor(String author) {
-        // First, check if books matching the author already exist in the database
-//        List<Book> booksFromDb = bookRepository.findByAuthorContainingIgnoreCase(author);
-//        if (!booksFromDb.isEmpty()) {
-//            return booksFromDb; // Return books from the database if found
-//        }
-        String authorUrl = OPEN_LIBRARY_URL_AUTHOR + author;  // Construct the author search URL
+        String authorUrl = OPEN_LIBRARY_URL_AUTHOR + author;
         return searchBooksFromApi(authorUrl);
     }
 
@@ -149,12 +144,12 @@ public class BookService {
 
     private String cleanText(String text) {
         if (text == null) return null;
-        return text.replace("\u2019", "'")  // Curly apostrophe → regular apostrophe
-                .replace("\u201C", "\"") // Left curly quote → regular quote
-                .replace("\u201D", "\"") // Right curly quote → regular quote
-                .replace("\u2013", "-")  // En dash → hyphen
-                .replace("\u2014", "-")  // Em dash → hyphen
-                .replaceAll("[^\\p{Print}]", ""); // Remove non-printable characters
+        return text.replace("\u2019", "'")
+                .replace("\u201C", "\"")
+                .replace("\u201D", "\"")
+                .replace("\u2013", "-")
+                .replace("\u2014", "-")
+                .replaceAll("[^\\p{Print}]", "");
     }
 
     private boolean containsExcludedWords(String title) {
