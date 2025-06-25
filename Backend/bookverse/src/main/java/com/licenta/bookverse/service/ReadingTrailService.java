@@ -2,7 +2,7 @@ package com.licenta.bookverse.service;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
-import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
+import com.licenta.bookverse.dto.trails.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.ReadingListStatus;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
@@ -34,9 +34,8 @@ public class ReadingTrailService {
         Trail trail = (Trail) trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
         int totalBooks = trail.getTrailBooks().size();
-        // Calculate the total pages by summing the pages of all books in the trail
         int totalPages = trail.getTrailBooks().stream()
-                .mapToInt(trailBook -> trailBook.getBook().getPages())  // Assuming getPageCount() returns the number of pages for a book
+                .mapToInt(trailBook -> trailBook.getBook().getPages())
                 .sum();
 
         if(createdType == CreatedType.FOLLOWED){
@@ -46,26 +45,21 @@ public class ReadingTrailService {
                 .person(person)
                 .trail(trail)
                 .createdType(createdType)
-                .status(ReadingListStatus.NOT_STARTED)  // Set the initial status as "Not Started"
+                .status(ReadingListStatus.NOT_STARTED)
                 .totalBooks(totalBooks)
                 .totalPages(totalPages)
                 .build();
         readingTrailListRepository.save(readingTrailList);
 
-        // Add books from the trail to the user's reading list
         for (TrailBook trailBook : trail.getTrailBooks()) {
-            // Check if the book is already in the user's reading list
             Optional<ReadingList> existingReadingList = readingListRepository.findByPersonAndBook(person, trailBook.getBook());
 
             if (existingReadingList.isEmpty()) {
-                // The book is not already in the user's reading list, so add it
                 ReadingList readingListItem = ReadingList.builder()
                         .person(person)
                         .book(trailBook.getBook())
-                        .status(ReadingListStatus.NOT_STARTED)  // Or another initial status
+                        .status(ReadingListStatus.NOT_STARTED)
                         .build();
-
-                // Save the book to the user's reading list
                 readingListRepository.save(readingListItem);
             }
         }
@@ -131,11 +125,6 @@ public class ReadingTrailService {
         return readingTrailListRepository.existsByPersonAndTrail(person, trail);
     }
 
-
-    public boolean updateReadingProgress(UUID personId, Long trailId, int pagesRead) {
-                return false;
-    }
-
     public boolean deleteTrailFromReadingList(UUID personId, Long trailId, boolean deleteBooks) {
         Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new RuntimeException("Person not found"));
@@ -144,41 +133,35 @@ public class ReadingTrailService {
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
 
         ReadingTrailList readingTrail = readingTrailListRepository.findByPersonAndTrail(person, trail);
+        System.out.println("Trail found. Proceeding to delete...");
+        if (deleteBooks) {
+            // Deleting books from the reading list
+            List<TrailBook> booksInTrail = readingTrail.getTrail().getTrailBooks();
+            List<ReadingTrailList> otherUserTrails = readingTrailListRepository.findByPerson(person)
+                    .stream()
+                    .filter(otherTrail -> !otherTrail.getTrail().getId().equals(trailId))
+                    .toList();
 
-        if (trail != null) {
+            for (TrailBook trailBook : booksInTrail) {
+                String bookKey = trailBook.getBook().getKey();
+                boolean isBookInOtherUserTrails = otherUserTrails.stream()
+                        .flatMap(otherTrail -> otherTrail.getTrail().getTrailBooks().stream())
+                        .anyMatch(tb -> tb.getBook().getKey().equals(bookKey));
 
-            System.out.println("Trail found. Proceeding to delete...");
-            if (deleteBooks) {
-                // Deleting books from the reading list
-                List<TrailBook> booksInTrail = readingTrail.getTrail().getTrailBooks();
-                List<ReadingTrailList> otherUserTrails = readingTrailListRepository.findByPerson(person)
-                        .stream()
-                        .filter(otherTrail -> !otherTrail.getTrail().getId().equals(trailId))
-                        .toList();
+                if (!isBookInOtherUserTrails){
+                    Optional<Object> readingListOptional = readingListRepository.findByPerson_IdAndBook_Key(personId, bookKey);
 
-                for (TrailBook trailBook : booksInTrail) {
-                    String bookKey = trailBook.getBook().getKey();
-                    boolean isBookInOtherUserTrails = otherUserTrails.stream()
-                            .flatMap(otherTrail -> otherTrail.getTrail().getTrailBooks().stream())
-                            .anyMatch(tb -> tb.getBook().getKey().equals(bookKey));
+                    if (readingListOptional.isPresent()) {
+                        ReadingList readingList = (ReadingList) readingListOptional.get();
 
-                    if (!isBookInOtherUserTrails){
-                        Optional<Object> readingListOptional = readingListRepository.findByPerson_IdAndBook_Key(personId, bookKey);
-
-                        if (readingListOptional.isPresent()) {
-                            ReadingList readingList = (ReadingList) readingListOptional.get();
-
-                            // Delete the book from the reading list
-                            readingListRepository.delete(readingList);
-                            System.out.println("Deleted book from reading list: " + trailBook.getBook().getTitle());
-                        }
+                        // Delete the book from the reading list
+                        readingListRepository.delete(readingList);
+                        System.out.println("Deleted book from reading list: " + trailBook.getBook().getTitle());
                     }
                 }
             }
-            readingTrailListRepository.delete(readingTrail);
-            return true;
-        } else {
-            return false;  // Trail not found
         }
+        readingTrailListRepository.delete(readingTrail);
+        return true;
     }
 }

@@ -1,16 +1,15 @@
 package com.licenta.bookverse.service;
 
-import com.licenta.bookverse.dto.books.TrailBookDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTO;
-import com.licenta.bookverse.dto.books.TrailDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
+import com.licenta.bookverse.dto.trailbooks.TrailBookDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTO;
+import com.licenta.bookverse.dto.trails.TrailDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTOGetRequest;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.*;
 import com.licenta.bookverse.repository.*;
 import com.licenta.bookverse.service.books.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class TrailsService {
     private final BookService bookService;
     private final NotificationService notificationService;
 
-    public TrailDTODetails getTrailById(Integer trailId) {
+    public TrailDTODetails getTrailById(Long trailId) {
         Trail trail = trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
         List<TrailBookDTODetails> bookDtos =
@@ -110,8 +109,6 @@ public class TrailsService {
                         .trailId(trail.getId())
                         .title(trail.getTitle())
                         .description(trail.getDescription())
-                       // .genre(trail.getGenres())
-                      //  .trailBookList(trail.getTrailBooks())
                         .numberOfReadings(trail.getNumberOfReadings())
                         .creatorId(trail.getCreator().getId())
                         .personName(trail.getCreator().getFullName())
@@ -178,7 +175,7 @@ public class TrailsService {
         trailRepository.save(trail);
     }
 
-    public Long updateTrail(Integer trailId, TrailDTO trailDTO) {
+    public Long updateTrail(Long trailId, TrailDTO trailDTO) {
         Trail trail = trailRepository.findById(trailId)
                 .orElseThrow(() -> new RuntimeException("Trail not found"));
 

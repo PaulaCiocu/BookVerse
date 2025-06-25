@@ -1,9 +1,9 @@
 package com.licenta.bookverse.controller;
 
 
-import com.licenta.bookverse.dto.books.TrailDTO;
-import com.licenta.bookverse.dto.books.TrailDTODetails;
-import com.licenta.bookverse.dto.books.TrailDTOGetRequest;
+import com.licenta.bookverse.dto.trails.TrailDTO;
+import com.licenta.bookverse.dto.trails.TrailDTODetails;
+import com.licenta.bookverse.dto.trails.TrailDTOGetRequest;
 import com.licenta.bookverse.service.TrailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ public class TrailController {
     private final TrailsService trailService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrailDTODetails> getTrailById(@PathVariable Integer id) {
+    public ResponseEntity<TrailDTODetails> getTrailById(@PathVariable Long id) {
         TrailDTODetails trail = trailService.getTrailById(id);
         return ResponseEntity.ok(trail);
     }
@@ -58,10 +58,10 @@ public class TrailController {
 
     @PutMapping("/{trailId}")
     public ResponseEntity<Long> updateTrailComplete(
-            @PathVariable Integer trailId,
+            @PathVariable Long trailId,
             @RequestBody TrailDTO trailDTO
     ) {
-        Long updatedTrail = trailService.updateTrail( trailId, trailDTO);
+        Long updatedTrail = trailService.updateTrail(trailId, trailDTO);
         return new ResponseEntity<>(updatedTrail, HttpStatus.OK);
     }
 

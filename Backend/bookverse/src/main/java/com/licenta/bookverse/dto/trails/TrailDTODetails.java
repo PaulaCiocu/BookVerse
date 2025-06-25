@@ -1,5 +1,6 @@
-package com.licenta.bookverse.dto.books;
+package com.licenta.bookverse.dto.trails;
 
+import com.licenta.bookverse.dto.trailbooks.TrailBookDTODetails;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -2,6 +2,7 @@ package com.licenta.bookverse.controller;
 
 import com.licenta.bookverse.entity.Book;
 import com.licenta.bookverse.service.books.BookService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/books")
+@AllArgsConstructor
 public class BookController {
 
     @Autowired

@@ -2,7 +2,7 @@ package com.licenta.bookverse.controller;
 
 
 import com.licenta.bookverse.dto.books.ReadingListFollowedDTO;
-import com.licenta.bookverse.dto.books.ReadingTrailListDTO;
+import com.licenta.bookverse.dto.trails.ReadingTrailListDTO;
 import com.licenta.bookverse.dto.books.enums.CreatedType;
 import com.licenta.bookverse.entity.ReadingTrailList;
 import com.licenta.bookverse.service.ReadingTrailService;
@@ -60,24 +60,24 @@ public class ReadingTrailListController {
         return readingTrailService.getReadingTrailsCreatedForPersonId(personId);
     }
 
-    @PutMapping("/update-progress/{personId}/{trailId}")
-    public ResponseEntity<String> updateReadingProgress(
-            @PathVariable UUID personId,
-            @PathVariable Long trailId,
-            @RequestParam int pagesRead) {
-        try {
-            // Call the service to update the progress
-            boolean success = readingTrailService.updateReadingProgress(personId, trailId, pagesRead);
-
-            if (success) {
-                return new ResponseEntity<>("Reading progress updated successfully!", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Failed to update reading progress. Trail not found.", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("Failed to update reading progress: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
+//    @PutMapping("/update-progress/{personId}/{trailId}")
+//    public ResponseEntity<String> updateReadingProgress(
+//            @PathVariable UUID personId,
+//            @PathVariable Long trailId,
+//            @RequestParam int pagesRead) {
+//        try {
+//            // Call the service to update the progress
+//            boolean success = readingTrailService.updateReadingProgress(personId, trailId, pagesRead);
+//
+//            if (success) {
+//                return new ResponseEntity<>("Reading progress updated successfully!", HttpStatus.OK);
+//            } else {
+//                return new ResponseEntity<>("Failed to update reading progress. Trail not found.", HttpStatus.NOT_FOUND);
+//            }
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("Failed to update reading progress: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
     @DeleteMapping("/delete/{personId}/{trailId}/{deleteBooks}")
     public ResponseEntity<String> deleteTrailFromReadingList(
