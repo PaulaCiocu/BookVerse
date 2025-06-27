@@ -5,13 +5,13 @@
 
 ## Project Overview
 
-**BookVerse** is a mobile app designed to help users track and organize their reading journeys through personalized **Trails** — themed reading paths. It allows users to discover books, track progress, write reviews, and connect with other readers. The app integrates Flutter, Firebase, Spring Boot, PostgreSQL (Neon), and Open Library API for a seamless experience.
+**BookVerse** is a mobile app designed to help users track and organize their reading journeys through personalized **Trails** — collections of books. It allows users to discover books, track progress, write reviews, and connect with other readers. The app integrates Flutter, Firebase, Spring Boot, PostgreSQL (Neon), and Open Library API for a seamless experience.
 
 ---
 
 ## Features
 
-- Create, follow, unfollow, and delete Trails (themed book lists)  
+- Create, follow, unfollow, and delete Trails
 - Search for books by title, author, or genre  
 - Track reading progress on books and Trails  
 - Write and submit book reviews  
@@ -25,7 +25,7 @@
 ### Prerequisites
   - Java Development Kit (JDK 11+)
   - Flutter SDK
-> **Note:** The application connects to a cloud-hosted PostgreSQL database (Neon). Connection details are managed securely via environment variables.
+> **Note:** Connection details for the database and Firebase are managed securely and are not included in the repository.
 
 ### Clone the  repository:  
    ```bash
@@ -38,6 +38,8 @@
   cd backend
   ./mvnw spring-boot:run
   ```
+
+
 ### Frontend
 
    Navigate into the frontend folder to run the mobile app:
@@ -74,7 +76,7 @@ The Open Library API provides book metadata for search and display.
 
 PostgreSQL stores user data, book info, Trails, progress, and reviews.
 
-Firebase handles authentication and media (profile images) storage.
+Firebase handles authentication and media (Trail images) storage.
 
 ## Configuration and Environment Variables
 
@@ -82,6 +84,5 @@ The application stores sensitive configuration data such as database connection 
 
 For security reasons, these environment variables are not included in the repository.
 
-If required, a separate configuration file containing the necessary environment variable values can be provided directly upon request.
-
+The `firebase-service-account.json` file, required for backend Firebase integration, is also stored locally and excluded from version control via `.gitignore`.
 
