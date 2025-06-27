@@ -1,5 +1,8 @@
 # README - BookVerse
 
+## GitHub repository link
+[https://github.com/PaulaCiocu/BookVerse](https://github.com/PaulaCiocu/BookVerse)
+
 ## Project Overview
 
 **BookVerse** is a mobile app designed to help users track and organize their reading journeys through personalized **Trails** — themed reading paths. It allows users to discover books, track progress, write reviews, and connect with other readers. The app integrates Flutter, Firebase, Spring Boot, PostgreSQL (Neon), and Open Library API for a seamless experience.
